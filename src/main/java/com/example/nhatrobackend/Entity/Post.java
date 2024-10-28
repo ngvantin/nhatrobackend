@@ -1,6 +1,6 @@
-package Entity;
+package com.example.nhatrobackend.Entity;
 
-import Entity.Field.PostStatus;
+import com.example.nhatrobackend.Entity.Field.PostStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -47,7 +47,7 @@ public class Post {
     // Thiết lập quan hệ 1-1 với Rooms
     @OneToOne
     @JoinColumn(name = "room_id", nullable = false)
-    private Rooms room;
+    private Room room;
 
     // Quan hệ 1-N với PostImage
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,4 +1,4 @@
-package Entity;
+package com.example.nhatrobackend.Entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
-package Entity;
+package com.example.nhatrobackend.Entity;
 
-import Entity.Field.FurnitureStatus;
+import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,8 +12,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "rooms")
-public class Rooms {
+@Table(name = "room")
+public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "room_id")

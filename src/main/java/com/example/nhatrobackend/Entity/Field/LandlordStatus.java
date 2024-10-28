@@ -1,4 +1,4 @@
-package Entity.Field;
+package com.example.nhatrobackend.Entity.Field;
 
 public enum LandlordStatus {
     NOT_REGISTERED,

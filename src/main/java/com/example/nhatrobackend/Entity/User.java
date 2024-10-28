@@ -1,7 +1,7 @@
-package Entity;
+package com.example.nhatrobackend.Entity;
 
 
-import Entity.Field.LandlordStatus;
+import com.example.nhatrobackend.Entity.Field.LandlordStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
