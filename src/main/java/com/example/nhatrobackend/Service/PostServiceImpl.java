@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.PostDetailResponseDTO;
 import com.example.nhatrobackend.DTO.PostResponseDTO;
+import com.example.nhatrobackend.DTO.RoomRequestDTO;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.ModelMapperUtil.PostConverter;
 import com.example.nhatrobackend.Responsitory.PostRepository;
@@ -23,6 +24,7 @@ public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
     private final PostConverter postConverter; // Inject PostConverter
 
+    // Lấy tất cả các bài viết
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         // Lấy tất cả các bài viết với phân trang
@@ -37,9 +39,10 @@ public class PostServiceImpl implements PostService{
         return new PageImpl<>(postResponseDTOs, pageable, postPage.getTotalElements());
     }
 
+    // Xem chi tiết bài viết
     @Override
-    public PostDetailResponseDTO getPostById(Integer postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
+    public PostDetailResponseDTO getPostById(String postUuid) {
+        Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
         if (optionalPost.isPresent()) {
             Post post = optionalPost.get();
             // Chuyển đổi bài viết sang PostDetailResponseDTO
@@ -48,9 +51,37 @@ public class PostServiceImpl implements PostService{
             return postDetailResponseDTO;
             // Tiếp tục xử lý post
         } else {
-            throw new EntityNotFoundException("Post not found with ID: " + postId);
+            throw new EntityNotFoundException("Post not found with ID: " + postUuid);
         }
 
+    }
+
+    @Override
+    public Page<PostResponseDTO> filterPosts(RoomRequestDTO roomRequestDTO, Pageable pageable) {
+        // Lấy danh sách bài viết đã lọc với phân trang
+        Page<Post> postPage = postRepository.findPostsByRoomCriteria(
+                roomRequestDTO.getMinPrice(),
+                roomRequestDTO.getMaxPrice(),
+                roomRequestDTO.getMinArea(),
+                roomRequestDTO.getMaxArea(),
+                roomRequestDTO.getFurnitureStatus(),
+                roomRequestDTO.getCity(),
+                roomRequestDTO.getDistrict(),
+                roomRequestDTO.getWard(),
+                pageable);
+
+        // Kiểm tra nếu không có bài viết nào được tìm thấy
+        if (!postPage.hasContent()) {
+            throw new EntityNotFoundException("Không tìm thấy kết quả phù hợp.");
+        }
+
+        // Chuyển đổi danh sách Post thành danh sách PostResponseDTO
+        List<PostResponseDTO> postResponseDTOs = postPage.getContent().stream()
+                .map(postConverter::convertToDTO)
+                .collect(Collectors.toList());
+
+        // Tạo Page<PostResponseDTO> và trả về
+        return new PageImpl<>(postResponseDTOs, pageable, postPage.getTotalElements());
     }
 
 }

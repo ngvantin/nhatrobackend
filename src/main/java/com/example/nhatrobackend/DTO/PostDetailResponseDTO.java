@@ -13,7 +13,16 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostDetailResponseDTO extends PostResponseDTO {
+public class PostDetailResponseDTO{
+    private String postUuid;
+    private List<String> postImages;
+    private String title;
+    private Double price; // Giá thuê của phòng
+    private Double area; // Diện tích phòng (m2)
+    private String city; // Tỉnh/Thành phố
+    private String district; // Quận/Huyện
+    private String ward; // Phường/Xã
+    private LocalDateTime createdAt;
     private String description;
     private double depositAmount;
     private String videoUrl;

@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,6 +23,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Integer userId;
+
+    @Column(name = "user_uuid", nullable = false, unique = true, length = 36)
+    private String userUuid = UUID.randomUUID().toString();
 
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;

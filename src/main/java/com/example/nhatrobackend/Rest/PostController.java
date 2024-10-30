@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.PostDetailResponseDTO;
 import com.example.nhatrobackend.DTO.PostResponseDTO;
+import com.example.nhatrobackend.DTO.RoomRequestDTO;
 import com.example.nhatrobackend.Service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,10 +27,17 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
-    @GetMapping("/{postId}")
-    public ResponseEntity<PostDetailResponseDTO> getPostById(@PathVariable Integer postId) {
-        PostDetailResponseDTO postDetailResponseDTO = postService.getPostById(postId);
+    @GetMapping("/{postUuid}")
+    public ResponseEntity<PostDetailResponseDTO> getPostById(@PathVariable String postUuid) {
+        PostDetailResponseDTO postDetailResponseDTO = postService.getPostById(postUuid);
         return ResponseEntity.ok(postDetailResponseDTO);
+    }
+    @PostMapping("/filter")
+    public ResponseEntity<Page<PostResponseDTO>> filterPosts(
+            @RequestBody RoomRequestDTO roomRequestDTO,
+            Pageable pageable) {
+        Page<PostResponseDTO> filteredPosts = postService.filterPosts(roomRequestDTO, pageable);
+        return ResponseEntity.ok(filteredPosts);
     }
 
 }
