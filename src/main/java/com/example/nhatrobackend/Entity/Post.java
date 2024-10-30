@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -20,6 +21,8 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Tự động tăng
     private int postId;
+    @Column(name = "post_uuid", nullable = false, unique = true, length = 36)
+    private String postUuid = UUID.randomUUID().toString();
 
     @Column(nullable = false) // Không cho phép null
     private String title;
