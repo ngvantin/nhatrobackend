@@ -4,6 +4,7 @@ import com.example.nhatrobackend.DTO.PostDetailResponseDTO;
 import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.DTO.RoomRequestDTO;
 import com.example.nhatrobackend.Entity.Post;
+import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.ModelMapperUtil.PostConverter;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,21 +23,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
-    private final PostConverter postConverter; // Inject PostConverter
+    private final PostMapper postMapper; // Thay PostConverter bằng PostMapper
 
-    // Lấy tất cả các bài viết
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
-        // Lấy tất cả các bài viết với phân trang
+        // Lấy tất cả các Post từ cơ sở dữ liệu dưới dạng Page
         Page<Post> postPage = postRepository.findAll(pageable);
 
-        // Chuyển đổi danh sách Post thành danh sách PostResponseDTO
-        List<PostResponseDTO> postResponseDTOs = postPage.getContent().stream()
-                .map(postConverter::convertToDTO) // Sử dụng PostConverter để chuyển đổi
-                .collect(Collectors.toList());
+        // Sử dụng mapStruct để chuyển đổi từng Post thành PostResponseDTO
+        return postPage.map(postMapper::toPostResponseDTO);
+    }
 
-        // Tạo Page<PostResponseDTO> và trả về
-        return new PageImpl<>(postResponseDTOs, pageable, postPage.getTotalElements());
+
+
+    @Override
+    public Page<PostResponseDTO> filterPosts(RoomRequestDTO roomRequestDTO, Pageable pageable) {
+        return null;
     }
 
     // Xem chi tiết bài viết
@@ -46,7 +48,7 @@ public class PostServiceImpl implements PostService{
         if (optionalPost.isPresent()) {
             Post post = optionalPost.get();
             // Chuyển đổi bài viết sang PostDetailResponseDTO
-            PostDetailResponseDTO postDetailResponseDTO = postConverter.convertToDetailDTO(post);
+            PostDetailResponseDTO postDetailResponseDTO = postMapper.convertToDetailDTO(post);
 
             return postDetailResponseDTO;
             // Tiếp tục xử lý post
@@ -55,33 +57,48 @@ public class PostServiceImpl implements PostService{
         }
 
     }
+//
+//    @Override
+//    public Page<PostResponseDTO> filterPosts(RoomRequestDTO roomRequestDTO, Pageable pageable) {
+//        // Lấy danh sách bài viết đã lọc với phân trang
+//        Page<Post> postPage = postRepository.findPostsByRoomCriteria(
+//                roomRequestDTO.getMinPrice(),
+//                roomRequestDTO.getMaxPrice(),
+//                roomRequestDTO.getMinArea(),
+//                roomRequestDTO.getMaxArea(),
+//                roomRequestDTO.getFurnitureStatus(),
+//                roomRequestDTO.getCity(),
+//                roomRequestDTO.getDistrict(),
+//                roomRequestDTO.getWard(),
+//                pageable);
+//
+//        // Kiểm tra nếu không có bài viết nào được tìm thấy
+//        if (!postPage.hasContent()) {
+//            throw new EntityNotFoundException("Không tìm thấy kết quả phù hợp.");
+//        }
+//
+//        // Chuyển đổi danh sách Post thành danh sách PostResponseDTO
+//        List<PostResponseDTO> postResponseDTOs = postPage.getContent().stream()
+//                .map(postConverter::convertToDTO)
+//                .collect(Collectors.toList());
+//
+//        // Tạo Page<PostResponseDTO> và trả về
+//        return new PageImpl<>(postResponseDTOs, pageable, postPage.getTotalElements());
+//    }
 
-    @Override
-    public Page<PostResponseDTO> filterPosts(RoomRequestDTO roomRequestDTO, Pageable pageable) {
-        // Lấy danh sách bài viết đã lọc với phân trang
-        Page<Post> postPage = postRepository.findPostsByRoomCriteria(
-                roomRequestDTO.getMinPrice(),
-                roomRequestDTO.getMaxPrice(),
-                roomRequestDTO.getMinArea(),
-                roomRequestDTO.getMaxArea(),
-                roomRequestDTO.getFurnitureStatus(),
-                roomRequestDTO.getCity(),
-                roomRequestDTO.getDistrict(),
-                roomRequestDTO.getWard(),
-                pageable);
 
-        // Kiểm tra nếu không có bài viết nào được tìm thấy
-        if (!postPage.hasContent()) {
-            throw new EntityNotFoundException("Không tìm thấy kết quả phù hợp.");
-        }
-
-        // Chuyển đổi danh sách Post thành danh sách PostResponseDTO
-        List<PostResponseDTO> postResponseDTOs = postPage.getContent().stream()
-                .map(postConverter::convertToDTO)
-                .collect(Collectors.toList());
-
-        // Tạo Page<PostResponseDTO> và trả về
-        return new PageImpl<>(postResponseDTOs, pageable, postPage.getTotalElements());
-    }
-
+    // Lấy tất cả các bài viết
+//    @Override
+//    public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
+//        // Lấy tất cả các bài viết với phân trang
+//        Page<Post> postPage = postRepository.findAll(pageable);
+//
+////        // Chuyển đổi danh sách Post thành danh sách PostResponseDTO
+////        Page<PostResponseDTO> postResponseDTOs = postPage
+////                .map(postConverter::convertToDTO);// Sử dụng PostConverter để chuyển đổi
+//
+//        // Tạo Page<PostResponseDTO> và trả về
+//        return postPage
+//                .map(postConverter::convertToDTO);// Sử dụng PostConverter để chuyển đổi;
+//    }
 }

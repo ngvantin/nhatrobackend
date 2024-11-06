@@ -51,8 +51,7 @@ public class Post {
     @OneToOne
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
-
-    // Quan hệ 1-N với PostImage
+      // Quan hệ 1-N với PostImage
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> postImages;
 
