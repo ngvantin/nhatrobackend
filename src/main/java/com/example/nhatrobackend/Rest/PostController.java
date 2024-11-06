@@ -5,10 +5,12 @@ import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.DTO.ResponseWrapper;
 import com.example.nhatrobackend.DTO.RoomRequestDTO;
 import com.example.nhatrobackend.Service.PostService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,17 +37,29 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/{postUuid}")
-//    public ResponseEntity<PostDetailResponseDTO> getPostById(@PathVariable String postUuid) {
-//        PostDetailResponseDTO postDetailResponseDTO = postService.getPostById(postUuid);
-//        return ResponseEntity.ok(postDetailResponseDTO);
-//    }
-//    @PostMapping("/filter")
-//    public ResponseEntity<Page<PostResponseDTO>> filterPosts(
-//            @RequestBody RoomRequestDTO roomRequestDTO,
-//            Pageable pageable) {
-//        Page<PostResponseDTO> filteredPosts = postService.filterPosts(roomRequestDTO, pageable);
-//        return ResponseEntity.ok(filteredPosts);
-//    }
+    @GetMapping("/{postUuid}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> getPostDetail(@PathVariable String postUuid) {
+        PostDetailResponseDTO postDetail = postService.getPostById(postUuid);
+        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(postDetail)
+                .message("Thông tin bài đăng")
+                .build());
+    }
+
+    @PostMapping("/filter")
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> filterPosts(
+            @RequestBody RoomRequestDTO roomRequestDTO,
+            Pageable pageable) {
+        Page<PostResponseDTO> filteredPosts = postService.filterPosts(roomRequestDTO, pageable);
+
+        return ResponseEntity.ok(
+                ResponseWrapper.<Page<PostResponseDTO>>builder()
+                        .status("success")
+                        .message("Danh sách bài đăng đã được lọc.")
+                        .data(filteredPosts)
+                        .build()
+        );
+    }
 
 }
