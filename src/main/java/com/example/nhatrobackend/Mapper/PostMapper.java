@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Mapper;
 
 import com.example.nhatrobackend.Config.MapStructConfig;
+import com.example.nhatrobackend.DTO.PostDetailResponseDTO;
 import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.PostImage;
@@ -17,16 +18,27 @@ import java.util.stream.Collectors;
 @Mapper(config = MapStructConfig.class)
 public interface PostMapper {
     // Ánh xạ từ Post sang PostResponseDTO
-    @Mapping(source = "post.postId", target = "postId")
-    @Mapping(source = "post.title", target = "title")
     @Mapping(source = "post.room.price", target = "price")
     @Mapping(source = "post.room.area", target = "area")
     @Mapping(source = "post.room.city", target = "city")
     @Mapping(source = "post.room.district", target = "district")
     @Mapping(source = "post.room.ward", target = "ward")
-    @Mapping(source = "post.createdAt", target = "createdAt")
-    @Mapping(source = "post.postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
+     @Mapping(source = "post.postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
     PostResponseDTO toPostResponseDTO(Post post);
+
+    // Ánh xạ từ trường của Room
+    @Mapping(source = "room.price", target = "price")
+    @Mapping(source = "room.area", target = "area")
+    @Mapping(source = "room.city", target = "city")
+    @Mapping(source = "room.district", target = "district")
+    @Mapping(source = "room.ward", target = "ward")
+    @Mapping(source = "room.numberOfRooms", target = "numberOfRooms")
+    @Mapping(source = "room.electricityPrice", target = "electricityPrice")
+    @Mapping(source = "room.waterPrice", target = "waterPrice")
+    @Mapping(source = "room.street", target = "street")
+    @Mapping(source = "room.houseNumber", target = "houseNumber")
+    @Mapping(source = "postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
+    PostDetailResponseDTO toPostDetailResponseDTO(Post post);
 
     // Phương thức ánh xạ danh sách URL từ PostImage
     @Named("mapImagesToUrls")
