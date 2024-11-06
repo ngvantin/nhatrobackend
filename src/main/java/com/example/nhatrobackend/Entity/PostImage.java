@@ -16,6 +16,7 @@ public class PostImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Tự động tăng cho image_id
+    @Column(name = "image_id")
     private int imageId;
 
     @Column(name = "image_url", nullable = false) // Không cho phép null

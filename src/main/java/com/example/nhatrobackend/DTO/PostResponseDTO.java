@@ -22,4 +22,6 @@ public class PostResponseDTO {
     private String district; // Quận/Huyện
     private String ward; // Phường/Xã
     private LocalDateTime createdAt;
+
+
 }
