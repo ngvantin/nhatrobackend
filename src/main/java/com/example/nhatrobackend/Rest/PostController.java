@@ -1,9 +1,6 @@
 package com.example.nhatrobackend.Rest;
 
-import com.example.nhatrobackend.DTO.PostDetailResponseDTO;
-import com.example.nhatrobackend.DTO.PostResponseDTO;
-import com.example.nhatrobackend.DTO.ResponseWrapper;
-import com.example.nhatrobackend.DTO.RoomRequestDTO;
+import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Service.PostService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +57,16 @@ public class PostController {
                         .data(filteredPosts)
                         .build()
         );
+    }
+    @GetMapping("/{postUuid}/user")
+    public ResponseEntity<ResponseWrapper<UserDetailDTO>> getUserByPostUuid(@PathVariable String postUuid){
+        UserDetailDTO  userDetailDTO = postService.getUserByPostUuid(postUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<UserDetailDTO>builder()
+                .status("success")
+                .data(userDetailDTO)
+                .message("Thông tin người dùng của bài đăng")
+                .build());
     }
 
 }

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.mapstruct.control.MappingControl;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,5 +55,12 @@ public class Post {
       // Quan hệ 1-N với PostImage
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> postImages;
+
+
+    // Quan hệ 1-N với User
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
 
 }
