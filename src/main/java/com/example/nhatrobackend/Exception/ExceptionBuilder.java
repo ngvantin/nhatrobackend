@@ -14,4 +14,13 @@ public class ExceptionBuilder {
                         .message(message)
                         .build());
     }
+
+    // Phương thức để trả về phản hồi với lỗi BAD_REQUEST cho IllegalArgumentException
+    public static ResponseEntity<ResponseWrapper<Void>> buildBadRequestExceptionResponse(String message) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ResponseWrapper.<Void>builder()
+                        .status("error")
+                        .message(message)
+                        .build());
+    }
 }

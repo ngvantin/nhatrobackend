@@ -1,13 +1,15 @@
 package com.example.nhatrobackend.Service;
 
-import com.example.nhatrobackend.DTO.PostDetailResponseDTO;
-import com.example.nhatrobackend.DTO.PostResponseDTO;
-import com.example.nhatrobackend.DTO.RoomRequestDTO;
-import com.example.nhatrobackend.DTO.UserDetailDTO;
+import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Entity.Post;
+import com.example.nhatrobackend.Entity.Room;
+import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.PostMapper;
+import com.example.nhatrobackend.Mapper.RoomMapper;
 import com.example.nhatrobackend.Mapper.UserMapper;
 import com.example.nhatrobackend.Responsitory.PostRepository;
+import com.example.nhatrobackend.Responsitory.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,9 +27,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
-    private final PostMapper postMapper; // Thay PostConverter bằng PostMapper
+    private final PostMapper postMapper;
     private final UserMapper userMapper;
-
+    private final RoomMapper roomMapper;
+    private final UserService userService;
+    private final RoomService roomService;
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         // Lấy tất cả các Post từ cơ sở dữ liệu dưới dạng Page
@@ -84,6 +89,23 @@ public class PostServiceImpl implements PostService{
         else{
             throw new EntityNotFoundException("Không tìm thấy kết quả phù hợp.");
         }
+    }
+
+    @Override
+    public PostDetailResponseDTO createPost(PostRequestDTO postRequestDTO, String userUuid) {
+        User user = userService.findByUserUuid(userUuid);
+        if(!userService.getApprovedUserByUuid(userUuid)){
+            throw new IllegalArgumentException("Chưa đăng kí tài khoản Chủ cho thuê, không thể đăng bài.");
+        }
+        Room room = roomMapper.toRoom(postRequestDTO);
+        Post post = postMapper.toPostWithImages(postRequestDTO,user);
+        roomService.saveRoom(room);
+        post.setRoom(room);
+        post.setUser(user);
+        post.setStatus(PostStatus.PENDING);
+        post.setCreatedAt(LocalDateTime.now());
+        Post savePost = postRepository.save(post);
+        return postMapper.toPostDetailResponseDTO(savePost);
     }
 
 
