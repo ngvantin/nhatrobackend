@@ -14,5 +14,8 @@ public class GlobalExceptionHandler {
         return ExceptionBuilder.buildNotFoundExceptionResponse(ex.getMessage());
     }
 
-    // Các bộ xử lý ngoại lệ khác có thể dùng các phương thức khác trong ExceptionBuilder
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ResponseWrapper<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ExceptionBuilder.buildBadRequestExceptionResponse(ex.getMessage());
+    }
 }

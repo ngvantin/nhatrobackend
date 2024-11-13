@@ -69,4 +69,20 @@ public class PostController {
                 .build());
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
+            @RequestBody PostRequestDTO postRequestDTO,
+            @RequestParam("userUuid") String userUuid){
+        PostDetailResponseDTO postDetailResponseDTO = postService.createPost(postRequestDTO, userUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(postDetailResponseDTO)
+                .message("Bài đăng đã được tạo thành công.")
+                .build());
+
+    }
+
+
 }
+

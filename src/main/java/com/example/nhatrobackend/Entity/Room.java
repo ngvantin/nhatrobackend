@@ -62,4 +62,25 @@ public class Room {
     // Thiết lập quan hệ 1-1 với Post
     @OneToOne(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private Post post;
+
+    @Override
+    public String toString() {
+        return "Room{" +
+                "roomId=" + roomId +
+                ", price=" + price +
+                ", area=" + area +
+                ", furnitureStatus=" + furnitureStatus +
+                ", numberOfRooms=" + numberOfRooms +
+                ", electricityPrice=" + electricityPrice +
+                ", waterPrice=" + waterPrice +
+                ", city='" + city + '\'' +
+                ", district='" + district + '\'' +
+                ", ward='" + ward + '\'' +
+                ", street='" + street + '\'' +
+                ", houseNumber='" + houseNumber + '\'' +
+                ", licensePcccUrl='" + licensePcccUrl + '\'' +
+                ", licenseBusinessUrl='" + licenseBusinessUrl + '\'' +
+                ", post=" + post +
+                '}';
+    }
 }
