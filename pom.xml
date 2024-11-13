@@ -64,12 +64,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.modelmapper/modelmapper -->
-<!--		<dependency>-->
-<!--			<groupId>org.modelmapper</groupId>-->
-<!--			<artifactId>modelmapper</artifactId>-->
-<!--			<version>3.1.1</version>-->
-<!--		</dependency>-->
 
 		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
 		<dependency>
@@ -84,6 +78,12 @@
 			<version>0.2.0</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+			<version>6.3.3</version>
+		</dependency>
 
 	</dependencies>
 
