@@ -66,10 +66,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Post> post;
 
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "account_id", insertable = false, updatable = false)
-//    private Account account;
+    // Thiết lập quan hệ 1-1 với Post
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Account account;
 
 
 }
