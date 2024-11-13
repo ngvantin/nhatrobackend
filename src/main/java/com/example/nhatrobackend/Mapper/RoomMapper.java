@@ -1,7 +1,6 @@
 package com.example.nhatrobackend.Mapper;
 
 import com.example.nhatrobackend.Config.MapStructConfig;
-import com.example.nhatrobackend.DTO.RoomDTO;
 import com.example.nhatrobackend.Entity.Room;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
