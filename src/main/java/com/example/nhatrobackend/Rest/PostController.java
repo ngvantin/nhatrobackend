@@ -83,6 +83,33 @@ public class PostController {
 
     }
 
+    @PutMapping("/update/{postUuid}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> updatePost(
+            @PathVariable String postUuid,
+            @RequestBody PostRequestDTO postRequestDTO,
+            @RequestParam("userUuid") String userUuid
+    ){
+        PostDetailResponseDTO  updatePost = postService.updatepost(postUuid,postRequestDTO,userUuid);
+        return  ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(updatePost)
+                .message("Cập nhật bài đăng thành công.")
+                .build());
+    }
+
+    @DeleteMapping("/delete/{postUuid}")
+    public ResponseEntity<ResponseWrapper<String>> deletePost(
+            @PathVariable String postUuid,
+            @RequestParam("userUuid") String userUuid
+    ){
+        postService.deletepost(postUuid,userUuid);
+        return  ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .message("Xóa bài đăng thành công.")
+                .build());
+    }
+
+
 
 }
 

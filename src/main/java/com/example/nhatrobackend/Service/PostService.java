@@ -10,4 +10,6 @@ public interface PostService {
     Page<PostResponseDTO> filterPosts(RoomRequestDTO roomRequestDTO, Pageable pageable);
     UserDetailDTO getUserByPostUuid(String postUuid);
     PostDetailResponseDTO  createPost(PostRequestDTO postRequestDTO, String userUuid);
+    PostDetailResponseDTO updatepost( String postUuid, PostRequestDTO postRequestDTO, String userUuid);
+    void deletepost( String postUuid, String userUuid);
 }
