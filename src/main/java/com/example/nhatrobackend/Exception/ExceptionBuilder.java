@@ -23,4 +23,12 @@ public class ExceptionBuilder {
                         .message(message)
                         .build());
     }
+
+    public static ResponseEntity<ResponseWrapper<Void>> handleIllegalAccessDeniedException(String message) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ResponseWrapper.<Void>builder()
+                        .status("error")
+                        .message(message)
+                        .build());
+    }
 }

@@ -11,6 +11,7 @@ import com.example.nhatrobackend.Mapper.UserMapper;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -106,6 +108,44 @@ public class PostServiceImpl implements PostService{
         post.setCreatedAt(LocalDateTime.now());
         Post savePost = postRepository.save(post);
         return postMapper.toPostDetailResponseDTO(savePost);
+    }
+
+    @Override
+    public PostDetailResponseDTO updatepost(String postUuid, PostRequestDTO postRequestDTO, String userUuid) {
+        Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
+        if(optionalPost.isPresent()){
+            Post post = optionalPost.get();
+            User user = userService.findByUserUuid(userUuid);
+            if(!post.getUser().equals(user)){
+                throw new IllegalArgumentException("Bạn không có quyền cho bài viết này");
+            }
+            Post updatePost = postMapper.toPostWithImages(postRequestDTO,user);
+            updatePost.setPostId(post.getPostId());
+            Post savePost = postRepository.save(updatePost);
+            return postMapper.toPostDetailResponseDTO(savePost);
+        }
+        else{
+            throw new EntityNotFoundException("Không tìm thấy bài viết.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deletepost(String postUuid, String userUuid) {
+        Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
+        if(optionalPost.isPresent()){
+            Post post = optionalPost.get();
+            User user = userService.findByUserUuid(userUuid);
+            if(!post.getUser().equals(user)){
+                throw new IllegalArgumentException("Bạn không có quyền cho bài viết này");
+            }
+            System.out.println("Đang thực hiện xóa bài đăng với ID: " + post.getPostId());
+            postRepository.deleteById(post.getPostId());
+            System.out.println("Đã xóa bài đăng với ID: " + post.getPostId());
+        }
+        else{
+            throw new EntityNotFoundException("Không tìm thấy bài viết.");
+        }
     }
 
 

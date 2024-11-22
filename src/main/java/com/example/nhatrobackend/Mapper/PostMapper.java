@@ -24,6 +24,8 @@ public interface PostMapper {
     RoomMapper roomMapper = Mappers.getMapper(RoomMapper.class);
 
     // Ánh xạ từ Post sang PostResponseDTO
+    @Mapping(source = "post.room.electricityPrice", target = "electricityPrice")
+    @Mapping(source = "post.room.waterPrice", target = "waterPrice")
     @Mapping(source = "post.room.price", target = "price")
     @Mapping(source = "post.room.area", target = "area")
     @Mapping(source = "post.room.city", target = "city")

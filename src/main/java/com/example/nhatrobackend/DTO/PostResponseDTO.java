@@ -1,5 +1,6 @@
 package com.example.nhatrobackend.DTO;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,4 +23,6 @@ public class PostResponseDTO {
     private String district; // Quận/Huyện
     private String ward; // Phường/Xã
     private LocalDateTime createdAt;
+    private Double electricityPrice; // Giá điện cho phòng
+    private Double waterPrice; // Giá nước cho phòng
 }
