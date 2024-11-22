@@ -36,4 +36,6 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
             @Param("district") String district,
             @Param("ward") String ward,
             Pageable pageable); // Thêm tham số Pageable
+
+    void deleteByPostId(int postId);
 }
