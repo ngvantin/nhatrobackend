@@ -10,6 +10,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/post")
@@ -89,7 +99,7 @@ public class PostController {
             @RequestBody PostRequestDTO postRequestDTO,
             @RequestParam("userUuid") String userUuid
     ){
-        PostDetailResponseDTO  updatePost = postService.updatepost(postUuid,postRequestDTO,userUuid);
+        PostDetailResponseDTO  updatePost = postService.updatePost(postUuid,postRequestDTO,userUuid);
         return  ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
                 .status("success")
                 .data(updatePost)
@@ -102,12 +112,54 @@ public class PostController {
             @PathVariable String postUuid,
             @RequestParam("userUuid") String userUuid
     ){
-        postService.deletepost(postUuid,userUuid);
+        postService.deletePost(postUuid,userUuid);
         return  ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
                 .message("Xóa bài đăng thành công.")
                 .build());
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<ResponseWrapper<List<String>>> uploadFiles(@RequestParam("files") MultipartFile[] files) {
+        List<String> fileUrls = new ArrayList<>();
+        String uploadDir = "D:\\anh\\"; // Thư mục lưu ảnh
+
+        try {
+            for (MultipartFile file : files) {
+                // Tạo tên file duy nhất
+                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+                // Kiểm tra thư mục lưu ảnh, tạo nếu chưa tồn tại
+                Path uploadPath = Paths.get(uploadDir);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                // Lưu file vào thư mục server
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // Thêm đường dẫn lưu file vào danh sách kết quả
+                String fileUrl = uploadDir + fileName; // Đường dẫn thực tế
+                fileUrls.add(fileUrl);
+            }
+
+            // Trả về phản hồi thành công
+            return ResponseEntity.ok(ResponseWrapper.<List<String>>builder()
+                    .status("success")
+                    .message("Upload thành công " + fileUrls.size() + " file(s).")
+                    .data(fileUrls)
+                    .build());
+        } catch (IOException e) {
+            // Xử lý lỗi upload và trả về phản hồi lỗi
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseWrapper.<List<String>>builder()
+                            .status("error")
+                            .message("Lỗi khi upload file: " + e.getMessage())
+                            .build());
+        }
+    }
+
 
 
 

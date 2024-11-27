@@ -31,4 +31,13 @@ public class ExceptionBuilder {
                         .message(message)
                         .build());
     }
+
+    public static ResponseEntity<ResponseWrapper<Void>> buildIOExceptionResponse(String message) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ResponseWrapper.<Void>builder()
+                        .status("error")
+                        .message(message)
+                        .build());
+    }
+
 }

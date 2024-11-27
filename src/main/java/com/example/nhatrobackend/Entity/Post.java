@@ -49,7 +49,7 @@ public class Post {
 
 
     // Thiết lập quan hệ 1-1 với Rooms
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
       // Quan hệ 1-N với PostImage
@@ -64,4 +64,22 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FavoritePost> favoritePosts ;
 
+    @Override
+    public String toString() {
+        return "Post{" +
+                "postId=" + postId +
+                ", postUuid='" + postUuid + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", depositAmount=" + depositAmount +
+                ", videoUrl='" + videoUrl + '\'' +
+                ", status=" + status +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+//                ", room=" + room +
+//                ", postImages=" + postImages +
+//                ", user=" + user +
+//                ", favoritePosts=" + favoritePosts +
+                '}';
+    }
 }

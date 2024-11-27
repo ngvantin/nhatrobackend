@@ -60,5 +60,7 @@ public interface PostMapper {
                 .collect(Collectors.toList());
     }
 
-
+    @Mapping(target = "postId", ignore = true)
+    @Mapping(target = "postImages", ignore = true)
+    void updatePostFromDTO(PostRequestDTO dto, @MappingTarget Post post);
 }
