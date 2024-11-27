@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponseDTO {
+    private String postUuid;
     private int postId;
     private List<String> postImages;
     private String title;

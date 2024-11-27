@@ -3,8 +3,10 @@ package com.example.nhatrobackend.Service;
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Entity.Post;
+import com.example.nhatrobackend.Entity.PostImage;
 import com.example.nhatrobackend.Entity.Room;
 import com.example.nhatrobackend.Entity.User;
+import com.example.nhatrobackend.Mapper.PostImageMapper;
 import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Mapper.RoomMapper;
 import com.example.nhatrobackend.Mapper.UserMapper;
@@ -34,6 +36,7 @@ public class PostServiceImpl implements PostService{
     private final RoomMapper roomMapper;
     private final UserService userService;
     private final RoomService roomService;
+    private final PostImageMapper postImageMapper;
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         // Lấy tất cả các Post từ cơ sở dữ liệu dưới dạng Page
@@ -110,28 +113,63 @@ public class PostServiceImpl implements PostService{
         return postMapper.toPostDetailResponseDTO(savePost);
     }
 
+//    @Override
+//    public PostDetailResponseDTO updatePost(String postUuid, PostRequestDTO postRequestDTO, String userUuid) {
+//        Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
+//        if(optionalPost.isPresent()){
+//            Post post = optionalPost.get();
+//            User user = userService.findByUserUuid(userUuid);
+//            if(!post.getUser().equals(user)){
+//                throw new IllegalArgumentException("Bạn không có quyền cho bài viết này");
+//            }
+//            Post updatePost = postMapper.toPostWithImages(postRequestDTO,user);
+//            updatePost.setPostId(post.getPostId());
+//            Post savePost = postRepository.save(updatePost);
+//            return postMapper.toPostDetailResponseDTO(savePost);
+//        }
+//        else{
+//            throw new EntityNotFoundException("Không tìm thấy bài viết.");
+//        }
+//    }
+
     @Override
-    public PostDetailResponseDTO updatepost(String postUuid, PostRequestDTO postRequestDTO, String userUuid) {
+    @Transactional
+    public PostDetailResponseDTO updatePost(String postUuid, PostRequestDTO postRequestDTO, String userUuid) {
         Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
-        if(optionalPost.isPresent()){
-            Post post = optionalPost.get();
-            User user = userService.findByUserUuid(userUuid);
-            if(!post.getUser().equals(user)){
-                throw new IllegalArgumentException("Bạn không có quyền cho bài viết này");
-            }
-            Post updatePost = postMapper.toPostWithImages(postRequestDTO,user);
-            updatePost.setPostId(post.getPostId());
-            Post savePost = postRepository.save(updatePost);
-            return postMapper.toPostDetailResponseDTO(savePost);
-        }
-        else{
+        if (optionalPost.isEmpty()) {
             throw new EntityNotFoundException("Không tìm thấy bài viết.");
         }
+
+        Post post = optionalPost.get();
+        User user = userService.findByUserUuid(userUuid);
+        if (!post.getUser().equals(user)) {
+            throw new IllegalArgumentException("Bạn không có quyền cập nhật bài viết này.");
+        }
+
+        // **Cập nhật các trường của Post**
+        postMapper.updatePostFromDTO(postRequestDTO, post); // Tận dụng mapper (cần bổ sung)
+
+        // **Cập nhật Room**
+        if (post.getRoom() != null) {
+            roomMapper.updateRoomFromDTO(postRequestDTO, post.getRoom()); // Cập nhật thông tin Room
+        }
+
+        // **Cập nhật PostImage**
+        if (postRequestDTO.getPostImages() != null) {
+            List<PostImage> updatedImages = postImageMapper.toPostImage(postRequestDTO.getPostImages(), post);
+            post.getPostImages().clear(); // Xóa ảnh cũ
+            post.getPostImages().addAll(updatedImages); // Thêm ảnh mới
+        }
+
+        // **Lưu các thay đổi**
+        Post updatedPost = postRepository.save(post);
+
+        return postMapper.toPostDetailResponseDTO(updatedPost);
     }
 
     @Override
     @Transactional
-    public void deletepost(String postUuid, String userUuid) {
+    public void deletePost(String postUuid, String userUuid) {
         Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
         if(optionalPost.isPresent()){
             Post post = optionalPost.get();
@@ -139,9 +177,7 @@ public class PostServiceImpl implements PostService{
             if(!post.getUser().equals(user)){
                 throw new IllegalArgumentException("Bạn không có quyền cho bài viết này");
             }
-            System.out.println("Đang thực hiện xóa bài đăng với ID: " + post.getPostId());
-            postRepository.deleteById(post.getPostId());
-            System.out.println("Đã xóa bài đăng với ID: " + post.getPostId());
+            postRepository.delete(post);
         }
         else{
             throw new EntityNotFoundException("Không tìm thấy bài viết.");

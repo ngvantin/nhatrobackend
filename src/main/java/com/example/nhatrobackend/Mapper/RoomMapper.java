@@ -6,9 +6,12 @@ import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.Room;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 @Mapper(config = MapStructConfig.class)
 public interface RoomMapper {
 
     Room toRoom(PostRequestDTO postRequestDTO);
+
+    void updateRoomFromDTO(PostRequestDTO dto, @MappingTarget Room room);
 }

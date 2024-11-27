@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import jakarta.persistence.EntityNotFoundException;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 
 @ControllerAdvice
@@ -25,4 +26,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseWrapper<Void>> handleIllegalAccessDeniedException(AccessDeniedException ex) {
         return ExceptionBuilder.buildBadRequestExceptionResponse(ex.getMessage());
     }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<ResponseWrapper<Void>> handleIOException(IOException ex) {
+        return ExceptionBuilder.buildIOExceptionResponse("Lỗi xảy ra khi upload file: " + ex.getMessage());
+    }
+
 }
