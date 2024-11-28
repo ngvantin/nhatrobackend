@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Service.PostService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -54,11 +55,20 @@ public class PostController {
                 .build());
     }
 
-    @PostMapping("/filter")
+    @GetMapping("/filter")
     public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> filterPosts(
-            @RequestBody RoomRequestDTO roomRequestDTO,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Double minArea,
+            @RequestParam(required = false) Double maxArea,
+            @RequestParam(required = false) FurnitureStatus furnitureStatus,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String district,
+            @RequestParam(required = false) String ward,
             Pageable pageable) {
-        Page<PostResponseDTO> filteredPosts = postService.filterPosts(roomRequestDTO, pageable);
+
+        Page<PostResponseDTO> filteredPosts = postService.filterPosts(
+                minPrice, maxPrice, minArea, maxArea, furnitureStatus, city, district, ward, pageable);
 
         return ResponseEntity.ok(
                 ResponseWrapper.<Page<PostResponseDTO>>builder()
@@ -68,6 +78,7 @@ public class PostController {
                         .build()
         );
     }
+
     @GetMapping("/{postUuid}/user")
     public ResponseEntity<ResponseWrapper<UserDetailDTO>> getUserByPostUuid(@PathVariable String postUuid){
         UserDetailDTO  userDetailDTO = postService.getUserByPostUuid(postUuid);

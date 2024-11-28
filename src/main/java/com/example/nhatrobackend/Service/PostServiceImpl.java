@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.PostImage;
@@ -62,19 +63,28 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public Page<PostResponseDTO> filterPosts(RoomRequestDTO roomRequestDTO, Pageable pageable) {
-        // Lấy danh sách bài viết đã lọc với phân trang
-        Page<Post> postPage = postRepository.findPostsByRoomCriteria(
-                roomRequestDTO.getMinPrice(),
-                roomRequestDTO.getMaxPrice(),
-                roomRequestDTO.getMinArea(),
-                roomRequestDTO.getMaxArea(),
-                roomRequestDTO.getFurnitureStatus(),
-                roomRequestDTO.getCity(),
-                roomRequestDTO.getDistrict(),
-                roomRequestDTO.getWard(),
-                pageable);
+    public Page<PostResponseDTO> filterPosts(
+            Double minPrice,
+            Double maxPrice,
+            Double minArea,
+            Double maxArea,
+            FurnitureStatus furnitureStatus,
+            String city,
+            String district,
+            String ward,
+            Pageable pageable) {
 
+        // Gọi repository với các tham số trực tiếp
+        Page<Post> postPage = postRepository.findPostsByRoomCriteria(
+                minPrice,
+                maxPrice,
+                minArea,
+                maxArea,
+                furnitureStatus,
+                city,
+                district,
+                ward,
+                pageable);
         // Kiểm tra nếu không có bài viết nào được tìm thấy, ném ngoại lệ
         if (!postPage.hasContent()) {
             throw new EntityNotFoundException("Không tìm thấy kết quả phù hợp.");
@@ -83,6 +93,30 @@ public class PostServiceImpl implements PostService{
         // Sử dụng mapStruct để chuyển đổi từng Post thành PostResponseDTO
         return postPage.map(postMapper::toPostResponseDTO);
     }
+
+
+//    @Override
+//    public Page<PostResponseDTO> filterPosts(RoomRequestDTO roomRequestDTO, Pageable pageable) {
+//        // Lấy danh sách bài viết đã lọc với phân trang
+//        Page<Post> postPage = postRepository.findPostsByRoomCriteria(
+//                roomRequestDTO.getMinPrice(),
+//                roomRequestDTO.getMaxPrice(),
+//                roomRequestDTO.getMinArea(),
+//                roomRequestDTO.getMaxArea(),
+//                roomRequestDTO.getFurnitureStatus(),
+//                roomRequestDTO.getCity(),
+//                roomRequestDTO.getDistrict(),
+//                roomRequestDTO.getWard(),
+//                pageable);
+//
+//        // Kiểm tra nếu không có bài viết nào được tìm thấy, ném ngoại lệ
+//        if (!postPage.hasContent()) {
+//            throw new EntityNotFoundException("Không tìm thấy kết quả phù hợp.");
+//        }
+//
+//        // Sử dụng mapStruct để chuyển đổi từng Post thành PostResponseDTO
+//        return postPage.map(postMapper::toPostResponseDTO);
+//    }
 
     @Override
     public UserDetailDTO getUserByPostUuid(String postUuid) {
