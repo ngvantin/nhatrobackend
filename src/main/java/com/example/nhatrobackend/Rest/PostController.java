@@ -45,7 +45,7 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{postUuid}")
+    @GetMapping("/detail/{postUuid}")
     public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> getPostDetail(@PathVariable String postUuid) {
         PostDetailResponseDTO postDetail = postService.getPostById(postUuid);
         return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()

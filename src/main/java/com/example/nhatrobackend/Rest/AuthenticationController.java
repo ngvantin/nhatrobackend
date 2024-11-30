@@ -3,6 +3,7 @@ package com.example.nhatrobackend.Rest;
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,26 +21,45 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(@RequestBody AuthenticationRequest request){
-//        AuthenticationResponse response = authenticationService.authenticate(request);
-//        return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
-//                .status("success")
-//                .data(response)
-//                .message("Đăng nhập thành công")
-//                .build());
         var result = authenticationService.authenticate(request);
                 return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
                 .status("success")
                 .data(result)
                 .message("Đăng nhập thành công")
                 .build());
+        //        AuthenticationResponse response = authenticationService.authenticate(request);
+//        return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
+//                .status("success")
+//                .data(response)
+//                .message("Đăng nhập thành công")
+//                .build());
     }
 
     @PostMapping("/introspect")
-    ResponseEntity<ResponseWrapper<IntrospectResponse>> authenticate(@RequestBody IntrospectRequest request)
+    public ResponseEntity<ResponseWrapper<IntrospectResponse>> authenticate(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
         var result = authenticationService.introspect(request);
         return ResponseEntity.ok(ResponseWrapper.<IntrospectResponse>builder()
                 .data(result)
+                .build());
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<ResponseWrapper<RegisterRequestDTO>> register(@Valid @RequestBody RegisterRequestDTO dto){
+        authenticationService.register(dto);
+        return ResponseEntity.ok(ResponseWrapper.<RegisterRequestDTO>builder()
+                .status("success")
+                .data(dto)
+                .message("OTP đã được gửi qua số điện thoại của bạn")
+                .build());
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ResponseWrapper> verifyOtp(@Valid @RequestBody OtpVerificationDTO dto){
+        authenticationService.verifyOtpAndCreateAccount(dto);
+        return ResponseEntity.ok(ResponseWrapper.builder()
+                .status("success")
+                .message("Đăng ký thành công")
                 .build());
     }
 }

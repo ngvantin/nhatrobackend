@@ -40,4 +40,13 @@ public class ExceptionBuilder {
                         .build());
     }
 
+    public static ResponseEntity<ResponseWrapper<Void>> buildBadRequestNotValidExceptionResponse(String message) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) // Đổi thành 400 Bad Request
+                .body(ResponseWrapper.<Void>builder()
+                        .status("error")
+                        .message(message) // Truyền thông báo lỗi ngắn gọn
+                        .build());
+    }
+
+
 }

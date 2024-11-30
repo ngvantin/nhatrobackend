@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Exception;
 
 import com.example.nhatrobackend.DTO.ResponseWrapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,6 +31,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IOException.class)
     public ResponseEntity<ResponseWrapper<Void>> handleIOException(IOException ex) {
         return ExceptionBuilder.buildIOExceptionResponse("Lỗi xảy ra khi upload file: " + ex.getMessage());
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ResponseWrapper<Void>> handleValidationException(MethodArgumentNotValidException ex) {
+        // Lấy thông báo lỗi đầu tiên từ danh sách các lỗi
+        String errorMessage = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(fieldError -> fieldError.getDefaultMessage()) // Chỉ lấy thông báo lỗi
+                .findFirst()
+                .orElse("Validation error");
+
+        // Trả về lỗi ngắn gọn
+        return ExceptionBuilder.buildBadRequestNotValidExceptionResponse(errorMessage);
     }
 
 }
