@@ -20,18 +20,18 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(@RequestBody AuthenticationRequest request){
-//        AuthenticationResponse response = authenticationService.authenticate(request);
-//        return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
-//                .status("success")
-//                .data(response)
-//                .message("Đăng nhập thành công")
-//                .build());
         var result = authenticationService.authenticate(request);
                 return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
                 .status("success")
                 .data(result)
                 .message("Đăng nhập thành công")
                 .build());
+        //        AuthenticationResponse response = authenticationService.authenticate(request);
+//        return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
+//                .status("success")
+//                .data(response)
+//                .message("Đăng nhập thành công")
+//                .build());
     }
 
     @PostMapping("/introspect")

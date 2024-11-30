@@ -30,12 +30,12 @@ public class AuthenticationService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @NonFinal
-    protected static final String SIGNER_KEY = "sXUTpDGAiL9kVkdE7jspTrpYZ3pQeHdaKBAKczxpkqJ/Wk83qgdkld/jhzFf7vy2";
-
 //    @NonFinal
-//    @Value("${jwt.signerKey}")
-//    protected String SIGNER_KEY;
+//    protected static final String SIGNER_KEY = "sXUTpDGAiL9kVkdE7jspTrpYZ3pQeHdaKBAKczxpkqJ/Wk83qgdkld/jhzFf7vy2";
+
+    @NonFinal
+    @Value("${jwt.signerKey}")
+    protected String SIGNER_KEY;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request){
         Optional<Account> optionalAccount = accountRepository.findByPhoneNumber(request.getPhoneNumber());
@@ -62,7 +62,7 @@ public class AuthenticationService {
                 .issuer("example.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                Instant.now().plus( 1, ChronoUnit.HOURS).toEpochMilli()
+                Instant.now().plus( 1, ChronoUnit.DAYS).toEpochMilli()
                 ))
                 .claim( "custonClaim", "Custom")
                 .build();
