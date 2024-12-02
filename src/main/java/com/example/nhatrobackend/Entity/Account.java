@@ -33,6 +33,9 @@ public class Account {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "role", nullable = false)
+//    private String role;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

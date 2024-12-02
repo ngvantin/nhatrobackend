@@ -19,6 +19,7 @@ import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import static com.example.nhatrobackend.Entity.Field.AccountStatus.ACTIVE;
 import static com.example.nhatrobackend.Entity.Field.LandlordStatus.NOT_REGISTERED;
@@ -53,7 +55,8 @@ public class AuthenticationService {
         if(optionalAccount.isPresent()){
             Account account = optionalAccount.get();
             if(passwordEncoder.matches(request.getPassword(),account.getPassword())){
-                var token = generateToken(request.getPhoneNumber());
+//                var token = generateToken(request.getPhoneNumber());
+                var token = generateToken(account);
                 return AuthenticationResponse.builder()
                         .accessToken(token)
                         .authenticated(true)
@@ -66,16 +69,17 @@ public class AuthenticationService {
 
         }
     }
-    private String generateToken(String phoneNumber){
+    private String generateToken(Account account){
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject (phoneNumber)
+                .subject (account.getPhoneNumber())
                 .issuer("example.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                 Instant.now().plus( 1, ChronoUnit.DAYS).toEpochMilli()
                 ))
-                .claim( "custonClaim", "Custom")
+                .claim( "scope", buildScope(account))
+                .claim( "sub", userUuid(account))
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header,payload);
@@ -130,4 +134,22 @@ public class AuthenticationService {
         account.setStatus(ACTIVE);
         accountRepository.save(account);
     }
+
+    private String buildScope (Account account){
+        StringJoiner stringJoiner = new StringJoiner (" ");
+        if (account.getRole() !=null){
+            stringJoiner.add(account.getRole().name());
+        }
+        return stringJoiner.toString();
+    }
+    private String userUuid (Account account) {
+        // Lấy userUuid từ User liên quan đến Account
+        User user = account.getUser();
+        if (user != null) {
+            return user.getUserUuid();  // Giả sử User có thuộc tính userUuid
+        } else {
+            return null;  // Trường hợp không tìm thấy User
+        }
+    }
+
 }
