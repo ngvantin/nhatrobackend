@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
+import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.PostService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
+    private final AuthenticationFacade authenticationFacade;
     @GetMapping
     public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
@@ -90,26 +92,30 @@ public class PostController {
                 .build());
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
-            @RequestBody PostRequestDTO postRequestDTO,
-            @RequestParam("userUuid") String userUuid){
-        PostDetailResponseDTO postDetailResponseDTO = postService.createPost(postRequestDTO, userUuid);
+@PostMapping("/create")
+public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
+        @RequestBody PostRequestDTO postRequestDTO) {
 
-        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
-                .status("success")
-                .data(postDetailResponseDTO)
-                .message("Bài đăng đã được tạo thành công.")
-                .build());
+    // Lấy userUuid từ Bearer Token
+    String userUuid = authenticationFacade.getCurrentUserUuid();
 
-    }
+    // Gọi service để tạo bài viết
+    PostDetailResponseDTO postDetailResponseDTO = postService.createPost(postRequestDTO, userUuid);
+
+    return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+            .status("success")
+            .data(postDetailResponseDTO)
+            .message("Bài đăng đã được tạo thành công.")
+            .build());
+}
 
     @PutMapping("/update/{postUuid}")
     public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> updatePost(
             @PathVariable String postUuid,
-            @RequestBody PostRequestDTO postRequestDTO,
-            @RequestParam("userUuid") String userUuid
+            @RequestBody PostRequestDTO postRequestDTO
     ){
+        // Lấy userUuid từ Bearer Token
+        String userUuid = authenticationFacade.getCurrentUserUuid();
         PostDetailResponseDTO  updatePost = postService.updatePost(postUuid,postRequestDTO,userUuid);
         return  ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
                 .status("success")
@@ -120,9 +126,10 @@ public class PostController {
 
     @DeleteMapping("/delete/{postUuid}")
     public ResponseEntity<ResponseWrapper<String>> deletePost(
-            @PathVariable String postUuid,
-            @RequestParam("userUuid") String userUuid
+            @PathVariable String postUuid
     ){
+        // Lấy userUuid từ Bearer Token
+        String userUuid = authenticationFacade.getCurrentUserUuid();
         postService.deletePost(postUuid,userUuid);
         return  ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
