@@ -64,6 +64,10 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FavoritePost> favoritePosts ;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportPost> reportPosts;
+
+
     @Override
     public String toString() {
         return "Post{" +

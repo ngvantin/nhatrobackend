@@ -34,4 +34,10 @@ public class UserServiceImpl implements UserService{
             throw new EntityNotFoundException("Không tìm thấy User ID: " + userUuid);
         }
     }
+
+    @Override
+    public User getUserByUuid(String userUuid) {
+        return userRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new RuntimeException("User not found with UUID: " + userUuid));
+    }
 }

@@ -45,4 +45,10 @@ public class GlobalExceptionHandler {
         return ExceptionBuilder.buildBadRequestNotValidExceptionResponse(errorMessage);
     }
 
+    // Xử lý RuntimeException
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ResponseWrapper<Void>> handleRuntimeException(RuntimeException ex) {
+        return ExceptionBuilder.buildRuntimeExceptionResponse(ex.getMessage());
+    }
+
 }

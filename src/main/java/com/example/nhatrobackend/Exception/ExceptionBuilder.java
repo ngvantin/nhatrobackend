@@ -48,5 +48,13 @@ public class ExceptionBuilder {
                         .build());
     }
 
+    // Xử lý lỗi RuntimeException
+    public static ResponseEntity<ResponseWrapper<Void>> buildRuntimeExceptionResponse(String message) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)  // Mã lỗi 500 cho lỗi server
+                .body(ResponseWrapper.<Void>builder()
+                        .status("error")
+                        .message(message)
+                        .build());
+    }
 
 }
