@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
+import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.PostService;
 import jakarta.persistence.EntityNotFoundException;
@@ -178,7 +179,77 @@ public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
         }
     }
 
+    @GetMapping("/approved")
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getApprovedPostsByUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
+        // Lấy userUuid từ Bearer Token
+        String userUuid = authenticationFacade.getCurrentUserUuid();
+
+        // Tạo Pageable từ các tham số page và size
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách các bài post với trạng thái APPROVED cho user
+        Page<PostResponseDTO> posts = postService.getPostsByStatusAndUser(PostStatus.APPROVED,userUuid, pageable);
+
+        // Tạo ResponseWrapper với status, message và dữ liệu
+        ResponseWrapper<Page<PostResponseDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài posts thành công",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/rejected")
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getRejectedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        // Lấy userUuid từ Bearer Token
+        String userUuid = authenticationFacade.getCurrentUserUuid();
+
+        // Tạo Pageable từ các tham số page và size
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách các bài post với trạng thái APPROVED cho user
+        Page<PostResponseDTO> posts = postService.getPostsByStatusAndUser(PostStatus.REJECTED,userUuid, pageable);
+
+        // Tạo ResponseWrapper với status, message và dữ liệu
+        ResponseWrapper<Page<PostResponseDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài posts bị từ chối thành công",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getPendingPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        // Lấy userUuid từ Bearer Token
+        String userUuid = authenticationFacade.getCurrentUserUuid();
+
+        // Tạo Pageable từ các tham số page và size
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách các bài post với trạng thái APPROVED cho user
+        Page<PostResponseDTO> posts = postService.getPostsByStatusAndUser(PostStatus.PENDING,userUuid, pageable);
+
+        // Tạo ResponseWrapper với status, message và dữ liệu
+        ResponseWrapper<Page<PostResponseDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài posts đang chờ xét duyệt thành công",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
 
 }

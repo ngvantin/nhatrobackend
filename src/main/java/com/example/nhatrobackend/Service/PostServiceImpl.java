@@ -224,4 +224,16 @@ public class PostServiceImpl implements PostService{
                 .orElseThrow(() -> new RuntimeException("Post not found with UUID: " + postUuid));
     }
 
+    @Override
+    public Page<PostResponseDTO> getPostsByStatusAndUser(PostStatus status, String userUuid, Pageable pageable) {
+        // Lấy userId từ userUuid
+        User user = userService.getUserByUuid(userUuid);
+        Integer userId = user.getUserId(); // Lấy userId từ User
+
+        // Lọc các bài post có trạng thái APPROVED và userId tương ứng
+        Page<Post> postPage = postRepository.findByStatusAndUser_UserId(status, userId, pageable);
+
+        // Chuyển đổi từ Post sang PostResponseDTO
+        return postPage.map(postMapper::toPostResponseDTO);
+    }
 }

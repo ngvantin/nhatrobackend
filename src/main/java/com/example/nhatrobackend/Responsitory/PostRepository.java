@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Responsitory;
 
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
+import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Entity.Post;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.data.domain.Page;
@@ -38,4 +39,7 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
             Pageable pageable); // Thêm tham số Pageable
 
     void deleteByPostId(int postId);
+
+    // Lọc bài viết có trạng thái APPROVED và userId tương ứng
+    Page<Post> findByStatusAndUser_UserId(PostStatus status, Integer userId, Pageable pageable);
 }

@@ -76,7 +76,7 @@ public class AuthenticationService {
                 .issuer("example.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                Instant.now().plus( 1, ChronoUnit.DAYS).toEpochMilli()
+                Instant.now().plus( 30, ChronoUnit.DAYS).toEpochMilli()
                 ))
                 .claim( "scope", buildScope(account))
                 .claim( "sub", userUuid(account))

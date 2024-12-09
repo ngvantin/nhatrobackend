@@ -38,6 +38,20 @@ public class FavoritePostServiceImpl implements FavoritePostService {
         return favoritePostRepository.save(favoritePost);
 
     }
+
+    @Override
+    public void removeFavoritePost(String userUuid, String postUuid) {
+        // Lấy User và Post từ các service tương ứng
+        User user = userService.getUserByUuid(userUuid);
+        Post post = postService.getPostByUuid(postUuid);
+
+        // Tìm FavoritePost nếu tồn tại
+        FavoritePost favoritePost = favoritePostRepository.findByUserAndPost(user, post)
+                .orElseThrow(() -> new RuntimeException("Favorite post không tìm thấy tương ứng với user và post"));
+
+        // Xóa FavoritePost
+        favoritePostRepository.delete(favoritePost);
+    }
 }
 
 

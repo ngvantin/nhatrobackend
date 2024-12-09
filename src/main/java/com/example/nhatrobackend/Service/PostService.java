@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
+import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,4 +18,6 @@ public interface PostService {
     void deletePost( String postUuid, String userUuid);
 
     Post getPostByUuid(String postUuid);
+
+    Page<PostResponseDTO> getPostsByStatusAndUser(PostStatus status, String userUuid, Pageable pageable);
 }

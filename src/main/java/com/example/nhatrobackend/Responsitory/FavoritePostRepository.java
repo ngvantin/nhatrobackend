@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface FavoritePostRepository extends JpaRepository<FavoritePost, Integer> {
     // Có thể thêm các phương thức custom nếu cần
     Optional<FavoritePost> findByUserAndPost(User user, Post post);
+
 }
 
