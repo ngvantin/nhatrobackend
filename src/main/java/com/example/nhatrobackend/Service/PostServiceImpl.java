@@ -218,5 +218,10 @@ public class PostServiceImpl implements PostService{
         }
     }
 
+    @Override
+    public Post getPostByUuid(String postUuid) {
+        return postRepository.findByPostUuid(postUuid)
+                .orElseThrow(() -> new RuntimeException("Post not found with UUID: " + postUuid));
+    }
 
 }
