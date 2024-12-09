@@ -244,4 +244,49 @@ public class PostServiceImpl implements PostService{
         // Lấy danh sách Post từ FavoritePost và chuyển đổi sang PostResponseDTO
         return favoritePostsPage.map(favoritePost -> postMapper.toPostResponseDTO(favoritePost.getPost()));
     }
+
+    public PostDetailResponseDTO approvePost(String postUuid) {
+        // Tìm bài viết theo postUuid
+        Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
+
+        // Kiểm tra bài viết có tồn tại hay không
+        if (optionalPost.isPresent()) {
+            Post post = optionalPost.get();
+
+            // Cập nhật trạng thái bài viết
+            post.setStatus(PostStatus.APPROVED);
+            post.setUpdatedAt(LocalDateTime.now()); // Cập nhật thời gian sửa
+
+            // Lưu lại bài viết đã cập nhật
+            postRepository.save(post);
+
+            // Trả về response DTO
+            return postMapper.toPostDetailResponseDTO(post);  // Chuyển đổi thành DTO nếu cần
+        } else {
+            throw new EntityNotFoundException("Post not found with UUID: " + postUuid);
+        }
+    }
+
+    // Phương thức từ chối bài viết
+    public PostDetailResponseDTO rejectPost(String postUuid) {
+        // Tìm bài viết theo postUuid
+        Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
+
+        // Kiểm tra bài viết có tồn tại hay không
+        if (optionalPost.isPresent()) {
+            Post post = optionalPost.get();
+
+            // Cập nhật trạng thái bài viết thành REJECTED
+            post.setStatus(PostStatus.REJECTED);
+            post.setUpdatedAt(LocalDateTime.now()); // Cập nhật thời gian sửa
+
+            // Lưu lại bài viết đã cập nhật
+            postRepository.save(post);
+
+            // Trả về response DTO
+            return postMapper.toPostDetailResponseDTO(post);  // Chuyển đổi thành DTO nếu cần
+        } else {
+            throw new EntityNotFoundException("Post not found with UUID: " + postUuid);
+        }
+    }
 }

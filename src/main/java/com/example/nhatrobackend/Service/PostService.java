@@ -21,4 +21,6 @@ public interface PostService {
 
     Page<PostResponseDTO> getPostsByStatusAndUser(PostStatus status, String userUuid, Pageable pageable);
     Page<PostResponseDTO> getFavoritePostsByUser(String userUuid, Pageable pageable);
+    PostDetailResponseDTO approvePost(String postUuid);
+    PostDetailResponseDTO rejectPost(String postUuid);
 }

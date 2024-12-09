@@ -275,5 +275,30 @@ public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
         return ResponseEntity.ok(response);
     }
 
+
+    @PutMapping("/approve/{postUuid}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> approvePost(@PathVariable String postUuid) {
+        // Duyệt bài viết
+        PostDetailResponseDTO postDetail = postService.approvePost(postUuid);
+        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(postDetail)
+                .message("Thông tin bài đăng")
+                .build());
+    }
+
+    // Phương thức từ chối bài viết
+    @PutMapping("/reject/{postUuid}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> rejectPost(@PathVariable String postUuid) {
+        // Từ chối bài viết
+        PostDetailResponseDTO postDetail = postService.rejectPost(postUuid);
+
+        // Trả về response với mã HTTP 200 OK
+        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(postDetail)
+                .message("Thông tin bài đăng đã bị từ chối")
+                .build());
+    }
 }
 
