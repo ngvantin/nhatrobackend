@@ -251,6 +251,29 @@ public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/favorites")
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getFavoritePosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        // Lấy userUuid từ Bearer Token
+        String userUuid = authenticationFacade.getCurrentUserUuid();
+
+        // Tạo Pageable từ các tham số page và size
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách các bài post yêu thích của user
+        Page<PostResponseDTO> posts = postService.getFavoritePostsByUser(userUuid, pageable);
+
+        // Tạo ResponseWrapper với status, message và dữ liệu
+        ResponseWrapper<Page<PostResponseDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài post yêu thích thành công",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
 }
 

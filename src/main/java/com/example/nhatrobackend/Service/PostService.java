@@ -20,4 +20,5 @@ public interface PostService {
     Post getPostByUuid(String postUuid);
 
     Page<PostResponseDTO> getPostsByStatusAndUser(PostStatus status, String userUuid, Pageable pageable);
+    Page<PostResponseDTO> getFavoritePostsByUser(String userUuid, Pageable pageable);
 }

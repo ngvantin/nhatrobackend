@@ -1,16 +1,14 @@
 package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.Entity.*;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
-import com.example.nhatrobackend.Entity.Post;
-import com.example.nhatrobackend.Entity.PostImage;
-import com.example.nhatrobackend.Entity.Room;
-import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.PostImageMapper;
 import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Mapper.RoomMapper;
 import com.example.nhatrobackend.Mapper.UserMapper;
+import com.example.nhatrobackend.Responsitory.FavoritePostRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,6 +36,7 @@ public class PostServiceImpl implements PostService{
     private final UserService userService;
     private final RoomService roomService;
     private final PostImageMapper postImageMapper;
+    private final FavoritePostRepository favoritePostRepository;
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         // Lấy tất cả các Post từ cơ sở dữ liệu dưới dạng Page
@@ -235,5 +234,14 @@ public class PostServiceImpl implements PostService{
 
         // Chuyển đổi từ Post sang PostResponseDTO
         return postPage.map(postMapper::toPostResponseDTO);
+    }
+
+    @Override
+    public Page<PostResponseDTO> getFavoritePostsByUser(String userUuid, Pageable pageable) {
+        // Lấy danh sách FavoritePost của User
+        Page<FavoritePost> favoritePostsPage = favoritePostRepository.findByUser_UserUuid(userUuid, pageable);
+
+        // Lấy danh sách Post từ FavoritePost và chuyển đổi sang PostResponseDTO
+        return favoritePostsPage.map(favoritePost -> postMapper.toPostResponseDTO(favoritePost.getPost()));
     }
 }

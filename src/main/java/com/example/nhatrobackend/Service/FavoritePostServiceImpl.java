@@ -1,12 +1,15 @@
 package com.example.nhatrobackend.Service;
 
+import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.Entity.FavoritePost;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.User;
+import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Responsitory.FavoritePostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 
 @Service
@@ -15,7 +18,7 @@ public class FavoritePostServiceImpl implements FavoritePostService {
     private final FavoritePostRepository favoritePostRepository;
     private final UserService userService;
     private final PostService postService;
-
+    private final PostMapper postMapper;
 
     @Override
     public FavoritePost addFavoritePost(String userUuid, String postUuid) {
@@ -52,6 +55,8 @@ public class FavoritePostServiceImpl implements FavoritePostService {
         // Xóa FavoritePost
         favoritePostRepository.delete(favoritePost);
     }
+
+
 }
 
 
