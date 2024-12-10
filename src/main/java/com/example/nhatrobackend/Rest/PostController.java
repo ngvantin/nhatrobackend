@@ -95,22 +95,40 @@ public class PostController {
                 .build());
     }
 
-@PostMapping("/create")
-public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
-        @RequestBody PostRequestDTO postRequestDTO) {
+    @PostMapping("/create")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
+            @RequestBody PostRequestDTO postRequestDTO) {
 
-    // Lấy userUuid từ Bearer Token
-    String userUuid = authenticationFacade.getCurrentUserUuid();
+        // Lấy userUuid từ Bearer Token
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
-    // Gọi service để tạo bài viết
-    PostDetailResponseDTO postDetailResponseDTO = postService.createPost(postRequestDTO, userUuid);
+        // Gọi service để tạo bài viết
+        PostDetailResponseDTO postDetailResponseDTO = postService.createPost(postRequestDTO, userUuid);
 
-    return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
-            .status("success")
-            .data(postDetailResponseDTO)
-            .message("Bài đăng đã được tạo thành công.")
-            .build());
-}
+        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(postDetailResponseDTO)
+                .message("Bài đăng đã được tạo thành công.")
+                .build());
+    }
+
+    @GetMapping("/edit/{postUuid}")
+    public ResponseEntity<ResponseWrapper<PostRequestDTO>> getPostForEdit(
+            @PathVariable String postUuid
+    ) {
+        // Lấy userUuid từ Bearer Token
+        String userUuid = authenticationFacade.getCurrentUserUuid();
+
+        // Lấy thông tin bài viết
+        PostRequestDTO postRequestDTO = postService.getPostForEdit(postUuid, userUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<PostRequestDTO>builder()
+                .status("success")
+                .data(postRequestDTO)
+                .message("Lấy thông tin bài viết thành công.")
+                .build());
+    }
+
 
     @PutMapping("/update/{postUuid}")
     public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> updatePost(
