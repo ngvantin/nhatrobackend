@@ -165,6 +165,31 @@ public class PostServiceImpl implements PostService{
 //        }
 //    }
 
+//    @Transactional(readOnly = true)
+    @Override
+    public PostRequestDTO getPostForEdit(String postUuid, String userUuid) {
+        System.out.printf("hi");
+        // Lấy bài viết dựa trên postUuid
+        Post post = postRepository.findByPostUuid(postUuid)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy bài viết."));
+
+        // Kiểm tra quyền của người dùng
+        User user = userService.findByUserUuid(userUuid);
+        if (!post.getUser().equals(user)) {
+            throw new IllegalArgumentException("Bạn không có quyền truy cập bài viết này.");
+        }
+
+        // Chuyển đổi Post thành PostRequestDTO
+        PostRequestDTO postRequestDTO = postMapper.toPostRequestDTO(post);
+
+        // Thêm thông tin room từ RoomService
+        RoomDTO roomDTO = roomMapper.toRoomDTO(post.getRoom());
+        postMapper.updatePostRequestFromRoomDTO(roomDTO, postRequestDTO);
+        postRequestDTO.setPostImages(postMapper.mapImagesToUrls(post.getPostImages()));
+        return postRequestDTO;
+    }
+
+
     @Override
     @Transactional
     public PostDetailResponseDTO updatePost(String postUuid, PostRequestDTO postRequestDTO, String userUuid) {

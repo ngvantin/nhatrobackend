@@ -4,6 +4,7 @@ import com.example.nhatrobackend.Config.MapStructConfig;
 import com.example.nhatrobackend.DTO.PostDetailResponseDTO;
 import com.example.nhatrobackend.DTO.PostRequestDTO;
 import com.example.nhatrobackend.DTO.PostResponseDTO;
+import com.example.nhatrobackend.DTO.RoomDTO;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.PostImage;
 import com.example.nhatrobackend.Entity.Room;
@@ -63,4 +64,13 @@ public interface PostMapper {
     @Mapping(target = "postId", ignore = true)
     @Mapping(target = "postImages", ignore = true)
     void updatePostFromDTO(PostRequestDTO dto, @MappingTarget Post post);
+
+    // Ánh xạ từ Post sang PostRequestDTO
+    @Mapping(source = "post.postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
+    PostRequestDTO toPostRequestDTO(Post post);
+
+    // Cập nhật thông tin từ RoomDTO vào PostRequestDTO
+    void updatePostRequestFromRoomDTO(RoomDTO roomDTO, @MappingTarget PostRequestDTO postRequestDTO);
+
+
 }

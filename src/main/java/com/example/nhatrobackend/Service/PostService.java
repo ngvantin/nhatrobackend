@@ -14,6 +14,7 @@ public interface PostService {
     Page<PostResponseDTO> filterPosts(Double minPrice, Double maxPrice, Double minArea, Double maxArea, FurnitureStatus furnitureStatus, String city, String district, String ward, Pageable pageable);
     UserDetailDTO getUserByPostUuid(String postUuid);
     PostDetailResponseDTO  createPost(PostRequestDTO postRequestDTO, String userUuid);
+    PostRequestDTO getPostForEdit(String postUuid, String userUuid);
     PostDetailResponseDTO updatePost( String postUuid, PostRequestDTO postRequestDTO, String userUuid);
     void deletePost( String postUuid, String userUuid);
 
@@ -24,4 +25,5 @@ public interface PostService {
     PostDetailResponseDTO approvePost(String postUuid);
     PostDetailResponseDTO rejectPost(String postUuid);
     Page<PostResponseDTO> searchPostsByKeyword(String keyword, Pageable pageable);
+
 }
