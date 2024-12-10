@@ -23,4 +23,5 @@ public interface PostService {
     Page<PostResponseDTO> getFavoritePostsByUser(String userUuid, Pageable pageable);
     PostDetailResponseDTO approvePost(String postUuid);
     PostDetailResponseDTO rejectPost(String postUuid);
+    Page<PostResponseDTO> searchPostsByKeyword(String keyword, Pageable pageable);
 }

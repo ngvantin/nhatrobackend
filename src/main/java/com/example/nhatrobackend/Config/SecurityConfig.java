@@ -35,6 +35,7 @@ public class SecurityConfig {
                         // Các API không cần xác thực
                         .requestMatchers(
                                 "/api/post",
+                                "/api/post/search",
                                 "/api/post/detail/{postUuid}",
                                 "/api/post/filter",
                                 "/api/post/{postUuid}/user",
