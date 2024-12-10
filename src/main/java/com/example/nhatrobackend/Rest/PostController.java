@@ -5,6 +5,7 @@ import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.PostService;
+import com.example.nhatrobackend.Service.UploadImageFileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,7 @@ import java.util.UUID;
 public class PostController {
     private final PostService postService;
     private final AuthenticationFacade authenticationFacade;
+    private final UploadImageFileService uploadImageFileService;
     @GetMapping
     public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
@@ -141,25 +143,13 @@ public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
     @PostMapping("/upload")
     public ResponseEntity<ResponseWrapper<List<String>>> uploadFiles(@RequestParam("files") MultipartFile[] files) {
         List<String> fileUrls = new ArrayList<>();
-        String uploadDir = "D:\\anh\\"; // Thư mục lưu ảnh
 
         try {
             for (MultipartFile file : files) {
-                // Tạo tên file duy nhất
-                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                // Sử dụng UploadImageFileService để tải lên Cloudinary
+                String fileUrl = uploadImageFileService.uploadImage(file);
 
-                // Kiểm tra thư mục lưu ảnh, tạo nếu chưa tồn tại
-                Path uploadPath = Paths.get(uploadDir);
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
-
-                // Lưu file vào thư mục server
-                Path filePath = uploadPath.resolve(fileName);
-                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-                // Thêm đường dẫn lưu file vào danh sách kết quả
-                String fileUrl = uploadDir + fileName; // Đường dẫn thực tế
+                // Thêm URL vào danh sách kết quả
                 fileUrls.add(fileUrl);
             }
 
@@ -178,6 +168,47 @@ public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
                             .build());
         }
     }
+//
+//    @PostMapping("/upload")
+//    public ResponseEntity<ResponseWrapper<List<String>>> uploadFiles(@RequestParam("files") MultipartFile[] files) {
+//        List<String> fileUrls = new ArrayList<>();
+//        String uploadDir = "D:\\anh\\"; // Thư mục lưu ảnh
+//
+//        try {
+//            for (MultipartFile file : files) {
+//                // Tạo tên file duy nhất
+//                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+//
+//                // Kiểm tra thư mục lưu ảnh, tạo nếu chưa tồn tại
+//                Path uploadPath = Paths.get(uploadDir);
+//                if (!Files.exists(uploadPath)) {
+//                    Files.createDirectories(uploadPath);
+//                }
+//
+//                // Lưu file vào thư mục server
+//                Path filePath = uploadPath.resolve(fileName);
+//                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+//
+//                // Thêm đường dẫn lưu file vào danh sách kết quả
+//                String fileUrl = uploadDir + fileName; // Đường dẫn thực tế
+//                fileUrls.add(fileUrl);
+//            }
+//
+//            // Trả về phản hồi thành công
+//            return ResponseEntity.ok(ResponseWrapper.<List<String>>builder()
+//                    .status("success")
+//                    .message("Upload thành công " + fileUrls.size() + " file(s).")
+//                    .data(fileUrls)
+//                    .build());
+//        } catch (IOException e) {
+//            // Xử lý lỗi upload và trả về phản hồi lỗi
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(ResponseWrapper.<List<String>>builder()
+//                            .status("error")
+//                            .message("Lỗi khi upload file: " + e.getMessage())
+//                            .build());
+//        }
+//    }
 
     @GetMapping("/approved")
     public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getApprovedPostsByUser(
@@ -300,5 +331,22 @@ public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
                 .message("Thông tin bài đăng đã bị từ chối")
                 .build());
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> searchPostsByKeyword(
+            @RequestParam String keyword,
+            Pageable pageable) {
+
+        Page<PostResponseDTO> posts = postService.searchPostsByKeyword(keyword, pageable);
+
+        return ResponseEntity.ok(
+                ResponseWrapper.<Page<PostResponseDTO>>builder()
+                        .status("success")
+                        .message("Danh sách bài đăng tìm kiếm được.")
+                        .data(posts)
+                        .build()
+        );
+    }
+
 }
 

@@ -289,4 +289,20 @@ public class PostServiceImpl implements PostService{
             throw new EntityNotFoundException("Post not found with UUID: " + postUuid);
         }
     }
+
+    @Override
+    public Page<PostResponseDTO> searchPostsByKeyword(String keyword, Pageable pageable) {
+
+        // Gọi repository với từ khóa tìm kiếm
+        Page<Post> postPage = postRepository.findPostsByKeyword(keyword, pageable);
+
+        // Nếu không có bài viết nào tìm thấy, ném ngoại lệ
+        if (!postPage.hasContent()) {
+            throw new EntityNotFoundException("Không tìm thấy bài viết nào với từ khóa: " + keyword);
+        }
+
+        // Chuyển đổi sang PostResponseDTO
+        return postPage.map(postMapper::toPostResponseDTO);
+    }
+
 }

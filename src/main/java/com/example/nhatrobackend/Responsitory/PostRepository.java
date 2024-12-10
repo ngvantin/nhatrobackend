@@ -42,4 +42,19 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
 
     // Lọc bài viết có trạng thái APPROVED và userId tương ứng
     Page<Post> findByStatusAndUser_UserId(PostStatus status, Integer userId, Pageable pageable);
+
+//    @Query("SELECT p FROM Post p JOIN p.room r WHERE " +
+//            "(:keyword IS NULL OR LOWER(r.city) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+//            "(:keyword IS NULL OR LOWER(r.district) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+//            "(:keyword IS NULL OR LOWER(r.ward) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+//            "(:keyword IS NULL OR LOWER(r.street) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+//    Page<Post> findPostsByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT p FROM Post p JOIN p.room r WHERE " +
+            "(:keyword IS NULL OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(r.city, ' ', ''), ',', ''), '.', ''), '-', '')) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:keyword IS NULL OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(r.district, ' ', ''), ',', ''), '.', ''), '-', '')) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:keyword IS NULL OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(r.ward, ' ', ''), ',', ''), '.', ''), '-', '')) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:keyword IS NULL OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(r.street, ' ', ''), ',', ''), '.', ''), '-', '')) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Post> findPostsByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
 }
