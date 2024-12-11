@@ -42,7 +42,6 @@ public class AuthenticationService {
     private final UserMapper userMapper;
     private final AccountMapper accountMapper;
 
-
 //    @NonFinal
 //    protected static final String SIGNER_KEY = "sXUTpDGAiL9kVkdE7jspTrpYZ3pQeHdaKBAKczxpkqJ/Wk83qgdkld/jhzFf7vy2";
 
@@ -96,6 +95,7 @@ public class AuthenticationService {
 
     public IntrospectResponse introspect (IntrospectRequest request)
             throws JOSEException, ParseException {
+        System.out.printf("run here2");
         var token = request.getToken();
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);

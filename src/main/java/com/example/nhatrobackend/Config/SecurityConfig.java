@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Config;
 
 import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,8 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableWebSecurity
 public class SecurityConfig {
 
+//    @Autowired
+//    private JWTFilter jwtFilter;
     @Value("${jwt.signerKey}")
     protected String signerKey;
 
@@ -45,6 +48,7 @@ public class SecurityConfig {
                         ).permitAll()
                         // Các request khác mặc định yêu cầu xác thực
                         .anyRequest().authenticated()
+
                 );
 
         //dk 1 provider
