@@ -42,7 +42,6 @@ public class AuthenticationService {
     private final UserMapper userMapper;
     private final AccountMapper accountMapper;
 
-
 //    @NonFinal
 //    protected static final String SIGNER_KEY = "sXUTpDGAiL9kVkdE7jspTrpYZ3pQeHdaKBAKczxpkqJ/Wk83qgdkld/jhzFf7vy2";
 
@@ -60,6 +59,8 @@ public class AuthenticationService {
                 return AuthenticationResponse.builder()
                         .accessToken(token)
                         .authenticated(true)
+                        .fullName(account.getUser().getFullName())
+                        .role(account.getRole())
                         .build();
             } else{
                 throw new IllegalArgumentException("Mật khẩu không chính xác");
@@ -94,6 +95,7 @@ public class AuthenticationService {
 
     public IntrospectResponse introspect (IntrospectRequest request)
             throws JOSEException, ParseException {
+        System.out.printf("run here2");
         var token = request.getToken();
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
