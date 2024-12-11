@@ -60,6 +60,8 @@ public class AuthenticationService {
                 return AuthenticationResponse.builder()
                         .accessToken(token)
                         .authenticated(true)
+                        .fullName(account.getUser().getFullName())
+                        .role(account.getRole())
                         .build();
             } else{
                 throw new IllegalArgumentException("Mật khẩu không chính xác");
