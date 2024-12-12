@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/post",
                                 "/api/post/search",
+                                "/api/post/upload",
                                 "/api/post/detail/{postUuid}",
                                 "/api/post/filter",
                                 "/api/post/{postUuid}/user",

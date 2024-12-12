@@ -5,6 +5,7 @@ import com.example.nhatrobackend.DTO.ResponseWrapper;
 import com.example.nhatrobackend.Entity.ReportPost;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.ReportPostService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +22,11 @@ public class ReportPostController {
     @PostMapping("/create/{postUuid}")
     public ResponseEntity<ResponseWrapper<String>> createReportPost(
             @PathVariable String postUuid,
-            @RequestBody ReportPostRequestDTO requestDTO) {
+            @RequestBody ReportPostRequestDTO requestDTO, HttpServletRequest request) {
 
-        // Lấy userUuid từ authenticationFacade (từ token JWT hoặc session)
-        String userUuid = authenticationFacade.getCurrentUserUuid();
+        //        String userUuid = authenticationFacade.getCurrentUserUuid();
+        // Lấy userUuid từ JWT token trong cookie
+        String userUuid = authenticationFacade.getCurrentUserUuid(request);
 
         reportPostService.createReportPost(requestDTO, postUuid, userUuid);
 

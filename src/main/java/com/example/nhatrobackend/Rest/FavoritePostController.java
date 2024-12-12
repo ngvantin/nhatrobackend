@@ -46,8 +46,10 @@ public class FavoritePostController {
     // Thêm API xóa bài viết yêu thích
     @DeleteMapping("/remove/{postUuid}")
     public ResponseEntity<ResponseWrapper<String>> removeFavoritePost(
-            @PathVariable String postUuid) {
-        String userUuid = authenticationFacade.getCurrentUserUuid();
+            @PathVariable String postUuid, HttpServletRequest request) {
+//        String userUuid = authenticationFacade.getCurrentUserUuid();
+        // Lấy userUuid từ JWT token trong cookie
+        String userUuid = authenticationFacade.getCurrentUserUuid(request);
         favoritePostService.removeFavoritePost(userUuid, postUuid);
 
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
