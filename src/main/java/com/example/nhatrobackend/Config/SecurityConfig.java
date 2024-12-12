@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -29,13 +30,45 @@ public class SecurityConfig {
     @Value("${jwt.signerKey}")
     protected String signerKey;
 
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+//        httpSecurity.csrf(AbstractHttpConfigurer::disable); // Vô hiệu hóa CSRF cho REST API
+//
+//        httpSecurity
+//                .authorizeHttpRequests(request -> request
+//                        // Các API không cần xác thực
+//                        .requestMatchers(
+//                                "/api/post",
+//                                "/api/post/search",
+//                                "/api/post/detail/{postUuid}",
+//                                "/api/post/filter",
+//                                "/api/post/{postUuid}/user",
+//                                "/api/auth/**",
+//                                "/api/administrative/**"
+////                                "/api/post/**"
+//                        ).permitAll()
+//                        // Các request khác mặc định yêu cầu xác thực
+//                        .anyRequest().authenticated()
+//
+//                );
+//
+//        //dk 1 provider
+//        httpSecurity.oauth2ResourceServer(oauth2 ->
+//                oauth2.jwt(jwtConfigurer ->
+//                        jwtConfigurer.decoder(jwtDecoder())
+//                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+//                );
+//
+//
+//        return httpSecurity.build();
+//    }
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable); // Vô hiệu hóa CSRF cho REST API
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, JwtTokenFilter jwtTokenFilter) throws Exception {
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
         httpSecurity
                 .authorizeHttpRequests(request -> request
-                        // Các API không cần xác thực
                         .requestMatchers(
                                 "/api/post",
                                 "/api/post/search",
@@ -44,23 +77,15 @@ public class SecurityConfig {
                                 "/api/post/{postUuid}/user",
                                 "/api/auth/**",
                                 "/api/administrative/**"
-//                                "/api/post/**"
                         ).permitAll()
-                        // Các request khác mặc định yêu cầu xác thực
                         .anyRequest().authenticated()
-
                 );
 
-        //dk 1 provider
-        httpSecurity.oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwtConfigurer ->
-                        jwtConfigurer.decoder(jwtDecoder())
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                );
-
+        httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
+
 
     @Bean
     JwtDecoder jwtDecoder(){
