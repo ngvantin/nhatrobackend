@@ -20,4 +20,8 @@ public interface UserMapper {
     @Mapping(target = "frontCccdUrl", source = "frontCccdUrl")
     @Mapping(target = "backCccdUrl", source = "backCccdUrl")
     void updateLandlordDetails(LandlordRegistrationDTO dto, @MappingTarget User user);
+
+    void updateUserFromDTO(UpdateUserDTO updateUserDTO, @MappingTarget User user);
+    // Chuyển đổi từ User sang UpdateUserDTO
+    UpdateUserDTO toUpdateUserDTO(User user);
 }

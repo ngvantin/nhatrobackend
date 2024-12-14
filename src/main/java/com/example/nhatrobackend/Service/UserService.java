@@ -1,9 +1,6 @@
 package com.example.nhatrobackend.Service;
 
-import com.example.nhatrobackend.DTO.LandlordRegistrationDTO;
-import com.example.nhatrobackend.DTO.UserDetailDTO;
-import com.example.nhatrobackend.DTO.UserInformationDTO;
-import com.example.nhatrobackend.DTO.UserProfileDTO;
+import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Entity.User;
 
 import java.util.Optional;
@@ -15,4 +12,6 @@ public interface UserService {
     UserInformationDTO getUserInformationByUuid(String userUuid);
     UserProfileDTO getUserProfile(String userUuid);
     String registerLandlord(String userUuid, LandlordRegistrationDTO dto);
+    UpdateUserDTO updateUser(String userUuid, UpdateUserDTO updateUserDTO);
+
 }

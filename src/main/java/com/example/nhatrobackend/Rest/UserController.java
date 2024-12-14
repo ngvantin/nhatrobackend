@@ -1,9 +1,6 @@
 package com.example.nhatrobackend.Rest;
 
-import com.example.nhatrobackend.DTO.LandlordRegistrationDTO;
-import com.example.nhatrobackend.DTO.ResponseWrapper;
-import com.example.nhatrobackend.DTO.UserInformationDTO;
-import com.example.nhatrobackend.DTO.UserProfileDTO;
+import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,6 +60,23 @@ public class UserController {
                 .message(message)
                 .build());
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<ResponseWrapper<UpdateUserDTO>> updateUser(HttpServletRequest request,
+                                                    @RequestBody UpdateUserDTO updateUserDTO) {
+        // Lấy userUuid từ cookie
+        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+
+        // Gọi service để cập nhật thông tin người dùng
+        UpdateUserDTO updatedUserDTO = userService.updateUser(userUuid, updateUserDTO);
+
+        return ResponseEntity.ok(ResponseWrapper.<UpdateUserDTO>builder()
+                .status("success")
+                .message("Lấy thông tin cá nhân thành công")
+                .data(updatedUserDTO)
+                .build());
+    }
+
 }
 
 

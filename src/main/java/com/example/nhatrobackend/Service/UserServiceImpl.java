@@ -1,9 +1,6 @@
 package com.example.nhatrobackend.Service;
 
-import com.example.nhatrobackend.DTO.LandlordRegistrationDTO;
-import com.example.nhatrobackend.DTO.UserDetailDTO;
-import com.example.nhatrobackend.DTO.UserInformationDTO;
-import com.example.nhatrobackend.DTO.UserProfileDTO;
+import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Entity.Account;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
 import com.example.nhatrobackend.Entity.Post;
@@ -93,4 +90,24 @@ public class UserServiceImpl implements UserService{
 
         return "Đăng ký quyền chủ trọ thành công, vui lòng chờ phê duyệt.";
     }
+
+    @Override
+    public UpdateUserDTO updateUser(String userUuid, UpdateUserDTO updateUserDTO) {
+        Optional<User> optionalUser = userRepository.findByUserUuid(userUuid);
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("Người dùng không tồn tại");
+        }
+
+        // Lấy user từ cơ sở dữ liệu
+        User user = optionalUser.get();
+
+        // Cập nhật thông tin user từ DTO
+        userMapper.updateUserFromDTO(updateUserDTO, user);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        // Chuyển đổi entity sang DTO để trả về
+        return userMapper.toUpdateUserDTO(user);
+    }
+
 }
