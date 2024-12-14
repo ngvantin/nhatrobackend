@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.ResponseWrapper;
 import com.example.nhatrobackend.DTO.UserInformationDTO;
+import com.example.nhatrobackend.DTO.UserProfileDTO;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +29,21 @@ public class UserController {
                 .status("success")
                 .data(userInformationDTO)
                 .message("Thông tin người dùng đang đăng nhập")
+                .build());
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ResponseWrapper<UserProfileDTO>> getUserProfile(HttpServletRequest request) {
+        // Lấy userUuid từ JWT token trong cookie
+        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+
+        // Gọi service để lấy thông tin người dùng
+        UserProfileDTO userProfile = userService.getUserProfile(userUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<UserProfileDTO>builder()
+                .status("success")
+                .message("Lấy thông tin cá nhân thành công")
+                .data(userProfile)
                 .build());
     }
 }

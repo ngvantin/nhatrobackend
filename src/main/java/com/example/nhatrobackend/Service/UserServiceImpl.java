@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.UserDetailDTO;
 import com.example.nhatrobackend.DTO.UserInformationDTO;
+import com.example.nhatrobackend.DTO.UserProfileDTO;
 import com.example.nhatrobackend.Entity.Account;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
 import com.example.nhatrobackend.Entity.Post;
@@ -58,5 +59,14 @@ public class UserServiceImpl implements UserService{
         userInformationDTO.setFullName(account.getUser().getFullName());
 
         return userInformationDTO;
+    }
+
+    @Override
+    public UserProfileDTO getUserProfile(String userUuid) {
+        User user = userRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+
+        // Sử dụng MapStruct để chuyển đổi
+        return userMapper.toUserProfileDTO(user);
     }
 }
