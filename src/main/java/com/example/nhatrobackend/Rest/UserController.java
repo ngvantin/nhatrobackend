@@ -1,5 +1,6 @@
 package com.example.nhatrobackend.Rest;
 
+import com.example.nhatrobackend.DTO.LandlordRegistrationDTO;
 import com.example.nhatrobackend.DTO.ResponseWrapper;
 import com.example.nhatrobackend.DTO.UserInformationDTO;
 import com.example.nhatrobackend.DTO.UserProfileDTO;
@@ -44,6 +45,22 @@ public class UserController {
                 .status("success")
                 .message("Lấy thông tin cá nhân thành công")
                 .data(userProfile)
+                .build());
+    }
+
+    @PostMapping("/register-landlord")
+    public ResponseEntity<ResponseWrapper<String>> registerLandlord(
+            @RequestBody LandlordRegistrationDTO dto,
+            HttpServletRequest request) {
+        // Lấy userUuid từ JWT token trong cookie
+        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+
+        // Gọi service để xử lý đăng ký
+        String message = userService.registerLandlord(userUuid, dto);
+
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .message(message)
                 .build());
     }
 }

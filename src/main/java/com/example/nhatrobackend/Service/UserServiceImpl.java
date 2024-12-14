@@ -1,5 +1,6 @@
 package com.example.nhatrobackend.Service;
 
+import com.example.nhatrobackend.DTO.LandlordRegistrationDTO;
 import com.example.nhatrobackend.DTO.UserDetailDTO;
 import com.example.nhatrobackend.DTO.UserInformationDTO;
 import com.example.nhatrobackend.DTO.UserProfileDTO;
@@ -13,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 @Service
 @RequiredArgsConstructor
@@ -68,5 +70,27 @@ public class UserServiceImpl implements UserService{
 
         // Sử dụng MapStruct để chuyển đổi
         return userMapper.toUserProfileDTO(user);
+    }
+
+    @Override
+    public String registerLandlord(String userUuid, LandlordRegistrationDTO dto) {
+        // Lấy user từ database
+        User user = userRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+
+        // Kiểm tra trạng thái hiện tại
+        if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
+            throw new RuntimeException("Người dùng đã là chủ trọ");
+        }
+
+        // Cập nhật thông tin CCCD và trạng thái
+        userMapper.updateLandlordDetails(dto, user);
+        user.setIsLandlordActivated(LandlordStatus.PENDING_APPROVAL);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu lại thay đổi
+        userRepository.save(user);
+
+        return "Đăng ký quyền chủ trọ thành công, vui lòng chờ phê duyệt.";
     }
 }
