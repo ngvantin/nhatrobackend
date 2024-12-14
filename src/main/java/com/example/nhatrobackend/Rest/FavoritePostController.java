@@ -15,19 +15,6 @@ public class FavoritePostController {
     private final FavoritePostService favoritePostService;
     private final AuthenticationFacade authenticationFacade;
 
-//    @PostMapping("/create/{postUuid}")
-//    public ResponseEntity<ResponseWrapper<String>> addFavoritePost(
-//            @PathVariable String postUuid) {
-//        // Lấy userUuid từ Bearer Token
-//        String userUuid = authenticationFacade.getCurrentUserUuid();
-//        favoritePostService.addFavoritePost(userUuid,postUuid);
-//
-//        return  ResponseEntity.ok(ResponseWrapper.<String>builder()
-//                .status("success")
-//                .message("Yêu thích bài đăng thành công.")
-//                .build());
-//    }
-
     @PostMapping("/create/{postUuid}")
     public ResponseEntity<ResponseWrapper<String>> addFavoritePost(
             @PathVariable String postUuid,
@@ -58,6 +45,37 @@ public class FavoritePostController {
                 .build());
     }
 
+    @GetMapping("/check-favorite/{postUuid}")
+    public ResponseEntity<ResponseWrapper<Boolean>> isPostFavorited(
+            @PathVariable String postUuid,
+            HttpServletRequest request) {
+
+        // Lấy userUuid từ JWT token trong cookie
+        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+
+        // Gọi service để kiểm tra
+        boolean isFavorited = favoritePostService.isPostFavorited(userUuid, postUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<Boolean>builder()
+                .status("success")
+                .message(isFavorited ? "Bài viết đã được yêu thích." : "Bài viết chưa được yêu thích.")
+                .data(isFavorited)
+                .build());
+    }
+
+
+    //    @PostMapping("/create/{postUuid}")
+//    public ResponseEntity<ResponseWrapper<String>> addFavoritePost(
+//            @PathVariable String postUuid) {
+//        // Lấy userUuid từ Bearer Token
+//        String userUuid = authenticationFacade.getCurrentUserUuid();
+//        favoritePostService.addFavoritePost(userUuid,postUuid);
+//
+//        return  ResponseEntity.ok(ResponseWrapper.<String>builder()
+//                .status("success")
+//                .message("Yêu thích bài đăng thành công.")
+//                .build());
+//    }
 
 }
 

@@ -30,6 +30,52 @@ public class SecurityConfig {
     @Value("${jwt.signerKey}")
     protected String signerKey;
 
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, JwtTokenFilter jwtTokenFilter) throws Exception {
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+
+        httpSecurity
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(
+                                "/api/post",
+                                "/api/post/search",
+                                "/api/post/upload",
+                                "/api/post/detail/{postUuid}",
+                                "/api/post/filter",
+                                "/api/post/{postUuid}/user",
+                                "/api/auth/**",
+                                "/api/administrative/**"
+                        ).permitAll()
+//                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
+                );
+
+        httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return httpSecurity.build();
+    }
+
+
+    @Bean
+    JwtDecoder jwtDecoder(){
+        SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(),"HS512");
+        return NimbusJwtDecoder
+                .withSecretKey(secretKeySpec)
+                .macAlgorithm(MacAlgorithm.HS512)
+                .build();
+    }
+
+    @Bean
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+        return jwtAuthenticationConverter;
+    }
+
+
 //    @Bean
 //    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 //        httpSecurity.csrf(AbstractHttpConfigurer::disable); // Vô hiệu hóa CSRF cho REST API
@@ -62,48 +108,5 @@ public class SecurityConfig {
 //
 //        return httpSecurity.build();
 //    }
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, JwtTokenFilter jwtTokenFilter) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-
-        httpSecurity
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers(
-                                "/api/post",
-                                "/api/post/search",
-                                "/api/post/upload",
-                                "/api/post/detail/{postUuid}",
-                                "/api/post/filter",
-                                "/api/post/{postUuid}/user",
-                                "/api/auth/**",
-                                "/api/administrative/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                );
-
-        httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return httpSecurity.build();
-    }
-
-
-    @Bean
-    JwtDecoder jwtDecoder(){
-        SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(),"HS512");
-        return NimbusJwtDecoder
-                .withSecretKey(secretKeySpec)
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
-    }
-
-    @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-        return jwtAuthenticationConverter;
-    }
 }
 

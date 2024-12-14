@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 public interface FavoritePostService {
     FavoritePost addFavoritePost(String userUuid, String postUuid);
     void removeFavoritePost(String userUuid, String postUuid);
+    boolean isPostFavorited(String userUuid, String postUuid);
 
 }
 
