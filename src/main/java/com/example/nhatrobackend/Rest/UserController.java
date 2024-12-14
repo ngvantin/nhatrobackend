@@ -1,12 +1,18 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.Entity.Field.LandlordStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+//import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Pageable;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -91,6 +97,45 @@ public class UserController {
                 .message("Lấy thông tin cá nhân thành công")
                 .data(updatedUserDTO)
                 .build());
+    }
+
+    @GetMapping("/admin/not-registered")
+    public ResponseEntity<ResponseWrapper<Page<UserAdminDTO>>> getNotRegisteredUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách người dùng với trạng thái NOT_REGISTERED
+        Page<UserAdminDTO> users = userService.getUsersByStatus(LandlordStatus.NOT_REGISTERED, pageable);
+
+        return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách người dùng chưa đăng ký thành công", users));
+    }
+
+    @GetMapping("/admin/pending-approval")
+    public ResponseEntity<ResponseWrapper<Page<UserAdminDTO>>> getPendingApprovalUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách người dùng với trạng thái PENDING_APPROVAL
+        Page<UserAdminDTO> users = userService.getUsersByStatus(LandlordStatus.PENDING_APPROVAL, pageable);
+
+        return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách người dùng chờ xét duyệt thành công", users));
+    }
+
+    @GetMapping("/admin/approved")
+    public ResponseEntity<ResponseWrapper<Page<UserAdminDTO>>> getApprovedUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách người dùng với trạng thái APPROVED
+        Page<UserAdminDTO> users = userService.getUsersByStatus(LandlordStatus.APPROVED, pageable);
+
+        return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách người dùng đã được phê duyệt thành công", users));
     }
 
 }

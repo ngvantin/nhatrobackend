@@ -10,6 +10,9 @@ import com.example.nhatrobackend.Responsitory.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+//import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -118,6 +121,20 @@ public class UserServiceImpl implements UserService{
 
         // Chuyển đổi entity sang DTO để trả về
         return userMapper.toUpdateUserDTO(user);
+    }
+
+    @Override
+    public Page<UserAdminDTO> getUsersByStatus(LandlordStatus status, Pageable pageable) {
+        // Lấy danh sách người dùng theo trạng thái
+        Page<User> userPage = userRepository.findByIsLandlordActivated(status, pageable);
+
+        // Chuyển đổi danh sách User thành danh sách UserAdminDTO
+        return userPage.map(this::convertToUserAdminDTO);
+    }
+
+    private UserAdminDTO convertToUserAdminDTO(User user) {
+        // Sử dụng MapStruct để chuyển đổi từ User sang UserAdminDTO
+        return userMapper.toUserAdminDTO(user);
     }
 
 }

@@ -24,4 +24,6 @@ public interface UserMapper {
     void updateUserFromDTO(UpdateUserDTO updateUserDTO, @MappingTarget User user);
     // Chuyển đổi từ User sang UpdateUserDTO
     UpdateUserDTO toUpdateUserDTO(User user);
+
+    UserAdminDTO toUserAdminDTO(User user);
 }
