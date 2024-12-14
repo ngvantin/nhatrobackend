@@ -57,4 +57,6 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
             "(:keyword IS NULL OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(r.street, ' ', ''), ',', ''), '.', ''), '-', '')) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Post> findPostsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
+    // Lọc bài post theo trạng thái và phân trang
+    Page<Post> findByStatus(PostStatus status, Pageable pageable);
 }

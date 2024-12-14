@@ -1,10 +1,7 @@
 package com.example.nhatrobackend.Mapper;
 
 import com.example.nhatrobackend.Config.MapStructConfig;
-import com.example.nhatrobackend.DTO.PostDetailResponseDTO;
-import com.example.nhatrobackend.DTO.PostRequestDTO;
-import com.example.nhatrobackend.DTO.PostResponseDTO;
-import com.example.nhatrobackend.DTO.RoomDTO;
+import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.PostImage;
 import com.example.nhatrobackend.Entity.Room;
@@ -71,6 +68,14 @@ public interface PostMapper {
 
     // Cập nhật thông tin từ RoomDTO vào PostRequestDTO
     void updatePostRequestFromRoomDTO(RoomDTO roomDTO, @MappingTarget PostRequestDTO postRequestDTO);
+
+    // Chuyển đổi từ Post sang PostAdminDTO
+    @Mapping(source = "postId", target = "postId")
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "description", target = "description")
+    @Mapping(source = "user.fullName", target = "fullName") // Lấy fullName từ mối quan hệ User
+    @Mapping(source = "createdAt", target = "createdAt")
+    PostAdminDTO toPostAdminDTO(Post post);
 
 
 }

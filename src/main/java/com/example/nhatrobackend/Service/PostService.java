@@ -25,5 +25,6 @@ public interface PostService {
     PostDetailResponseDTO approvePost(String postUuid);
     PostDetailResponseDTO rejectPost(String postUuid);
     Page<PostResponseDTO> searchPostsByKeyword(String keyword, Pageable pageable);
+    Page<PostAdminDTO> getPostsForAdmin(PostStatus status, Pageable pageable);
 
 }

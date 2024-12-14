@@ -56,6 +56,16 @@ public class FavoritePostServiceImpl implements FavoritePostService {
         favoritePostRepository.delete(favoritePost);
     }
 
+    @Override
+    public boolean isPostFavorited(String userUuid, String postUuid) {
+        // Lấy User và Post từ các service tương ứng
+        User user = userService.getUserByUuid(userUuid);
+        Post post = postService.getPostByUuid(postUuid);
+
+        // Kiểm tra trong cơ sở dữ liệu xem đã tồn tại FavoritePost hay chưa
+        return favoritePostRepository.findByUserAndPost(user, post).isPresent();
+    }
+
 
 }
 
