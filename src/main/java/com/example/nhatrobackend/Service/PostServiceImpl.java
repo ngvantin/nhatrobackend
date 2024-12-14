@@ -330,4 +330,21 @@ public class PostServiceImpl implements PostService{
         return postPage.map(postMapper::toPostResponseDTO);
     }
 
+    @Override
+    public Page<PostAdminDTO> getPostsForAdmin(PostStatus status, Pageable pageable) {
+        // Lấy danh sách bài viết theo trạng thái và phân trang từ repository
+        Page<Post> postPage = postRepository.findByStatus(status, pageable);
+
+        // Tạo danh sách PostAdminDTO từ danh sách Post
+        Page<PostAdminDTO> postAdminDTOs = postPage.map(this::convertToPostAdminDTO);
+
+        return postAdminDTOs;
+    }
+
+    // Phương thức riêng để chuyển đổi Post thành PostAdminDTO
+    private PostAdminDTO convertToPostAdminDTO(Post post) {
+        // Sử dụng MapStruct để chuyển đổi Post sang PostAdminDTO
+        return postMapper.toPostAdminDTO(post);
+    }
+
 }

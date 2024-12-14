@@ -375,5 +375,56 @@ public class PostController {
         );
     }
 
+    @GetMapping("/admin/approved")
+    public ResponseEntity<ResponseWrapper<Page<PostAdminDTO>>> getApprovedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostAdminDTO> posts = postService.getPostsForAdmin(PostStatus.APPROVED, pageable);
+
+        ResponseWrapper<Page<PostAdminDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài posts đã được phê duyệt thành công",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin/rejected")
+    public ResponseEntity<ResponseWrapper<Page<PostAdminDTO>>> getRejectedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostAdminDTO> posts = postService.getPostsForAdmin(PostStatus.REJECTED, pageable);
+
+        ResponseWrapper<Page<PostAdminDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài posts bị từ chối thành công",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin/pending")
+    public ResponseEntity<ResponseWrapper<Page<PostAdminDTO>>> getPendingPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostAdminDTO> posts = postService.getPostsForAdmin(PostStatus.PENDING, pageable);
+
+        ResponseWrapper<Page<PostAdminDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài posts đang chờ xét duyệt thành công",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
 }
 
