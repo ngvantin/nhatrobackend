@@ -61,6 +61,22 @@ public class UserController {
                 .build());
     }
 
+    // Endpoint lấy thông tin người dùng hiện tại
+    @GetMapping("/info-update")
+    public ResponseEntity<ResponseWrapper<UpdateUserDTO>> getCurrentUserInfo(HttpServletRequest request) {
+        // Lấy userUuid từ cookie
+        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+
+        // Gọi service để lấy thông tin người dùng
+        UpdateUserDTO currentUserDTO = userService.getUserInfo(userUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<UpdateUserDTO>builder()
+                .status("success")
+                .message("Lấy thông tin cá nhân thành công")
+                .data(currentUserDTO)
+                .build());
+    }
+
     @PutMapping("/update")
     public ResponseEntity<ResponseWrapper<UpdateUserDTO>> updateUser(HttpServletRequest request,
                                                     @RequestBody UpdateUserDTO updateUserDTO) {

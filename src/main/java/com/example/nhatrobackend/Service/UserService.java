@@ -13,5 +13,6 @@ public interface UserService {
     UserProfileDTO getUserProfile(String userUuid);
     String registerLandlord(String userUuid, LandlordRegistrationDTO dto);
     UpdateUserDTO updateUser(String userUuid, UpdateUserDTO updateUserDTO);
+    UpdateUserDTO getUserInfo(String userUuid);
 
 }

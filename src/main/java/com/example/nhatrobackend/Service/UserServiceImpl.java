@@ -91,6 +91,16 @@ public class UserServiceImpl implements UserService{
         return "Đăng ký quyền chủ trọ thành công, vui lòng chờ phê duyệt.";
     }
 
+    // Phương thức lấy thông tin người dùng hiện tại
+    public UpdateUserDTO getUserInfo(String userUuid) {
+        // Tìm người dùng trong cơ sở dữ liệu theo userUuid
+        User user = userRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+
+        // Chuyển đổi từ User entity sang UpdateUserDTO
+        return userMapper.toUpdateUserDTO(user);
+    }
+
     @Override
     public UpdateUserDTO updateUser(String userUuid, UpdateUserDTO updateUserDTO) {
         Optional<User> optionalUser = userRepository.findByUserUuid(userUuid);
