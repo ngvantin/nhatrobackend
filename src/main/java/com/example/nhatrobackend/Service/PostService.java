@@ -27,4 +27,5 @@ public interface PostService {
     Page<PostResponseDTO> searchPostsByKeyword(String keyword, Pageable pageable);
     Page<PostAdminDTO> getPostsForAdmin(PostStatus status, Pageable pageable);
 
+
 }

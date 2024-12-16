@@ -18,4 +18,5 @@ public interface UserService {
     UpdateUserDTO updateUser(String userUuid, UpdateUserDTO updateUserDTO);
     UpdateUserDTO getUserInfo(String userUuid);
     Page<UserAdminDTO> getUsersByStatus(LandlordStatus status, Pageable pageable);
+    String getLandlordStatusByUserUuid(String userUuid);
 }

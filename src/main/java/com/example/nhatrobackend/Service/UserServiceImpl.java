@@ -137,4 +137,14 @@ public class UserServiceImpl implements UserService{
         return userMapper.toUserAdminDTO(user);
     }
 
+    @Override
+    public String getLandlordStatusByUserUuid(String userUuid) {
+        // Tìm user dựa vào userUuid
+        User user = userRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new RuntimeException("User not found with UUID: " + userUuid));
+
+        // Trả về trạng thái dưới dạng chuỗi
+        return user.getIsLandlordActivated().name(); // Enum -> String
+    }
+
 }

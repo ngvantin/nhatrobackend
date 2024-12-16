@@ -138,6 +138,21 @@ public class UserController {
         return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách người dùng đã được phê duyệt thành công", users));
     }
 
+
+    @GetMapping("/landlord-status")
+    public ResponseEntity<ResponseWrapper<String>> getLandlordStatus(HttpServletRequest request) {
+        // Lấy userUuid từ JWT token thông qua AuthenticationFacade
+        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+
+        // Gọi service để lấy trạng thái của user và trả về dạng String
+        String status = userService.getLandlordStatusByUserUuid(userUuid);
+
+        return  ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .message("Lấy trạng thái thành công.")
+                .data(status)
+                .build());
+    }
 }
 
 
