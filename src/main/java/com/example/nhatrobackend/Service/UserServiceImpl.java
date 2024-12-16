@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 @Service
@@ -22,6 +24,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final AccountService accountService;
+    private final UploadImageFileService uploadImageFileService;
 
     @Override
     public boolean getApprovedUserByUuid(String userUuid) {
@@ -145,6 +148,21 @@ public class UserServiceImpl implements UserService{
 
         // Trả về trạng thái dưới dạng chuỗi
         return user.getIsLandlordActivated().name(); // Enum -> String
+    }
+
+    public String updateProfilePicture(String userUuid, MultipartFile file) throws IOException {
+        // Tìm User trong database bằng userUuid
+        User user = userRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+
+        // Upload file lên Cloudinary
+        String imageUrl = uploadImageFileService.uploadImage(file);
+
+        // Cập nhật URL ảnh đại diện trong database
+        user.setProfilePicture(imageUrl);
+        userRepository.save(user);
+
+        return imageUrl;
     }
 
 }

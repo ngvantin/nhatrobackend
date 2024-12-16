@@ -7,11 +7,13 @@ import com.example.nhatrobackend.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/user")
@@ -152,6 +154,37 @@ public class UserController {
                 .message("Lấy trạng thái thành công.")
                 .data(status)
                 .build());
+    }
+
+    @PostMapping("/profile-picture")
+    public ResponseEntity<ResponseWrapper<String>> updateProfilePicture(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request) {
+        try {
+            // Lấy userUuid từ JWT token trong cookie
+            String userUuid = authenticationFacade.getCurrentUserUuid(request);
+
+            // Gửi file và userUuid tới Service để xử lý
+            String imageUrl = userService.updateProfilePicture(userUuid, file);
+
+            // Trả về phản hồi thành công
+            return ResponseEntity.ok(
+                    ResponseWrapper.<String>builder()
+                            .status("success")
+                            .message("Cập nhật ảnh đại diện thành công.")
+                            .data(imageUrl)
+                            .build()
+            );
+        } catch (Exception e) {
+            // Trả về lỗi nếu gặp vấn đề
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            ResponseWrapper.<String>builder()
+                                    .status("error")
+                                    .message("Lỗi khi cập nhật ảnh đại diện: " + e.getMessage())
+                                    .build()
+                    );
+        }
     }
 }
 
