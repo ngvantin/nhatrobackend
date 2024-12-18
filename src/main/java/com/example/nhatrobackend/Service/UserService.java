@@ -22,4 +22,7 @@ public interface UserService {
     Page<UserAdminDTO> getUsersByStatus(LandlordStatus status, Pageable pageable);
     String getLandlordStatusByUserUuid(String userUuid);
     String updateProfilePicture(String userUuid, MultipartFile file) throws IOException;
+    UserDetailAdminDTO getUserDetailById(Integer userId);
+    UserDetailAdminDTO approveLandlord(Integer userId);
+    UserDetailAdminDTO rejectLandlord(Integer userId);
 }

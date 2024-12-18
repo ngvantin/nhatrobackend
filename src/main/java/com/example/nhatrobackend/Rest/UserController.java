@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
@@ -186,6 +187,38 @@ public class UserController {
                     );
         }
     }
+
+    @GetMapping("/admin/detail/{userId}")
+    public ResponseEntity<ResponseWrapper<UserDetailAdminDTO>> getUserDetail(@PathVariable Integer userId) {
+        UserDetailAdminDTO userDetail = userService.getUserDetailById(userId);
+        return  ResponseEntity.ok(ResponseWrapper.<UserDetailAdminDTO>builder()
+                .status("success")
+                .message("Lấy thông tin user thành công.")
+                .data(userDetail)
+                .build());
+    }
+
+    @PutMapping("/admin/approve-landlord/{userId}")
+    public ResponseEntity<ResponseWrapper<UserDetailAdminDTO>> approveLandlord(@PathVariable Integer userId) {
+        UserDetailAdminDTO userDetail = userService.approveLandlord(userId);
+        return ResponseEntity.ok(ResponseWrapper.<UserDetailAdminDTO>builder()
+                .status("success")
+                .data(userDetail)
+                .message("Quyền chủ trọ đã được duyệt.")
+                .build());
+    }
+
+    @PutMapping("/admin/reject-landlord/{userId}")
+    public ResponseEntity<ResponseWrapper<UserDetailAdminDTO>> rejectLandlord(@PathVariable Integer userId) {
+        UserDetailAdminDTO userDetail = userService.rejectLandlord(userId);
+        return ResponseEntity.ok(ResponseWrapper.<UserDetailAdminDTO>builder()
+                .status("success")
+                .data(userDetail)
+                .message("Quyền chủ trọ đã bị từ chối.")
+                .build());
+    }
+
+
 }
 
 

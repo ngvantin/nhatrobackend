@@ -86,6 +86,11 @@ public class UserServiceImpl implements UserService{
             throw new RuntimeException("Người dùng đã là chủ trọ");
         }
 
+        // Kiểm tra trạng thái hiện tại
+        if (user.getIsLandlordActivated() == LandlordStatus.PENDING_APPROVAL) {
+            throw new RuntimeException("Người dùng đã đăng ký. Hãy chờ xét duyệt.");
+        }
+
         // Cập nhật thông tin CCCD và trạng thái
         userMapper.updateLandlordDetails(dto, user);
         user.setIsLandlordActivated(LandlordStatus.PENDING_APPROVAL);
@@ -163,6 +168,55 @@ public class UserServiceImpl implements UserService{
         userRepository.save(user);
 
         return imageUrl;
+    }
+
+    @Override
+    public UserDetailAdminDTO getUserDetailById(Integer userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại với ID: " + userId));
+
+        // Map User entity sang UserDetailAdminDTO
+        return userMapper.toUserDetailAdminDTO(user);
+    }
+
+    private User findUserByIdOrThrow(Integer userId) {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+    }
+
+    @Override
+    public UserDetailAdminDTO approveLandlord(Integer userId) {
+        User user = findUserByIdOrThrow(userId);
+
+        // Kiểm tra trạng thái hiện tại
+        if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
+            throw new IllegalStateException("User is already approved as landlord.");
+        }
+
+        // Cập nhật trạng thái thành APPROVED
+        user.setIsLandlordActivated(LandlordStatus.APPROVED);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu vào DB
+        userRepository.save(user);
+
+        // Trả về DTO
+        return userMapper.toUserDetailAdminDTO(user);
+    }
+
+    @Override
+    public UserDetailAdminDTO rejectLandlord(Integer userId) {
+        User user = findUserByIdOrThrow(userId);
+
+        // Cập nhật trạng thái thành NOT_REGISTERED
+        user.setIsLandlordActivated(LandlordStatus.NOT_REGISTERED);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu vào DB
+        userRepository.save(user);
+
+        // Trả về DTO
+        return userMapper.toUserDetailAdminDTO(user);
     }
 
 }
