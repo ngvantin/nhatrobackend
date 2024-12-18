@@ -15,4 +15,5 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUserUuid(String userUuid);
     Page<User> findByIsLandlordActivated(LandlordStatus status, Pageable pageable);
+    Optional<User> findByUserId(Integer userId);;
 }

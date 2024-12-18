@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 @Service
@@ -22,6 +24,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final AccountService accountService;
+    private final UploadImageFileService uploadImageFileService;
 
     @Override
     public boolean getApprovedUserByUuid(String userUuid) {
@@ -83,6 +86,11 @@ public class UserServiceImpl implements UserService{
             throw new RuntimeException("Người dùng đã là chủ trọ");
         }
 
+        // Kiểm tra trạng thái hiện tại
+        if (user.getIsLandlordActivated() == LandlordStatus.PENDING_APPROVAL) {
+            throw new RuntimeException("Người dùng đã đăng ký. Hãy chờ xét duyệt.");
+        }
+
         // Cập nhật thông tin CCCD và trạng thái
         userMapper.updateLandlordDetails(dto, user);
         user.setIsLandlordActivated(LandlordStatus.PENDING_APPROVAL);
@@ -135,6 +143,80 @@ public class UserServiceImpl implements UserService{
     private UserAdminDTO convertToUserAdminDTO(User user) {
         // Sử dụng MapStruct để chuyển đổi từ User sang UserAdminDTO
         return userMapper.toUserAdminDTO(user);
+    }
+
+    @Override
+    public String getLandlordStatusByUserUuid(String userUuid) {
+        // Tìm user dựa vào userUuid
+        User user = userRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new RuntimeException("User not found with UUID: " + userUuid));
+
+        // Trả về trạng thái dưới dạng chuỗi
+        return user.getIsLandlordActivated().name(); // Enum -> String
+    }
+
+    public String updateProfilePicture(String userUuid, MultipartFile file) throws IOException {
+        // Tìm User trong database bằng userUuid
+        User user = userRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+
+        // Upload file lên Cloudinary
+        String imageUrl = uploadImageFileService.uploadImage(file);
+
+        // Cập nhật URL ảnh đại diện trong database
+        user.setProfilePicture(imageUrl);
+        userRepository.save(user);
+
+        return imageUrl;
+    }
+
+    @Override
+    public UserDetailAdminDTO getUserDetailById(Integer userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại với ID: " + userId));
+
+        // Map User entity sang UserDetailAdminDTO
+        return userMapper.toUserDetailAdminDTO(user);
+    }
+
+    private User findUserByIdOrThrow(Integer userId) {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+    }
+
+    @Override
+    public UserDetailAdminDTO approveLandlord(Integer userId) {
+        User user = findUserByIdOrThrow(userId);
+
+        // Kiểm tra trạng thái hiện tại
+        if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
+            throw new IllegalStateException("User is already approved as landlord.");
+        }
+
+        // Cập nhật trạng thái thành APPROVED
+        user.setIsLandlordActivated(LandlordStatus.APPROVED);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu vào DB
+        userRepository.save(user);
+
+        // Trả về DTO
+        return userMapper.toUserDetailAdminDTO(user);
+    }
+
+    @Override
+    public UserDetailAdminDTO rejectLandlord(Integer userId) {
+        User user = findUserByIdOrThrow(userId);
+
+        // Cập nhật trạng thái thành NOT_REGISTERED
+        user.setIsLandlordActivated(LandlordStatus.NOT_REGISTERED);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu vào DB
+        userRepository.save(user);
+
+        // Trả về DTO
+        return userMapper.toUserDetailAdminDTO(user);
     }
 
 }

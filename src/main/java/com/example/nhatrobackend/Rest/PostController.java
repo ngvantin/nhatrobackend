@@ -191,47 +191,6 @@ public class PostController {
                             .build());
         }
     }
-//
-//    @PostMapping("/upload")
-//    public ResponseEntity<ResponseWrapper<List<String>>> uploadFiles(@RequestParam("files") MultipartFile[] files) {
-//        List<String> fileUrls = new ArrayList<>();
-//        String uploadDir = "D:\\anh\\"; // Thư mục lưu ảnh
-//
-//        try {
-//            for (MultipartFile file : files) {
-//                // Tạo tên file duy nhất
-//                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-//
-//                // Kiểm tra thư mục lưu ảnh, tạo nếu chưa tồn tại
-//                Path uploadPath = Paths.get(uploadDir);
-//                if (!Files.exists(uploadPath)) {
-//                    Files.createDirectories(uploadPath);
-//                }
-//
-//                // Lưu file vào thư mục server
-//                Path filePath = uploadPath.resolve(fileName);
-//                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-//
-//                // Thêm đường dẫn lưu file vào danh sách kết quả
-//                String fileUrl = uploadDir + fileName; // Đường dẫn thực tế
-//                fileUrls.add(fileUrl);
-//            }
-//
-//            // Trả về phản hồi thành công
-//            return ResponseEntity.ok(ResponseWrapper.<List<String>>builder()
-//                    .status("success")
-//                    .message("Upload thành công " + fileUrls.size() + " file(s).")
-//                    .data(fileUrls)
-//                    .build());
-//        } catch (IOException e) {
-//            // Xử lý lỗi upload và trả về phản hồi lỗi
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(ResponseWrapper.<List<String>>builder()
-//                            .status("error")
-//                            .message("Lỗi khi upload file: " + e.getMessage())
-//                            .build());
-//        }
-//    }
 
     @GetMapping("/approved")
     public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getApprovedPostsByUser(
@@ -334,10 +293,10 @@ public class PostController {
     }
 
 
-    @PutMapping("/approve/{postUuid}")
-    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> approvePost(@PathVariable String postUuid) {
+    @PutMapping("/admin/approve/{postId}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> approvePost(@PathVariable int postId) {
         // Duyệt bài viết
-        PostDetailResponseDTO postDetail = postService.approvePost(postUuid);
+        PostDetailResponseDTO postDetail = postService.approvePost(postId);
         return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
                 .status("success")
                 .data(postDetail)
@@ -346,10 +305,10 @@ public class PostController {
     }
 
     // Phương thức từ chối bài viết
-    @PutMapping("/reject/{postUuid}")
-    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> rejectPost(@PathVariable String postUuid) {
+    @PutMapping("/admin/reject/{postId}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> rejectPost(@PathVariable int postId) {
         // Từ chối bài viết
-        PostDetailResponseDTO postDetail = postService.rejectPost(postUuid);
+        PostDetailResponseDTO postDetail = postService.rejectPost(postId);
 
         // Trả về response với mã HTTP 200 OK
         return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
@@ -424,6 +383,16 @@ public class PostController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin/detail/{postId}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> getPostDetail(@PathVariable int postId) {
+        PostDetailResponseDTO postDetail = postService.getPostAdminById(postId);
+        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(postDetail)
+                .message("Thông tin bài đăng")
+                .build());
     }
 
 }
