@@ -146,26 +146,6 @@ public class PostServiceImpl implements PostService{
         return postMapper.toPostDetailResponseDTO(savePost);
     }
 
-//    @Override
-//    public PostDetailResponseDTO updatePost(String postUuid, PostRequestDTO postRequestDTO, String userUuid) {
-//        Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
-//        if(optionalPost.isPresent()){
-//            Post post = optionalPost.get();
-//            User user = userService.findByUserUuid(userUuid);
-//            if(!post.getUser().equals(user)){
-//                throw new IllegalArgumentException("Bạn không có quyền cho bài viết này");
-//            }
-//            Post updatePost = postMapper.toPostWithImages(postRequestDTO,user);
-//            updatePost.setPostId(post.getPostId());
-//            Post savePost = postRepository.save(updatePost);
-//            return postMapper.toPostDetailResponseDTO(savePost);
-//        }
-//        else{
-//            throw new EntityNotFoundException("Không tìm thấy bài viết.");
-//        }
-//    }
-
-//    @Transactional(readOnly = true)
     @Override
     public PostRequestDTO getPostForEdit(String postUuid, String userUuid) {
         System.out.printf("hi");
@@ -270,9 +250,10 @@ public class PostServiceImpl implements PostService{
         return favoritePostsPage.map(favoritePost -> postMapper.toPostResponseDTO(favoritePost.getPost()));
     }
 
-    public PostDetailResponseDTO approvePost(String postUuid) {
+    @Override
+    public PostDetailResponseDTO approvePost(int postId) {
         // Tìm bài viết theo postUuid
-        Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
+        Optional<Post> optionalPost = postRepository.findById(postId);
 
         // Kiểm tra bài viết có tồn tại hay không
         if (optionalPost.isPresent()) {
@@ -288,14 +269,15 @@ public class PostServiceImpl implements PostService{
             // Trả về response DTO
             return postMapper.toPostDetailResponseDTO(post);  // Chuyển đổi thành DTO nếu cần
         } else {
-            throw new EntityNotFoundException("Post not found with UUID: " + postUuid);
+            throw new EntityNotFoundException("Post not found with ID: " + postId);
         }
     }
 
+    @Override
     // Phương thức từ chối bài viết
-    public PostDetailResponseDTO rejectPost(String postUuid) {
+    public PostDetailResponseDTO rejectPost(int postId) {
         // Tìm bài viết theo postUuid
-        Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
+        Optional<Post> optionalPost = postRepository.findById(postId);
 
         // Kiểm tra bài viết có tồn tại hay không
         if (optionalPost.isPresent()) {
@@ -311,7 +293,7 @@ public class PostServiceImpl implements PostService{
             // Trả về response DTO
             return postMapper.toPostDetailResponseDTO(post);  // Chuyển đổi thành DTO nếu cần
         } else {
-            throw new EntityNotFoundException("Post not found with UUID: " + postUuid);
+            throw new EntityNotFoundException("Post not found with ID: " + postId);
         }
     }
 
@@ -347,5 +329,16 @@ public class PostServiceImpl implements PostService{
         return postMapper.toPostAdminDTO(post);
     }
 
+    @Override
+    public PostDetailResponseDTO getPostAdminById(int postId) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
 
+        // Nếu tìm thấy Post, chuyển đổi sang PostDetailResponseDTO
+        if (optionalPost.isPresent()) {
+            Post post = optionalPost.get();
+            return postMapper.toPostDetailResponseDTO(post);
+        } else {
+            throw new EntityNotFoundException("Post not found with ID: " + postId);
+        }
+    }
 }

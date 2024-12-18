@@ -43,6 +43,8 @@ public interface PostMapper {
     @Mapping(source = "room.waterPrice", target = "waterPrice")
     @Mapping(source = "room.street", target = "street")
     @Mapping(source = "room.houseNumber", target = "houseNumber")
+    @Mapping(source = "room.licenseBusinessUrl", target = "licenseBusinessUrl")
+    @Mapping(source = "room.licensePcccUrl", target = "licensePcccUrl")
     @Mapping(source = "postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
     PostDetailResponseDTO toPostDetailResponseDTO(Post post);
 
@@ -76,6 +78,5 @@ public interface PostMapper {
     @Mapping(source = "user.fullName", target = "fullName") // Lấy fullName từ mối quan hệ User
     @Mapping(source = "createdAt", target = "createdAt")
     PostAdminDTO toPostAdminDTO(Post post);
-
 
 }

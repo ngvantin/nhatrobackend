@@ -22,10 +22,10 @@ public interface PostService {
 
     Page<PostResponseDTO> getPostsByStatusAndUser(PostStatus status, String userUuid, Pageable pageable);
     Page<PostResponseDTO> getFavoritePostsByUser(String userUuid, Pageable pageable);
-    PostDetailResponseDTO approvePost(String postUuid);
-    PostDetailResponseDTO rejectPost(String postUuid);
+    PostDetailResponseDTO approvePost(int postId);
+    PostDetailResponseDTO rejectPost(int postId);
     Page<PostResponseDTO> searchPostsByKeyword(String keyword, Pageable pageable);
     Page<PostAdminDTO> getPostsForAdmin(PostStatus status, Pageable pageable);
-
+    PostDetailResponseDTO getPostAdminById(int postId);
 
 }

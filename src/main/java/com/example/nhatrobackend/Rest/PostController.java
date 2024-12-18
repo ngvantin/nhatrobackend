@@ -293,10 +293,10 @@ public class PostController {
     }
 
 
-    @PutMapping("/approve/{postUuid}")
-    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> approvePost(@PathVariable String postUuid) {
+    @PutMapping("/admin/approve/{postId}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> approvePost(@PathVariable int postId) {
         // Duyệt bài viết
-        PostDetailResponseDTO postDetail = postService.approvePost(postUuid);
+        PostDetailResponseDTO postDetail = postService.approvePost(postId);
         return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
                 .status("success")
                 .data(postDetail)
@@ -305,10 +305,10 @@ public class PostController {
     }
 
     // Phương thức từ chối bài viết
-    @PutMapping("/reject/{postUuid}")
-    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> rejectPost(@PathVariable String postUuid) {
+    @PutMapping("/admin/reject/{postId}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> rejectPost(@PathVariable int postId) {
         // Từ chối bài viết
-        PostDetailResponseDTO postDetail = postService.rejectPost(postUuid);
+        PostDetailResponseDTO postDetail = postService.rejectPost(postId);
 
         // Trả về response với mã HTTP 200 OK
         return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
@@ -383,6 +383,16 @@ public class PostController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin/detail/{postId}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> getPostDetail(@PathVariable int postId) {
+        PostDetailResponseDTO postDetail = postService.getPostAdminById(postId);
+        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(postDetail)
+                .message("Thông tin bài đăng")
+                .build());
     }
 
 }

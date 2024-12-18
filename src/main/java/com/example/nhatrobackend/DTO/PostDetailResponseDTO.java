@@ -1,6 +1,8 @@
 package com.example.nhatrobackend.DTO;
 
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
+import com.example.nhatrobackend.Entity.Field.PostStatus;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,5 +34,8 @@ public class PostDetailResponseDTO{
     private Double waterPrice; // Giá nước cho phòng
     private String street; // Tên đường
     private String houseNumber; // Số nhà
+    private String licensePcccUrl; // Đường dẫn đến giấy chứng nhận PCCC
+    private String licenseBusinessUrl; // Đường dẫn đến giấy phép kinh doanh
+    private PostStatus status;
 }
 
