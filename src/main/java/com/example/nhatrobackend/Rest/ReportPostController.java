@@ -52,5 +52,44 @@ public class ReportPostController {
                 .message("Thông tin bài đăng")
                 .build());
     }
+
+    @GetMapping("/admin/detail/{reportId}")
+    public ResponseEntity<ResponseWrapper<ReportPostDetailDTO>> getReportPostDetail(@PathVariable Integer reportId) {
+        ReportPostDetailDTO reportPostDetailDTO = reportPostService.getReportPostDetail(reportId);
+        return ResponseEntity.ok(ResponseWrapper.<ReportPostDetailDTO>builder()
+                .status("success")
+                .data(reportPostDetailDTO)
+                .message("Thông tin chi tiết báo cáo bài đăng")
+                .build());
+    }
+
+    // API duyệt bài viết bị tố cáo
+    @PutMapping("/admin/approve/{reportId}")
+    public ResponseEntity<ResponseWrapper<String>> approveReportPost(@PathVariable Integer reportId,
+                                                                     @RequestBody ApproveRequest request) {
+        String reason = request.getReason();
+        reportPostService.approveReportPost(reportId, reason);
+
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data("Bài viết đã được duyệt.")
+                .message("Duyệt bài viết thành công")
+                .build());
+    }
+
+    // API từ chối bài viết bị tố cáo
+    @PutMapping("/admin/reject/{reportId}")
+    public ResponseEntity<ResponseWrapper<String>> rejectReportPost(@PathVariable Integer reportId,
+                                                                    @RequestBody ApproveRequest request) {
+        String reason = request.getReason();
+        reportPostService.rejectReportPost(reportId, reason);
+
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data("Bài viết đã bị từ chối.")
+                .message("Từ chối bài viết thành công")
+                .build());
+    }
+
 }
 
