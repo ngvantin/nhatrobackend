@@ -1,14 +1,18 @@
 package com.example.nhatrobackend.Rest;
 
-import com.example.nhatrobackend.DTO.ReportPostRequestDTO;
-import com.example.nhatrobackend.DTO.ResponseWrapper;
+import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Entity.ReportPost;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.ReportPostService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -33,6 +37,19 @@ public class ReportPostController {
         return  ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
                 .message("Báo cáo bài đăng thành công.")
+                .build());
+    }
+    @GetMapping("/admin/all")
+    public ResponseEntity<ResponseWrapper<Page<ReportPostAdminDTO>>> getAllReportedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        // Lấy danh sách bài viết bị tố cáo và trả về DTO
+        Page<ReportPostAdminDTO> reportPostDTOPage = reportPostService.getAllReportedPosts(pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<ReportPostAdminDTO>>builder()
+                .status("success")
+                .data(reportPostDTOPage)
+                .message("Thông tin bài đăng")
                 .build());
     }
 }

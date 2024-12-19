@@ -11,7 +11,7 @@ public interface PostService {
     Page<PostResponseDTO> getAllPosts(Pageable pageable);
     PostDetailResponseDTO getPostById(String postUuid);
 //    Page<PostResponseDTO> filterPosts(RoomRequestDTO roomRequestDTO, Pageable pageable);
-    Page<PostResponseDTO> filterPosts(Double minPrice, Double maxPrice, Double minArea, Double maxArea, FurnitureStatus furnitureStatus, String city, String district, String ward, Pageable pageable);
+    Page<PostResponseDTO> filterPosts(Double minPrice, Double maxPrice, Double minArea, Double maxArea, FurnitureStatus furnitureStatus, String city, String district, String ward,String keyword, Pageable pageable);
     UserDetailDTO getUserByPostUuid(String postUuid);
     PostDetailResponseDTO  createPost(PostRequestDTO postRequestDTO, String userUuid);
     PostRequestDTO getPostForEdit(String postUuid, String userUuid);
@@ -27,5 +27,5 @@ public interface PostService {
     Page<PostResponseDTO> searchPostsByKeyword(String keyword, Pageable pageable);
     Page<PostAdminDTO> getPostsForAdmin(PostStatus status, Pageable pageable);
     PostDetailResponseDTO getPostAdminById(int postId);
-
+    Page<PostAdminDTO> getAllReportedPosts(Pageable pageable);
 }

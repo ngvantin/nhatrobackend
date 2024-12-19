@@ -10,6 +10,7 @@ import com.example.nhatrobackend.Mapper.RoomMapper;
 import com.example.nhatrobackend.Mapper.UserMapper;
 import com.example.nhatrobackend.Responsitory.FavoritePostRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
+import com.example.nhatrobackend.Responsitory.ReportPostRepository;
 import com.example.nhatrobackend.Responsitory.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -37,6 +38,7 @@ public class PostServiceImpl implements PostService{
     private final RoomService roomService;
     private final PostImageMapper postImageMapper;
     private final FavoritePostRepository favoritePostRepository;
+    private final ReportPostRepository reportPostRepository;
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         // Lấy tất cả các Post từ cơ sở dữ liệu dưới dạng Page
@@ -71,6 +73,7 @@ public class PostServiceImpl implements PostService{
             String city,
             String district,
             String ward,
+            String keyword,
             Pageable pageable) {
 
         // Gọi repository với các tham số trực tiếp
@@ -83,6 +86,7 @@ public class PostServiceImpl implements PostService{
                 city,
                 district,
                 ward,
+                keyword,
                 pageable);
         // Kiểm tra nếu không có bài viết nào được tìm thấy, ném ngoại lệ
         if (!postPage.hasContent()) {
@@ -328,6 +332,16 @@ public class PostServiceImpl implements PostService{
         // Sử dụng MapStruct để chuyển đổi Post sang PostAdminDTO
         return postMapper.toPostAdminDTO(post);
     }
+    @Override
+    public Page<PostAdminDTO> getAllReportedPosts(Pageable pageable) {
+        // Lấy danh sách bài viết bị tố cáo từ repository
+        Page<Post> postPage = reportPostRepository.findAllReportedPosts(pageable);
+
+        // Ánh xạ từ Post sang PostAdminDTO
+        return postPage.map(this::convertToPostAdminDTO);
+    }
+
+
 
     @Override
     public PostDetailResponseDTO getPostAdminById(int postId) {
