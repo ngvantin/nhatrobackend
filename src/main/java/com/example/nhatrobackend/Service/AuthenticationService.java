@@ -41,7 +41,7 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final AccountMapper accountMapper;
-
+    private final UserService userService;
 //    @NonFinal
 //    protected static final String SIGNER_KEY = "sXUTpDGAiL9kVkdE7jspTrpYZ3pQeHdaKBAKczxpkqJ/Wk83qgdkld/jhzFf7vy2";
 
@@ -152,6 +152,30 @@ public class AuthenticationService {
         } else {
             return null;  // Trường hợp không tìm thấy User
         }
+    }
+
+    public void changePassword(String userUuid, ChangePasswordRequest request) {
+        User user = userService.findByUserUuid(userUuid);
+
+        // Lấy tài khoản dựa trên userUuid
+        Account account = accountRepository.findByUser_UserId(user.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("Tài khoản không tồn tại"));
+
+        // Kiểm tra mật khẩu hiện tại
+        if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không chính xác");
+        }
+
+        // Kiểm tra xác nhận mật khẩu mới
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+            throw new IllegalArgumentException("Mật khẩu mới và xác nhận không khớp");
+        }
+
+        // Cập nhật mật khẩu mới sau khi mã hóa
+        account.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // Lưu thay đổi vào cơ sở dữ liệu
+        accountRepository.save(account);
     }
 
 }

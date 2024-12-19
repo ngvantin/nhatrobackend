@@ -140,6 +140,19 @@ public class UserController {
 
         return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách người dùng đã được phê duyệt thành công", users));
     }
+    @GetMapping("/admin/rejected")
+    public ResponseEntity<ResponseWrapper<Page<UserAdminDTO>>> getRejectedUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách người dùng với trạng thái APPROVED
+        Page<UserAdminDTO> users = userService.getUsersByStatus(LandlordStatus.REJECTED, pageable);
+
+        return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách người dùng bị từ chối", users));
+    }
+
 
 
     @GetMapping("/landlord-status")

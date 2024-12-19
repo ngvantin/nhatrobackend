@@ -209,7 +209,7 @@ public class UserServiceImpl implements UserService{
         User user = findUserByIdOrThrow(userId);
 
         // Cập nhật trạng thái thành NOT_REGISTERED
-        user.setIsLandlordActivated(LandlordStatus.NOT_REGISTERED);
+        user.setIsLandlordActivated(LandlordStatus.REJECTED);
         user.setUpdatedAt(LocalDateTime.now());
 
         // Lưu vào DB

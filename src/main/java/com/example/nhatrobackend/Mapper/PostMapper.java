@@ -2,10 +2,7 @@ package com.example.nhatrobackend.Mapper;
 
 import com.example.nhatrobackend.Config.MapStructConfig;
 import com.example.nhatrobackend.DTO.*;
-import com.example.nhatrobackend.Entity.Post;
-import com.example.nhatrobackend.Entity.PostImage;
-import com.example.nhatrobackend.Entity.Room;
-import com.example.nhatrobackend.Entity.User;
+import com.example.nhatrobackend.Entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -78,5 +75,26 @@ public interface PostMapper {
     @Mapping(source = "user.fullName", target = "fullName") // Lấy fullName từ mối quan hệ User
     @Mapping(source = "createdAt", target = "createdAt")
     PostAdminDTO toPostAdminDTO(Post post);
+
+    // Phương thức chuyển đổi từ Post và ReportPost sang ReportPostDetailDTO
+    @Mapping(source = "post.room.price", target = "price")
+    @Mapping(source = "post.room.area", target = "area")
+    @Mapping(source = "post.room.city", target = "city")
+    @Mapping(source = "post.room.district", target = "district")
+    @Mapping(source = "post.room.ward", target = "ward")
+    @Mapping(source = "post.room.numberOfRooms", target = "numberOfRooms")
+    @Mapping(source = "post.room.electricityPrice", target = "electricityPrice")
+    @Mapping(source = "post.room.waterPrice", target = "waterPrice")
+    @Mapping(source = "post.room.street", target = "street")
+    @Mapping(source = "post.room.houseNumber", target = "houseNumber")
+    @Mapping(source = "post.room.licenseBusinessUrl", target = "licenseBusinessUrl")
+    @Mapping(source = "post.room.licensePcccUrl", target = "licensePcccUrl")
+    @Mapping(source = "post.postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
+    @Mapping(source = "reportPost.reportId", target = "reportId")
+    @Mapping(source = "reportPost.reason", target = "reason")
+    @Mapping(source = "reportPost.details", target = "details")
+    @Mapping(source = "reportPost.status", target = "status")
+    @Mapping(source = "reportPost.createdAt", target = "createdAt")
+    ReportPostDetailDTO toReportPostDetailDTO(Post post, ReportPost reportPost);
 
 }

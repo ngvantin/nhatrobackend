@@ -1,9 +1,11 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.text.ParseException;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
+    private final AuthenticationFacade authenticationFacade;
 
 //    @PostMapping("/login")
 //    public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(@RequestBody AuthenticationRequest request){
@@ -87,4 +90,23 @@ public class AuthenticationController {
                 .message("Đăng ký thành công")
                 .build());
     }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ResponseWrapper<String>> changePassword(
+            @RequestBody @Valid ChangePasswordRequest request,
+            HttpServletRequest httpServletRequest) {
+
+        // Lấy userUuid từ JWT token trong cookie thông qua authenticationFacade
+        String userUuid = authenticationFacade.getCurrentUserUuid(httpServletRequest);
+
+        // Gọi service để xử lý thay đổi mật khẩu
+        authenticationService.changePassword(userUuid, request);
+
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .message("Đổi mật khẩu thành công")
+                .data("Mật khẩu đã được thay đổi")
+                .build());
+    }
+
 }

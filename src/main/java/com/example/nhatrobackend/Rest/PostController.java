@@ -71,10 +71,11 @@ public class PostController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String district,
             @RequestParam(required = false) String ward,
+            @RequestParam(required = false) String keyword,
             Pageable pageable) {
 
         Page<PostResponseDTO> filteredPosts = postService.filterPosts(
-                minPrice, maxPrice, minArea, maxArea, furnitureStatus, city, district, ward, pageable);
+                minPrice, maxPrice, minArea, maxArea, furnitureStatus, city, district, ward,keyword, pageable);
 
         return ResponseEntity.ok(
                 ResponseWrapper.<Page<PostResponseDTO>>builder()
@@ -351,6 +352,22 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/admin/reported")
+    public ResponseEntity<ResponseWrapper<Page<PostAdminDTO>>> getReportedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostAdminDTO> posts = postService.getAllReportedPosts(pageable);
+
+        ResponseWrapper<Page<PostAdminDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài posts bị tố cáo",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
     @GetMapping("/admin/rejected")
     public ResponseEntity<ResponseWrapper<Page<PostAdminDTO>>> getRejectedPosts(
             @RequestParam(defaultValue = "0") int page,
