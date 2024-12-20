@@ -4,5 +4,6 @@ public enum LandlordStatus {
     NOT_REGISTERED,
     PENDING_APPROVAL,
     APPROVED,
+    MODERATOR,
     REJECTED;
 }
