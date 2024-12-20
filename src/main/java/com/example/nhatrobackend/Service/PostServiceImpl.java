@@ -42,8 +42,10 @@ public class PostServiceImpl implements PostService{
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         // Lấy tất cả các Post từ cơ sở dữ liệu dưới dạng Page
-        Page<Post> postPage = postRepository.findAll(pageable);
+//        Page<Post> postPage = postRepository.findAll(pageable);
 
+        // Lấy danh sách bài viết theo trạng thái và phân trang từ repository
+        Page<Post> postPage = postRepository.findByStatus(PostStatus.APPROVED, pageable);
         // Sử dụng mapStruct để chuyển đổi từng Post thành PostResponseDTO
         return postPage.map(postMapper::toPostResponseDTO);
     }
