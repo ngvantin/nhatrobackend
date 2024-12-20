@@ -181,6 +181,20 @@ public class UserController {
                 .build());
     }
 
+    @GetMapping("/admin/all-users")
+    public ResponseEntity<ResponseWrapper<Page<UserAdminDTO>>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Gọi service để lấy danh sách người dùng
+        Page<UserAdminDTO> users = userService.getAllUsersExcludingModerator(pageable);
+
+        return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách người dùng thành công", users));
+    }
+
+
     @PostMapping("/profile-picture")
     public ResponseEntity<ResponseWrapper<String>> updateProfilePicture(
             @RequestParam("file") MultipartFile file,

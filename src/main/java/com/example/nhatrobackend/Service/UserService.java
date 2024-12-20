@@ -25,4 +25,5 @@ public interface UserService {
     UserDetailAdminDTO getUserDetailById(Integer userId);
     UserDetailAdminDTO approveLandlord(Integer userId);
     UserDetailAdminDTO rejectLandlord(Integer userId);
+    Page<UserAdminDTO> getAllUsersExcludingModerator(Pageable pageable);
 }
