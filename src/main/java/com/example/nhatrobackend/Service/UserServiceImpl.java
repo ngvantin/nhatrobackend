@@ -146,6 +146,16 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public Page<UserAdminDTO> getAllUsersExcludingModerator(Pageable pageable) {
+        // Lấy danh sách người dùng, loại trừ trạng thái MODERATOR
+        Page<User> userPage = userRepository.findByIsLandlordActivatedNot(LandlordStatus.MODERATOR, pageable);
+
+        // Chuyển đổi danh sách User sang UserAdminDTO
+        return userPage.map(this::convertToUserAdminDTO);
+    }
+
+
+    @Override
     public String getLandlordStatusByUserUuid(String userUuid) {
         // Tìm user dựa vào userUuid
         User user = userRepository.findByUserUuid(userUuid)
