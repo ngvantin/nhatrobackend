@@ -1,4 +1,4 @@
-package com.example.nhatrobackend.Service;
+package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.Entity.FavoritePost;
@@ -6,6 +6,9 @@ import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Responsitory.FavoritePostRepository;
+import com.example.nhatrobackend.Service.FavoritePostService;
+import com.example.nhatrobackend.Service.PostService;
+import com.example.nhatrobackend.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;

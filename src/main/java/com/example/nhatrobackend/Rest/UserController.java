@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
@@ -27,8 +28,9 @@ public class UserController {
     public ResponseEntity<ResponseWrapper<UserInformationDTO>> getCurrentUserInformation(HttpServletRequest request) {
         //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
-
+        String userUuid = authenticationFacade.getCurrentUserUuid();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+//        log.infor("Roles: ");
         // Gọi service để lấy thông tin
         UserInformationDTO userInformationDTO = userService.getUserInformationByUuid(userUuid);
 
@@ -42,7 +44,7 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<ResponseWrapper<UserProfileDTO>> getUserProfile(HttpServletRequest request) {
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Gọi service để lấy thông tin người dùng
         UserProfileDTO userProfile = userService.getUserProfile(userUuid);
@@ -59,7 +61,7 @@ public class UserController {
             @RequestBody LandlordRegistrationDTO dto,
             HttpServletRequest request) {
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Gọi service để xử lý đăng ký
         String message = userService.registerLandlord(userUuid, dto);
@@ -74,7 +76,7 @@ public class UserController {
     @GetMapping("/info-update")
     public ResponseEntity<ResponseWrapper<UpdateUserDTO>> getCurrentUserInfo(HttpServletRequest request) {
         // Lấy userUuid từ cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Gọi service để lấy thông tin người dùng
         UpdateUserDTO currentUserDTO = userService.getUserInfo(userUuid);
@@ -90,7 +92,7 @@ public class UserController {
     public ResponseEntity<ResponseWrapper<UpdateUserDTO>> updateUser(HttpServletRequest request,
                                                     @RequestBody UpdateUserDTO updateUserDTO) {
         // Lấy userUuid từ cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Gọi service để cập nhật thông tin người dùng
         UpdateUserDTO updatedUserDTO = userService.updateUser(userUuid, updateUserDTO);
@@ -169,7 +171,7 @@ public class UserController {
     @GetMapping("/landlord-status")
     public ResponseEntity<ResponseWrapper<String>> getLandlordStatus(HttpServletRequest request) {
         // Lấy userUuid từ JWT token thông qua AuthenticationFacade
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Gọi service để lấy trạng thái của user và trả về dạng String
         String status = userService.getLandlordStatusByUserUuid(userUuid);
@@ -201,7 +203,7 @@ public class UserController {
             HttpServletRequest request) {
         try {
             // Lấy userUuid từ JWT token trong cookie
-            String userUuid = authenticationFacade.getCurrentUserUuid(request);
+            String userUuid = authenticationFacade.getCurrentUserUuid();
 
             // Gửi file và userUuid tới Service để xử lý
             String imageUrl = userService.updateProfilePicture(userUuid, file);

@@ -9,6 +9,7 @@ import com.example.nhatrobackend.Service.UploadImageFileService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/post")
 @RequiredArgsConstructor
@@ -99,11 +101,12 @@ public class PostController {
 
     @PostMapping("/create")
     public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> creatPost(
-            @RequestBody PostRequestDTO postRequestDTO, HttpServletRequest request) {
+            @RequestBody PostRequestDTO postRequestDTO) {
+        // , HttpServletRequest request
 
-//        String userUuid = authenticationFacade.getCurrentUserUuid();
+        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+//        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Gọi service để tạo bài viết
         PostDetailResponseDTO postDetailResponseDTO = postService.createPost(postRequestDTO, userUuid);
@@ -121,7 +124,7 @@ public class PostController {
     ) {
 //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Lấy thông tin bài viết
         PostRequestDTO postRequestDTO = postService.getPostForEdit(postUuid, userUuid);
@@ -141,7 +144,7 @@ public class PostController {
     ){
 //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
         PostDetailResponseDTO  updatePost = postService.updatePost(postUuid,postRequestDTO,userUuid);
         return  ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
                 .status("success")
@@ -156,7 +159,7 @@ public class PostController {
     ){
 //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
         postService.deletePost(postUuid,userUuid);
         return  ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
@@ -200,7 +203,8 @@ public class PostController {
 
         //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+//        String userUuid = authenticationFacade.getCurrentUserUuid();
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Tạo Pageable từ các tham số page và size
         Pageable pageable = PageRequest.of(page, size);
@@ -225,7 +229,7 @@ public class PostController {
 
         //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Tạo Pageable từ các tham số page và size
         Pageable pageable = PageRequest.of(page, size);
@@ -250,7 +254,7 @@ public class PostController {
 
         //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Tạo Pageable từ các tham số page và size
         Pageable pageable = PageRequest.of(page, size);
@@ -273,9 +277,10 @@ public class PostController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size, HttpServletRequest request) {
 
-        //        String userUuid = authenticationFacade.getCurrentUserUuid();
+                String userUuid = authenticationFacade.getCurrentUserUuid();
+                log.info("userUuid :"+ userUuid);
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+//        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Tạo Pageable từ các tham số page và size
         Pageable pageable = PageRequest.of(page, size);
@@ -339,7 +344,7 @@ public class PostController {
     public ResponseEntity<ResponseWrapper<Page<PostAdminDTO>>> getApprovedPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-
+        log.info("f--------------------- controller");
         Pageable pageable = PageRequest.of(page, size);
         Page<PostAdminDTO> posts = postService.getPostsForAdmin(PostStatus.APPROVED, pageable);
 

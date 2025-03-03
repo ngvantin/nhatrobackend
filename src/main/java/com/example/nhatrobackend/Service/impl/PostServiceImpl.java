@@ -1,4 +1,4 @@
-package com.example.nhatrobackend.Service;
+package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.Entity.*;
@@ -12,6 +12,9 @@ import com.example.nhatrobackend.Responsitory.FavoritePostRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.ReportPostRepository;
 import com.example.nhatrobackend.Responsitory.RoomRepository;
+import com.example.nhatrobackend.Service.PostService;
+import com.example.nhatrobackend.Service.RoomService;
+import com.example.nhatrobackend.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PostServiceImpl implements PostService{
+public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final UserMapper userMapper;
@@ -42,8 +45,10 @@ public class PostServiceImpl implements PostService{
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         // Lấy tất cả các Post từ cơ sở dữ liệu dưới dạng Page
-        Page<Post> postPage = postRepository.findAll(pageable);
+//        Page<Post> postPage = postRepository.findAll(pageable);
 
+        // Lấy danh sách bài viết theo trạng thái và phân trang từ repository
+        Page<Post> postPage = postRepository.findByStatus(PostStatus.APPROVED, pageable);
         // Sử dụng mapStruct để chuyển đổi từng Post thành PostResponseDTO
         return postPage.map(postMapper::toPostResponseDTO);
     }

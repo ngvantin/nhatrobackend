@@ -20,7 +20,8 @@ public class FavoritePostController {
             @PathVariable String postUuid,
             HttpServletRequest request) {  // Thêm HttpServletRequest để lấy cookie
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+//        String userUuid = authenticationFacade.getCurrentUserUuid();
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         favoritePostService.addFavoritePost(userUuid, postUuid);
 
@@ -36,7 +37,8 @@ public class FavoritePostController {
             @PathVariable String postUuid, HttpServletRequest request) {
 //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+//        String userUuid = authenticationFacade.getCurrentUserUuid();
+        String userUuid = authenticationFacade.getCurrentUserUuid();
         favoritePostService.removeFavoritePost(userUuid, postUuid);
 
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
@@ -51,7 +53,7 @@ public class FavoritePostController {
             HttpServletRequest request) {
 
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         // Gọi service để kiểm tra
         boolean isFavorited = favoritePostService.isPostFavorited(userUuid, postUuid);

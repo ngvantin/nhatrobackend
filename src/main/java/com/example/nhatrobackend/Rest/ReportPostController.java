@@ -30,7 +30,7 @@ public class ReportPostController {
 
         //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
-        String userUuid = authenticationFacade.getCurrentUserUuid(request);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
 
         reportPostService.createReportPost(requestDTO, postUuid, userUuid);
 
@@ -63,33 +63,6 @@ public class ReportPostController {
                 .build());
     }
 
-    // API duyệt bài viết bị tố cáo
-    @PutMapping("/admin/approve/{reportId}")
-    public ResponseEntity<ResponseWrapper<String>> approveReportPost(@PathVariable Integer reportId,
-                                                                     @RequestBody ApproveRequest request) {
-        String reason = request.getReason();
-        reportPostService.approveReportPost(reportId, reason);
-
-        return ResponseEntity.ok(ResponseWrapper.<String>builder()
-                .status("success")
-                .data("Bài viết đã được duyệt.")
-                .message("Duyệt bài viết thành công")
-                .build());
-    }
-
-    // API từ chối bài viết bị tố cáo
-    @PutMapping("/admin/reject/{reportId}")
-    public ResponseEntity<ResponseWrapper<String>> rejectReportPost(@PathVariable Integer reportId,
-                                                                    @RequestBody ApproveRequest request) {
-        String reason = request.getReason();
-        reportPostService.rejectReportPost(reportId, reason);
-
-        return ResponseEntity.ok(ResponseWrapper.<String>builder()
-                .status("success")
-                .data("Bài viết đã bị từ chối.")
-                .message("Từ chối bài viết thành công")
-                .build());
-    }
 
 }
 

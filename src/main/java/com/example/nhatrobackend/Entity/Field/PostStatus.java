@@ -4,5 +4,6 @@ public enum PostStatus {
    PENDING,
     APPROVED,
     LOCKED,
-    REJECTED;
+    REJECTED,
+    ACTIVE; // dính lỗi khi sửa security xóa bảng account
     }

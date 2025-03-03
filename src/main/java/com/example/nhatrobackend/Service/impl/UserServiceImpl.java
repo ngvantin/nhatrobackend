@@ -1,14 +1,19 @@
-package com.example.nhatrobackend.Service;
+package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.*;
-import com.example.nhatrobackend.Entity.Account;
+//import com.example.nhatrobackend.Entity.Account;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
-import com.example.nhatrobackend.Entity.Post;
+import com.example.nhatrobackend.Entity.Field.UserType;
 import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.UserMapper;
+//import com.example.nhatrobackend.Responsitory.AccountRepository;
 import com.example.nhatrobackend.Responsitory.UserRepository;
+//import com.example.nhatrobackend.Service.AccountService;
+import com.example.nhatrobackend.Service.UploadImageFileService;
+import com.example.nhatrobackend.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
@@ -20,11 +25,12 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final AccountService accountService;
+//    private final AccountService accountService;
     private final UploadImageFileService uploadImageFileService;
+//    private final AccountRepository accountRepository; // // dính lỗi khi sửa security xóa bảng account
 
     @Override
     public boolean getApprovedUserByUuid(String userUuid) {
@@ -50,20 +56,22 @@ public class UserServiceImpl implements UserService{
                 .orElseThrow(() -> new RuntimeException("User not found with UUID: " + userUuid));
     }
 
+    // dính lỗi khi sửa security xóa bảng account
     @Override
     public UserInformationDTO getUserInformationByUuid(String userUuid) {
-        // Tìm userId từ userUuid
-        Integer userId = userRepository.findByUserUuid(userUuid)
-                .map(User::getUserId)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng với UUID đã cung cấp."));
-
-        // Gọi AccountService để lấy `Account`
-        Account account = accountService.findAccountByUserId(userId);
-        UserInformationDTO userInformationDTO = new UserInformationDTO();
-        userInformationDTO.setRole(account.getRole());
-        userInformationDTO.setFullName(account.getUser().getFullName());
-
-        return userInformationDTO;
+//        // Tìm userId từ userUuid
+//        Integer userId = userRepository.findByUserUuid(userUuid)
+//                .map(User::getUserId)
+//                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng với UUID đã cung cấp."));
+//
+//        // Gọi AccountService để lấy `Account`
+//        Account account = accountService.findAccountByUserId(userId);
+//        UserInformationDTO userInformationDTO = new UserInformationDTO();
+//        userInformationDTO.setUserType(account.getUserType());
+////        userInformationDTO.setFullName(account.getUser().getFullName());
+//
+//        return userInformationDTO;
+        return null;
     }
 
     @Override
@@ -154,7 +162,6 @@ public class UserServiceImpl implements UserService{
         return userPage.map(this::convertToUserAdminDTO);
     }
 
-
     @Override
     public String getLandlordStatusByUserUuid(String userUuid) {
         // Tìm user dựa vào userUuid
@@ -194,24 +201,28 @@ public class UserServiceImpl implements UserService{
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
     }
 
+    // dính lỗi khi sửa security xóa bảng account
     @Override
     public UserDetailAdminDTO approveLandlord(Integer userId) {
-        User user = findUserByIdOrThrow(userId);
-
-        // Kiểm tra trạng thái hiện tại
-        if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
-            throw new IllegalStateException("User is already approved as landlord.");
-        }
-
-        // Cập nhật trạng thái thành APPROVED
-        user.setIsLandlordActivated(LandlordStatus.APPROVED);
-        user.setUpdatedAt(LocalDateTime.now());
-
-        // Lưu vào DB
-        userRepository.save(user);
-
-        // Trả về DTO
-        return userMapper.toUserDetailAdminDTO(user);
+//        User user = findUserByIdOrThrow(userId);
+//
+//        // Kiểm tra trạng thái hiện tại
+//        if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
+//            throw new IllegalStateException("User is already approved as landlord.");
+//        }
+//
+//        // Cập nhật trạng thái thành APPROVED
+//        user.setIsLandlordActivated(LandlordStatus.APPROVED);
+//        user.setUpdatedAt(LocalDateTime.now());
+//
+//        // Lưu vào DB
+//        userRepository.save(user);
+//        Account account = accountService.findAccountByUserId(userId);
+//        account.setUserType(UserType.LANDLORD);
+//        accountRepository.save(account);
+//        // Trả về DTO
+//        return userMapper.toUserDetailAdminDTO(user);
+        return null;
     }
 
     @Override
@@ -229,4 +240,26 @@ public class UserServiceImpl implements UserService{
         return userMapper.toUserDetailAdminDTO(user);
     }
 
+    @Override
+    public UserDetailsService userDetailsService() {
+        return phoneNumber -> userRepository.findByPhoneNumber(phoneNumber).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
+    @Override
+    public User findByPhoneNumber(String phoneNumber) {
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại với phone number: " + phoneNumber));
+        return user;
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() ->new RuntimeException("User không tồn tại với email: " + email));
+    }
+
+    @Override
+    public Integer saveUser(User user) {
+        userRepository.save(user);
+        return user.getUserId();
+    }
 }

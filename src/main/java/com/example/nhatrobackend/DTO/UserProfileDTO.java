@@ -1,7 +1,6 @@
 package com.example.nhatrobackend.DTO;
 
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
-import com.example.nhatrobackend.Entity.Field.Role;
 import lombok.*;
 
 import java.time.LocalDateTime;

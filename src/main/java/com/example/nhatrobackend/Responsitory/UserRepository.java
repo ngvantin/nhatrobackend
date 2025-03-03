@@ -17,5 +17,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Page<User> findByIsLandlordActivated(LandlordStatus status, Pageable pageable);
     Optional<User> findByUserId(Integer userId);
     Page<User> findByIsLandlordActivatedNot(LandlordStatus status, Pageable pageable);
+    Optional<User> findByPhoneNumber(String phoneNumber);
 
+    Optional<User> findByEmail(String email);
 }

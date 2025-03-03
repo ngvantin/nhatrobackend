@@ -1,18 +1,18 @@
 package com.example.nhatrobackend.Sercurity;
 
-import com.example.nhatrobackend.Filter.JwtService;
+import com.example.nhatrobackend.Entity.User;
+import com.example.nhatrobackend.Service.UserService;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.JWTClaimsSet;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 //@Component
-//public class AuthenticationFacadeImpl implements AuthenticationFacade {
+//public class AuthenticationFacadeImpl2 implements AuthenticationFacade {
 //
 //    @Override
 //    public String getCurrentUserUuid() {
@@ -22,19 +22,39 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 //        }
 //        throw new IllegalStateException("User is not authenticated");
 //    }
+//
+//    @Override
+//    public String getCurrentUserUuid(HttpServletRequest request) {
+//        return null;
+//    }
 //}
 
 
 @Component
+@RequiredArgsConstructor
 public class AuthenticationFacadeImpl implements AuthenticationFacade {
-        @Override
+    private final UserService userService;
+//    @Override
+//    public String getCurrentUserUuid() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (authentication != null && authentication.isAuthenticated()) {
+//            return authentication.getName(); // Lấy userUuid từ `Authentication.getName()`
+//        }
+//        throw new IllegalStateException("User is not authenticated");
+//    }
+
+    @Override
     public String getCurrentUserUuid() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            return authentication.getName(); // Lấy userUuid từ `Authentication.getName()`
+            // Lấy userUuid từ `Authentication.getName()`
+            String phoneNumber = authentication.getName(); // Lấy số điện thoại của user hiện tại
+            User user = userService.findByPhoneNumber(phoneNumber);
+            return user.getUserUuid();
         }
         throw new IllegalStateException("User is not authenticated");
     }
+
 
     @Override
     public String getCurrentUserUuid(HttpServletRequest request) {
@@ -47,6 +67,18 @@ public class AuthenticationFacadeImpl implements AuthenticationFacade {
                     return getUserUuidFromToken(jwtToken); // Giải mã JWT token để lấy userUuid
                 }
             }
+        }
+        throw new IllegalStateException("User is not authenticated");
+    }
+
+    @Override
+    public Integer getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            // Lấy userUuid từ `Authentication.getName()`
+            String phoneNumber = authentication.getName(); // Lấy số điện thoại của user hiện tại
+            User user = userService.findByPhoneNumber(phoneNumber);
+            return user.getUserId();
         }
         throw new IllegalStateException("User is not authenticated");
     }

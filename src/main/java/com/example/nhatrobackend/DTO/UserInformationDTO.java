@@ -1,6 +1,6 @@
 package com.example.nhatrobackend.DTO;
 
-import com.example.nhatrobackend.Entity.Field.Role;
+import com.example.nhatrobackend.Entity.Field.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,5 +12,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserInformationDTO {
     private String fullName;
-    private Role role;
+    private UserType userType;
 }
