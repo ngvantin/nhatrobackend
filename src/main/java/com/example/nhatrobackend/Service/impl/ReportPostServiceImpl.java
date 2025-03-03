@@ -1,4 +1,4 @@
-package com.example.nhatrobackend.Service;
+package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.ReportPostAdminDTO;
 import com.example.nhatrobackend.DTO.ReportPostDetailDTO;
@@ -13,6 +13,9 @@ import com.example.nhatrobackend.Mapper.ReportPostMapper;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.ReportPostRepository;
 import com.example.nhatrobackend.Responsitory.UserRepository;
+import com.example.nhatrobackend.Service.PostService;
+import com.example.nhatrobackend.Service.ReportPostService;
+import com.example.nhatrobackend.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -62,20 +65,22 @@ public class ReportPostServiceImpl implements ReportPostService {
         return reportPosts.map(reportPostMapper::reportPostToReportPostAdminDTO);
     }
 
+    // dính lỗi khi sửa security xóa bảng account
     @Override
     public ReportPostDetailDTO getReportPostDetail(Integer reportId) {
-        // Lấy ReportPost theo reportId
-        Optional<ReportPost> optionalReportPost = reportPostRepository.findById(reportId);
-
-        if (!optionalReportPost.isPresent()) {
-            throw new EntityNotFoundException("ReportPost not found with ID: " + reportId);
-        }
-
-        ReportPost reportPost = optionalReportPost.get();
-        Post post = reportPost.getPost(); // Lấy Post liên quan
-
-        // Chuyển đổi và trả về DTO
-        return postMapper.toReportPostDetailDTO(post, reportPost);
+//        // Lấy ReportPost theo reportId
+//        Optional<ReportPost> optionalReportPost = reportPostRepository.findById(reportId);
+//
+//        if (!optionalReportPost.isPresent()) {
+//            throw new EntityNotFoundException("ReportPost not found with ID: " + reportId);
+//        }
+//
+//        ReportPost reportPost = optionalReportPost.get();
+//        Post post = reportPost.getPost(); // Lấy Post liên quan
+//
+//        // Chuyển đổi và trả về DTO
+//        return postMapper.toReportPostDetailDTO(post, reportPost);
+        return null;
     }
 
     // Phương thức duyệt bài viết bị tố cáo

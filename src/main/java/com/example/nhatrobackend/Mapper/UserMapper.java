@@ -2,7 +2,6 @@ package com.example.nhatrobackend.Mapper;
 
 import com.example.nhatrobackend.Config.MapStructConfig;
 import com.example.nhatrobackend.DTO.*;
-import com.example.nhatrobackend.Entity.Account;
 import com.example.nhatrobackend.Entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

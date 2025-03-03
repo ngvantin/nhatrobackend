@@ -51,4 +51,5 @@ public class GlobalExceptionHandler {
         return ExceptionBuilder.buildRuntimeExceptionResponse(ex.getMessage());
     }
 
+
 }

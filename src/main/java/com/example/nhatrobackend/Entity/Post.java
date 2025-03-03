@@ -2,10 +2,7 @@ package com.example.nhatrobackend.Entity;
 
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.mapstruct.control.MappingControl;
 
 import java.time.LocalDateTime;
@@ -16,9 +13,11 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+//@ToString(exclude )
 @Entity
 @Table(name = "post") // Tên bảng trong cơ sở dữ liệu
 public class Post {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Tự động tăng
     private int postId;

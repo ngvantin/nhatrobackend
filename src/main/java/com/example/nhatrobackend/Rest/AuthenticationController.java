@@ -1,6 +1,9 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.request.ResetPasswordDTO;
+import com.example.nhatrobackend.DTO.request.SignInRequest;
+import com.example.nhatrobackend.DTO.respone.TokenResponse;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
@@ -9,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,12 +21,96 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 
+import static org.springframework.http.HttpStatus.OK;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final AuthenticationFacade authenticationFacade;
+
+    // khi sửa security xóa bảng account
+    @PostMapping("/login")
+    public ResponseEntity<ResponseWrapper<TokenResponse>> login(@RequestBody SignInRequest request) {
+//        return new ResponseEntity<>(authenticationService.authenticate(request), OK);
+            var result = authenticationService.authenticate(request);
+            return ResponseEntity.ok(ResponseWrapper.<TokenResponse>builder()
+            .status("success")
+            .data(result)
+            .message("Đăng nhập thành công")
+            .build());
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ResponseWrapper<TokenResponse>> refresh(HttpServletRequest request){
+        var result =  authenticationService.refreshToken(request);
+        return ResponseEntity.ok(ResponseWrapper.<TokenResponse>builder()
+                .status("success")
+                .data(result)
+                .message("Refresh thành công")
+                .build());
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseWrapper<String>> logout(HttpServletRequest request) {
+        var result =  authenticationService.logout(request);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(result)
+                .message("Logout thành công")
+                .build());
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ResponseWrapper<String>> forgotPassword(@RequestBody String email){
+        var result =  authenticationService.forgotPassword(email);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(result)
+                .message("Forgot password thành công")
+                .build());
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ResponseWrapper<String>> resetPassword(@RequestBody String secretKey) {
+        var result =  authenticationService.resetPassword(secretKey);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(result)
+                .message("Reset password thành công")
+                .build());
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ResponseWrapper<String>> changePassword(@RequestBody @Valid ResetPasswordDTO request) {
+        var result =  authenticationService.changePassword(request);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(result)
+                .message("Reset password thành công")
+                .build());
+    }
+
+    @PostMapping("/update-password")
+    public ResponseEntity<ResponseWrapper<String>> changePassword(
+            @RequestBody @Valid ChangePasswordRequest request,
+            HttpServletRequest httpServletRequest) {
+
+        // Lấy userUuid từ JWT token trong cookie thông qua authenticationFacade
+//        String userUuid = authenticationFacade.getCurrentUserUuid(httpServletRequest);
+        String userUuid = authenticationFacade.getCurrentUserUuid();
+
+
+        // Gọi service để xử lý thay đổi mật khẩu
+        authenticationService.updatePassword(userUuid, request);
+
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .message("Đổi mật khẩu thành công")
+                .data("Mật khẩu đã được thay đổi")
+                .build());
+    }
 
 //    @PostMapping("/login")
 //    public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(@RequestBody AuthenticationRequest request){
@@ -33,31 +121,31 @@ public class AuthenticationController {
 //                .message("Đăng nhập thành công")
 //                .build());
 //    }
-
-    @PostMapping("/login")
-    public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(
-            @RequestBody AuthenticationRequest request,
-            HttpServletResponse response) {
-        // Gọi service để xử lý xác thực
-        var result = authenticationService.authenticate(request);
-
-        // Tạo cookie để lưu JWT token
-        Cookie cookie = new Cookie("jwtToken", result.getAccessToken());
-        cookie.setHttpOnly(true); // Cookie chỉ được gửi qua HTTP, không thể truy cập bằng JavaScript
-        cookie.setSecure(true);  // Chỉ gửi qua HTTPS
-        cookie.setPath("/");     // Cookie được gửi kèm với mọi endpoint
-        cookie.setMaxAge(24 * 60 * 60); // Thời gian sống: 1 ngày
-
-        // Thêm cookie vào response
-        response.addCookie(cookie);
-
-        // Trả về response
-        return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
-                .status("success")
-                .data(result)
-                .message("Đăng nhập thành công")
-                .build());
-    }
+//
+//    @PostMapping("/login")
+//    public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(
+//            @RequestBody AuthenticationRequest request,
+//            HttpServletResponse response) {
+//        // Gọi service để xử lý xác thực
+//        var result = authenticationService.authenticate(request);
+//
+//        // Tạo cookie để lưu JWT token
+//        Cookie cookie = new Cookie("jwtToken", result.getAccessToken());
+//        cookie.setHttpOnly(true); // Cookie chỉ được gửi qua HTTP, không thể truy cập bằng JavaScript
+//        cookie.setSecure(true);  // Chỉ gửi qua HTTPS
+//        cookie.setPath("/");     // Cookie được gửi kèm với mọi endpoint
+//        cookie.setMaxAge(24 * 60 * 60); // Thời gian sống: 1 ngày
+//
+//        // Thêm cookie vào response
+//        response.addCookie(cookie);
+//
+//        // Trả về response
+//        return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
+//                .status("success")
+//                .data(result)
+//                .message("Đăng nhập thành công")
+//                .build());
+//    }
 
 
     @PostMapping("/introspect")
@@ -71,42 +159,51 @@ public class AuthenticationController {
                 .data(result)
                 .build());
     }
+//
+//    @PostMapping("/register")
+//    public ResponseEntity<ResponseWrapper<RegisterRequestDTO>> register(@Valid @RequestBody RegisterRequestDTO dto){
+//        authenticationService.register(dto);
+//        return ResponseEntity.ok(ResponseWrapper.<RegisterRequestDTO>builder()
+//                .status("success")
+//                .data(dto)
+//                .message("OTP đã được gửi qua số điện thoại của bạn")
+//                .build());
+//    }
+//
+//    @PostMapping("/verify-otp")
+//    public ResponseEntity<ResponseWrapper> verifyOtp(@Valid @RequestBody OtpVerificationDTO dto){
+//        authenticationService.verifyOtpAndCreateAccount(dto);
+//        return ResponseEntity.ok(ResponseWrapper.builder()
+//                .status("success")
+//                .message("Đăng ký thành công")
+//                .build());
+//    }
+//
+//    @PostMapping("/change-password")
+//    public ResponseEntity<ResponseWrapper<String>> changePassword(
+//            @RequestBody @Valid ChangePasswordRequest request,
+//            HttpServletRequest httpServletRequest) {
+//
+//        // Lấy userUuid từ JWT token trong cookie thông qua authenticationFacade
+//        String userUuid = authenticationFacade.getCurrentUserUuid(httpServletRequest);
+//
+//        // Gọi service để xử lý thay đổi mật khẩu
+//        authenticationService.changePassword(userUuid, request);
+//
+//        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+//                .status("success")
+//                .message("Đổi mật khẩu thành công")
+//                .data("Mật khẩu đã được thay đổi")
+//                .build());
+//    }
 
-    @PostMapping("/register")
-    public ResponseEntity<ResponseWrapper<RegisterRequestDTO>> register(@Valid @RequestBody RegisterRequestDTO dto){
-        authenticationService.register(dto);
-        return ResponseEntity.ok(ResponseWrapper.<RegisterRequestDTO>builder()
-                .status("success")
-                .data(dto)
-                .message("OTP đã được gửi qua số điện thoại của bạn")
-                .build());
-    }
-
-    @PostMapping("/verify-otp")
-    public ResponseEntity<ResponseWrapper> verifyOtp(@Valid @RequestBody OtpVerificationDTO dto){
-        authenticationService.verifyOtpAndCreateAccount(dto);
-        return ResponseEntity.ok(ResponseWrapper.builder()
-                .status("success")
-                .message("Đăng ký thành công")
-                .build());
-    }
-
-    @PostMapping("/change-password")
-    public ResponseEntity<ResponseWrapper<String>> changePassword(
-            @RequestBody @Valid ChangePasswordRequest request,
-            HttpServletRequest httpServletRequest) {
-
-        // Lấy userUuid từ JWT token trong cookie thông qua authenticationFacade
-        String userUuid = authenticationFacade.getCurrentUserUuid(httpServletRequest);
-
-        // Gọi service để xử lý thay đổi mật khẩu
-        authenticationService.changePassword(userUuid, request);
-
-        return ResponseEntity.ok(ResponseWrapper.<String>builder()
-                .status("success")
-                .message("Đổi mật khẩu thành công")
-                .data("Mật khẩu đã được thay đổi")
-                .build());
-    }
-
+//    @PostMapping("/refresh")
+//    public ResponseEntity<TokenResponse> refresh(HttpServletRequest request) {
+//        return new ResponseEntity<>(authenticationService.refreshToken(request), OK);
+//    }
+//
+//    @PostMapping("/logout")
+//    public ResponseEntity<String> logout(HttpServletRequest request) {
+//        return new ResponseEntity<>(authenticationService.logout(request), OK);
+//    }
 }

@@ -1,4 +1,4 @@
-package com.example.nhatrobackend.Service;
+package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.AdministrativeServiceDTO.DistrictDTO;
 import com.example.nhatrobackend.DTO.AdministrativeServiceDTO.ProvinceDTO;
@@ -13,6 +13,7 @@ import com.example.nhatrobackend.Mapper.RoomMapper;
 import com.example.nhatrobackend.Responsitory.Administrative.DistrictRepository;
 import com.example.nhatrobackend.Responsitory.Administrative.ProvinceRepository;
 import com.example.nhatrobackend.Responsitory.Administrative.WardRepository;
+import com.example.nhatrobackend.Service.AdministrativeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AdministrativeServiceImpl implements AdministrativeService{
+public class AdministrativeServiceImpl implements AdministrativeService {
     private final ProvinceRepository provinceRepository;
     private final DistrictRepository districtRepository;
     private final WardRepository wardRepository;
