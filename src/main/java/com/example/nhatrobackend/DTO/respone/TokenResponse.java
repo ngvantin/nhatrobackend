@@ -1,5 +1,6 @@
 package com.example.nhatrobackend.DTO.respone;
 
+import com.example.nhatrobackend.Entity.Field.UserType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,6 +14,8 @@ public class TokenResponse implements Serializable {
     private String refreshToken;
 
     private Integer userId;
+    private String fullName;
+    private UserType userType;
 
     // more over
 }
