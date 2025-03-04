@@ -91,6 +91,8 @@ public class AuthenticationService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .userId(user.getUserId())
+                .fullName(user.getFullName())
+                .userType(user.getType())
                 .build();
     }
 

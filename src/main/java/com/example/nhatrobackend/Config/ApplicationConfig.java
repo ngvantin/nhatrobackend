@@ -25,19 +25,36 @@ public class ApplicationConfig {
         return new RestTemplate();
     }
 
+
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
-                registry.addMapping("**")
-                        .allowedOrigins("http://localhost:5173")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed HTTP methods
-                        .allowedHeaders("*") // Allowed request headers
-                        .allowCredentials(false)
-                        .maxAge(3600);
+                registry.addMapping("/**") // Cho phép tất cả API
+                        .allowedOrigins("http://localhost:5173") // Cho phép frontend truy cập
+                        .allowedMethods("GET", "POST", "PUT", "DELETE") // Các phương thức HTTP
+                        .allowedHeaders("*") // Chấp nhận tất cả các header
+                        .allowCredentials(true) // Nếu cần gửi cookie hoặc xác thực
+                        .maxAge(3600); // Cache CORS 1 giờ
             }
         };
     }
+
+//    @Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addCorsMappings(@NonNull CorsRegistry registry) {
+//                registry.addMapping("**")
+//                        .allowedOrigins("http://localhost:5173")
+//                        .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed HTTP methods
+//                        .allowedHeaders("*") // Allowed request headers
+//                        .allowCredentials(false)
+//                        .maxAge(3600);
+//            }
+//        };
+//    }
 
 }
