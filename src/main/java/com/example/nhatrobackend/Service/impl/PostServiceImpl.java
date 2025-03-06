@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.respone.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.*;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
@@ -102,30 +103,6 @@ public class PostServiceImpl implements PostService {
         return postPage.map(postMapper::toPostResponseDTO);
     }
 
-
-//    @Override
-//    public Page<PostResponseDTO> filterPosts(RoomRequestDTO roomRequestDTO, Pageable pageable) {
-//        // Lấy danh sách bài viết đã lọc với phân trang
-//        Page<Post> postPage = postRepository.findPostsByRoomCriteria(
-//                roomRequestDTO.getMinPrice(),
-//                roomRequestDTO.getMaxPrice(),
-//                roomRequestDTO.getMinArea(),
-//                roomRequestDTO.getMaxArea(),
-//                roomRequestDTO.getFurnitureStatus(),
-//                roomRequestDTO.getCity(),
-//                roomRequestDTO.getDistrict(),
-//                roomRequestDTO.getWard(),
-//                pageable);
-//
-//        // Kiểm tra nếu không có bài viết nào được tìm thấy, ném ngoại lệ
-//        if (!postPage.hasContent()) {
-//            throw new EntityNotFoundException("Không tìm thấy kết quả phù hợp.");
-//        }
-//
-//        // Sử dụng mapStruct để chuyển đổi từng Post thành PostResponseDTO
-//        return postPage.map(postMapper::toPostResponseDTO);
-//    }
-
     @Override
     public UserDetailDTO getUserByPostUuid(String postUuid) {
         Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
@@ -157,7 +134,6 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostRequestDTO getPostForEdit(String postUuid, String userUuid) {
-        System.out.printf("hi");
         // Lấy bài viết dựa trên postUuid
         Post post = postRepository.findByPostUuid(postUuid)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy bài viết."));
@@ -346,8 +322,6 @@ public class PostServiceImpl implements PostService {
         return postPage.map(this::convertToPostAdminDTO);
     }
 
-
-
     @Override
     public PostDetailResponseDTO getPostAdminById(int postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
@@ -360,4 +334,24 @@ public class PostServiceImpl implements PostService {
             throw new EntityNotFoundException("Post not found with ID: " + postId);
         }
     }
+
+    private Post findPostByUuidOrThrow(String postUuid) {
+        return postRepository.findByPostUuid(postUuid)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy bài đăng với UUID: " + postUuid));
+    }
+
+    @Override
+    public List<SimilarPostResponse> getSimilarPosts(String postUuid) {
+        Post post = findPostByUuidOrThrow(postUuid); // Gọi hàm riêng
+        List<Post> similarPosts = postRepository.findByRoom_CityAndRoom_DistrictAndRoom_WardOrderByCreatedAtAsc(
+                post.getRoom().getCity(),
+                post.getRoom().getDistrict(),
+                post.getRoom().getWard()
+        );
+        return similarPosts.stream()
+                .filter(p -> !p.getPostUuid().equals(postUuid))
+                .map(postMapper::toSimilarPostResponse) // Sử dụng MapStruct
+                .collect(Collectors.toList());
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.respone.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
@@ -60,6 +61,18 @@ public class PostController {
                 .status("success")
                 .data(postDetail)
                 .message("Thông tin bài đăng")
+                .build());
+    }
+
+    @GetMapping("/{postUuid}/similar")
+    public ResponseEntity<ResponseWrapper<List<SimilarPostResponse>>> getSimilarPosts(
+            @PathVariable String postUuid) {
+        List<SimilarPostResponse> similarPosts = postService.getSimilarPosts(postUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<List<SimilarPostResponse>>builder()
+                .status("success")
+                .data(similarPosts)
+                .message("Các bài đăng tương tự.")
                 .build());
     }
 
