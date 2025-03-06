@@ -144,14 +144,26 @@ public class AuthenticationService {
                 .build();
     }
 
-    public String logout(HttpServletRequest request) {
+//    public String logout(HttpServletRequest request) {
+//        log.info("---------- logout ----------");
+//        final String token = request.getHeader(REFERER);
+//        if(StringUtils.isBlank(token)){
+//            throw new IllegalArgumentException("Token must be not blank");
+//        }
+//        final String phoneNumber = jwtService.extractUsername(token,ACCESS_TOKEN);
+//        tokenService.delete(phoneNumber);
+//        return "Removed!";
+//    }
+
+    public String logout(String authorizationHeader) { // Nhận header Authorization
         log.info("---------- logout ----------");
-        final String token = request.getHeader(REFERER);
-        if(StringUtils.isBlank(token)){
-            throw new IllegalArgumentException("Token must be not blank");
+        if (StringUtils.isBlank(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid Authorization header");
         }
-        final String phoneNumber = jwtService.extractUsername(token,ACCESS_TOKEN);
-        tokenService.delete(phoneNumber);
+
+        final String token = authorizationHeader.substring(7); // Loại bỏ "Bearer "
+        final String phoneNumber = jwtService.extractUsername(token, ACCESS_TOKEN); // Lấy username từ token
+        tokenService.delete(phoneNumber); // Xóa token dựa trên username
         return "Removed!";
     }
 
