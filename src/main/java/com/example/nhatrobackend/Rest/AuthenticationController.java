@@ -52,9 +52,20 @@ public class AuthenticationController {
                 .build());
     }
 
+//    @PostMapping("/logout")
+//    public ResponseEntity<ResponseWrapper<String>> logout(HttpServletRequest request) {
+//        var result =  authenticationService.logout(request);
+//        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+//                .status("success")
+//                .data(result)
+//                .message("Logout thành công")
+//                .build());
+//    }
+
     @PostMapping("/logout")
     public ResponseEntity<ResponseWrapper<String>> logout(HttpServletRequest request) {
-        var result =  authenticationService.logout(request);
+        String token = request.getHeader("Authorization"); // Lấy token từ header Authorization
+        var result = authenticationService.logout(token);
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
                 .data(result)
