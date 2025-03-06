@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Mapper;
 
 import com.example.nhatrobackend.Config.MapStructConfig;
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.respone.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -75,6 +76,18 @@ public interface PostMapper {
     @Mapping(source = "user.fullName", target = "fullName") // Lấy fullName từ mối quan hệ User
     @Mapping(source = "createdAt", target = "createdAt")
     PostAdminDTO toPostAdminDTO(Post post);
+
+    // Ánh xạ từ Post sang SimilarPostResponseDTO
+    @Mapping(source = "postUuid", target = "postUuid")
+    @Mapping(source = "postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "room.price", target = "price")
+    @Mapping(source = "room.area", target = "area")
+    @Mapping(source = "room.city", target = "city")
+    @Mapping(source = "room.district", target = "district")
+    @Mapping(source = "room.ward", target = "ward")
+    @Mapping(source = "createdAt", target = "createdAt")
+    SimilarPostResponse toSimilarPostResponse(Post post);
 
     // dính lỗi khi sửa security xóa bảng account
 //    // Phương thức chuyển đổi từ Post và ReportPost sang ReportPostDetailDTO

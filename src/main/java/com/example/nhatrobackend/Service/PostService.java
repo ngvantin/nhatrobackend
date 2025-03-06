@@ -1,11 +1,14 @@
 package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.respone.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface PostService {
     Page<PostResponseDTO> getAllPosts(Pageable pageable);
@@ -28,4 +31,5 @@ public interface PostService {
     Page<PostAdminDTO> getPostsForAdmin(PostStatus status, Pageable pageable);
     PostDetailResponseDTO getPostAdminById(int postId);
     Page<PostAdminDTO> getAllReportedPosts(Pageable pageable);
+    public List<SimilarPostResponse> getSimilarPosts(String postUuid);
 }
