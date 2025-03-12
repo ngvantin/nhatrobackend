@@ -2,6 +2,8 @@ package com.example.nhatrobackend.Mapper;
 
 import com.example.nhatrobackend.Config.MapStructConfig;
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
+import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.Entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -27,4 +29,5 @@ public interface UserMapper {
     UserAdminDTO toUserAdminDTO(User user);
 
     UserDetailAdminDTO toUserDetailAdminDTO(User user);
+    UserLandlordResponse toUserLandlordResponse(User user);
 }

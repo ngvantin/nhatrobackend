@@ -1,6 +1,8 @@
 package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
+import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
 import com.example.nhatrobackend.Entity.User;
 import org.springframework.data.domain.Page;
@@ -9,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
 
 public interface UserService {
     boolean getApprovedUserByUuid(String userUuid);
@@ -32,4 +33,6 @@ public interface UserService {
     User findByPhoneNumber(String phoneNumber);
     User getUserByEmail(String email);
     Integer saveUser(User user);
+    Page<UserLandlordResponse> getApprovedLandlords(Pageable pageable, String loggedInUserUuid);
+    User findByUserId(Integer userId);
 }
