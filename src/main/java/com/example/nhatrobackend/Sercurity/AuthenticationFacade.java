@@ -6,5 +6,6 @@ public interface AuthenticationFacade {
     String getCurrentUserUuid();
     String getCurrentUserUuid(HttpServletRequest request);
     Integer getCurrentUserId();
+    String getCurrentUserUuidToPhone();
 }
 

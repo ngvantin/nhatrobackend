@@ -3,13 +3,11 @@ package com.example.nhatrobackend.Rest;
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.request.ResetPasswordDTO;
 import com.example.nhatrobackend.DTO.request.SignInRequest;
-import com.example.nhatrobackend.DTO.respone.TokenResponse;
+import com.example.nhatrobackend.DTO.response.TokenResponse;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -20,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
-
-import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/auth")

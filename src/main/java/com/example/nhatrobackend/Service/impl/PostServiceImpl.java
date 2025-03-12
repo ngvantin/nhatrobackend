@@ -1,7 +1,7 @@
 package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.*;
-import com.example.nhatrobackend.DTO.respone.SimilarPostResponse;
+import com.example.nhatrobackend.DTO.response.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.*;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
@@ -12,20 +12,16 @@ import com.example.nhatrobackend.Mapper.UserMapper;
 import com.example.nhatrobackend.Responsitory.FavoritePostRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.ReportPostRepository;
-import com.example.nhatrobackend.Responsitory.RoomRepository;
 import com.example.nhatrobackend.Service.PostService;
 import com.example.nhatrobackend.Service.RoomService;
 import com.example.nhatrobackend.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +39,14 @@ public class PostServiceImpl implements PostService {
     private final PostImageMapper postImageMapper;
     private final FavoritePostRepository favoritePostRepository;
     private final ReportPostRepository reportPostRepository;
+
+    @Override
+    public List<SimilarPostResponse> getPostsByUserUuid(String userUuid) {
+        List<Post> posts = postRepository.findByUser_UserUuid(userUuid);
+        return posts.stream()
+                .map(postMapper::toSimilarPostResponse)
+                .collect(Collectors.toList());
+    }
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         // Lấy tất cả các Post từ cơ sở dữ liệu dưới dạng Page

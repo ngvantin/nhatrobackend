@@ -1,13 +1,12 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
-import com.example.nhatrobackend.DTO.respone.SimilarPostResponse;
+import com.example.nhatrobackend.DTO.response.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.PostService;
 import com.example.nhatrobackend.Service.UploadImageFileService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -36,6 +30,19 @@ public class PostController {
     private final PostService postService;
     private final AuthenticationFacade authenticationFacade;
     private final UploadImageFileService uploadImageFileService;
+    @GetMapping("/user/{userUuid}") // Thêm endpoint mới
+    public ResponseEntity<ResponseWrapper<List<SimilarPostResponse>>> getPostsByUserUuid(
+            @PathVariable String userUuid) {
+
+        List<SimilarPostResponse> posts = postService.getPostsByUserUuid(userUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<List<SimilarPostResponse>>builder()
+                .status("success")
+                .data(posts)
+                .message("Các bài đăng của người dùng.")
+                .build());
+    }
+
     @GetMapping
     public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,

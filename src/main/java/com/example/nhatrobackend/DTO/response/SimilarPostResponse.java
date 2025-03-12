@@ -1,4 +1,4 @@
-package com.example.nhatrobackend.DTO.respone;
+package com.example.nhatrobackend.DTO.response;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.example.nhatrobackend.DTO.respone;
+package com.example.nhatrobackend.DTO.response;
 
 import com.example.nhatrobackend.Entity.Field.UserType;
 import lombok.Builder;
