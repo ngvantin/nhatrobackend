@@ -64,4 +64,5 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
     Page<Post> findByStatus(PostStatus status, Pageable pageable);
     List<Post> findByRoom_CityAndRoom_DistrictAndRoom_WardOrderByCreatedAtAsc(String city, String district, String ward);
 
+    List<Post> findByUser_UserUuid(String userUuid);
 }

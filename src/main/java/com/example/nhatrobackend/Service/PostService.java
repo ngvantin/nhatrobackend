@@ -1,7 +1,7 @@
 package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.*;
-import com.example.nhatrobackend.DTO.respone.SimilarPostResponse;
+import com.example.nhatrobackend.DTO.response.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Entity.Post;
@@ -32,4 +32,5 @@ public interface PostService {
     PostDetailResponseDTO getPostAdminById(int postId);
     Page<PostAdminDTO> getAllReportedPosts(Pageable pageable);
     public List<SimilarPostResponse> getSimilarPosts(String postUuid);
+    List<SimilarPostResponse> getPostsByUserUuid(String userUuid);
 }

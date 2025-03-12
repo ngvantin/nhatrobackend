@@ -3,22 +3,17 @@ package com.example.nhatrobackend.Service;
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.request.ResetPasswordDTO;
 import com.example.nhatrobackend.DTO.request.SignInRequest;
-import com.example.nhatrobackend.DTO.respone.TokenResponse;
+import com.example.nhatrobackend.DTO.response.TokenResponse;
 //import com.example.nhatrobackend.Entity.Account;
-import com.example.nhatrobackend.Entity.Field.UserType;
 import com.example.nhatrobackend.Entity.Token;
 import com.example.nhatrobackend.Entity.User;
 //import com.example.nhatrobackend.Mapper.AccountMapper;
 import com.example.nhatrobackend.Mapper.UserMapper;
 //import com.example.nhatrobackend.Responsitory.AccountRepository;
 import com.example.nhatrobackend.Responsitory.UserRepository;
-import com.example.nhatrobackend.util.TokenType;
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
@@ -27,22 +22,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringJoiner;
 
-import static com.example.nhatrobackend.Entity.Field.UserStatus.ACTIVE;
-import static com.example.nhatrobackend.Entity.Field.LandlordStatus.NOT_REGISTERED;
 import static com.example.nhatrobackend.util.TokenType.*;
 import static org.springframework.http.HttpHeaders.REFERER;
 

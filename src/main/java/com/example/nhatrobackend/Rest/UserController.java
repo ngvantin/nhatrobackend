@@ -1,6 +1,8 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
+import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.UserService;
@@ -9,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
@@ -29,7 +29,6 @@ public class UserController {
         //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie
         String userUuid = authenticationFacade.getCurrentUserUuid();
-        var auth = SecurityContextHolder.getContext().getAuthentication();
 //        log.infor("Roles: ");
         // Gọi service để lấy thông tin
         UserInformationDTO userInformationDTO = userService.getUserInformationByUuid(userUuid);
@@ -42,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<ResponseWrapper<UserProfileDTO>> getUserProfile(HttpServletRequest request) {
+    public ResponseEntity<ResponseWrapper<UserProfileDTO>> getUserProfile() {
         // Lấy userUuid từ JWT token trong cookie
         String userUuid = authenticationFacade.getCurrentUserUuid();
 
@@ -52,6 +51,21 @@ public class UserController {
         return ResponseEntity.ok(ResponseWrapper.<UserProfileDTO>builder()
                 .status("success")
                 .message("Lấy thông tin cá nhân thành công")
+                .data(userProfile)
+                .build());
+    }
+
+    // API thông tin 1 user bất kì
+    @GetMapping("/{userUuid}")
+    public ResponseEntity<ResponseWrapper<UserProfileDTO>> getUserProfileByUuid(
+            @PathVariable String userUuid) {
+
+        // Gọi service để lấy thông tin người dùng
+        UserProfileDTO userProfile = userService.getUserProfile(userUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<UserProfileDTO>builder()
+                .status("success")
+                .message("Lấy thông tin người dùng thành công")
                 .data(userProfile)
                 .build());
     }
@@ -259,6 +273,18 @@ public class UserController {
     }
 
 
+    @GetMapping("/landlords")
+    public ResponseEntity<ResponseWrapper<Page<UserLandlordResponse>>> getApprovedLandlords(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        String loggedInUserUuid = authenticationFacade.getCurrentUserUuidToPhone(); // Lấy userUuid từ AuthenticationFacade
+
+        Page<UserLandlordResponse> landlords = userService.getApprovedLandlords(pageable, loggedInUserUuid); // Truyền loggedInUserUuid vào service
+
+        return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách chủ trọ đã được phê duyệt thành công", landlords));
+    }
 }
 
 

@@ -2,7 +2,7 @@ package com.example.nhatrobackend.Mapper;
 
 import com.example.nhatrobackend.Config.MapStructConfig;
 import com.example.nhatrobackend.DTO.*;
-import com.example.nhatrobackend.DTO.respone.SimilarPostResponse;
+import com.example.nhatrobackend.DTO.response.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,7 +10,6 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

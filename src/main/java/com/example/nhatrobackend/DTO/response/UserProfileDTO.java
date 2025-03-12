@@ -1,4 +1,4 @@
-package com.example.nhatrobackend.DTO;
+package com.example.nhatrobackend.DTO.response;
 
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
 import lombok.*;

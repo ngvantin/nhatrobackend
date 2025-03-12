@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Sercurity;
 
 import com.example.nhatrobackend.Entity.User;
+import com.example.nhatrobackend.Responsitory.UserRepository;
 import com.example.nhatrobackend.Service.UserService;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -10,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 //@Component
 //public class AuthenticationFacadeImpl2 implements AuthenticationFacade {
@@ -34,6 +37,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AuthenticationFacadeImpl implements AuthenticationFacade {
     private final UserService userService;
+    private final UserRepository userRepository;
 //    @Override
 //    public String getCurrentUserUuid() {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -53,6 +57,19 @@ public class AuthenticationFacadeImpl implements AuthenticationFacade {
             return user.getUserUuid();
         }
         throw new IllegalStateException("User is not authenticated");
+    }
+
+    @Override
+    public String getCurrentUserUuidToPhone() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            String phoneNumber = authentication.getName();
+            Optional<User> userOptional = userRepository.findByPhoneNumber(phoneNumber);
+            if (userOptional.isPresent()) {
+                return userOptional.get().getUserUuid();
+            }
+        }
+        return null;
     }
 
 

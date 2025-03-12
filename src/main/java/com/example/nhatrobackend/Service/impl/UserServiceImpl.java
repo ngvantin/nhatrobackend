@@ -2,8 +2,9 @@ package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.*;
 //import com.example.nhatrobackend.Entity.Account;
+import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
+import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
-import com.example.nhatrobackend.Entity.Field.UserType;
 import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.UserMapper;
 //import com.example.nhatrobackend.Responsitory.AccountRepository;
@@ -30,8 +31,27 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 //    private final AccountService accountService;
     private final UploadImageFileService uploadImageFileService;
+
 //    private final AccountRepository accountRepository; // // dính lỗi khi sửa security xóa bảng account
 
+
+    @Override
+    public Page<UserLandlordResponse> getApprovedLandlords(Pageable pageable, String loggedInUserUuid) { // Thêm tham số loggedInUserUuid
+        Page<User> userPage = userRepository.findByIsLandlordActivated(LandlordStatus.APPROVED, pageable);
+        return userPage.map(user -> convertToUserLandlordResponse(user, loggedInUserUuid));
+    }
+
+    private UserLandlordResponse convertToUserLandlordResponse(User user, String loggedInUserUuid) {
+        UserLandlordResponse dto = userMapper.toUserLandlordResponse(user);
+
+        if (loggedInUserUuid == null ) {
+            String phoneNumber = user.getPhoneNumber();
+            if (phoneNumber != null && phoneNumber.length() > 3) {
+                dto.setPhoneNumber(phoneNumber.substring(0, phoneNumber.length() - 3) + "xxx");
+            }
+        }
+        return dto;
+    }
     @Override
     public boolean getApprovedUserByUuid(String userUuid) {
         Optional<User> optionalUser = userRepository.findByUserUuid(userUuid);
@@ -54,6 +74,12 @@ public class UserServiceImpl implements UserService {
     public User getUserByUuid(String userUuid) {
         return userRepository.findByUserUuid(userUuid)
                 .orElseThrow(() -> new RuntimeException("User not found with UUID: " + userUuid));
+    }
+
+    @Override
+    public User findByUserId(Integer userId) {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with userId: " + userId));
     }
 
     // dính lỗi khi sửa security xóa bảng account
@@ -262,4 +288,5 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return user.getUserId();
     }
+
 }
