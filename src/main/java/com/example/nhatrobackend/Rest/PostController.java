@@ -99,6 +99,17 @@ public class PostController {
         Page<PostResponseDTO> filteredPosts = postService.filterPosts(
                 minPrice, maxPrice, minArea, maxArea, furnitureStatus, city, district, ward,keyword, pageable);
 
+        // Kiểm tra nếu không có bài viết nào được tìm thấy
+        if (!filteredPosts.hasContent()) {
+            return ResponseEntity.ok(
+                    ResponseWrapper.<Page<PostResponseDTO>>builder()
+                            .status("success")
+                            .message("Không tìm thấy kết quả phù hợp.")
+                            .data(Page.empty()) // Trả về Page trống
+                            .build()
+            );
+        }
+
         return ResponseEntity.ok(
                 ResponseWrapper.<Page<PostResponseDTO>>builder()
                         .status("success")
