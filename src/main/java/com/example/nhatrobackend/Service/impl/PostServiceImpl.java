@@ -19,10 +19,12 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -98,10 +100,6 @@ public class PostServiceImpl implements PostService {
                 ward,
                 keyword,
                 pageable);
-        // Kiểm tra nếu không có bài viết nào được tìm thấy, ném ngoại lệ
-        if (!postPage.hasContent()) {
-            throw new EntityNotFoundException("Không tìm thấy kết quả phù hợp.");
-        }
 
         // Sử dụng mapStruct để chuyển đổi từng Post thành PostResponseDTO
         return postPage.map(postMapper::toPostResponseDTO);
