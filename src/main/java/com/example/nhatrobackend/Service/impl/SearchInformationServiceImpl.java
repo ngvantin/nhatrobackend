@@ -30,10 +30,10 @@ public class SearchInformationServiceImpl implements SearchInformationService {
         searchInformationRepository.save(searchInformation);
     }
     @Override
-    public SearchInforRequest getSearchInformationByUuid(String searchInforUuid) {
-        log.info("searchInforUuid " + searchInforUuid);
-        SearchInformation searchInformation = findByUuid(searchInforUuid);
-        log.info("SearchInformation :" + searchInformation.getMaxArea());
+    public SearchInforRequest getSearchInformationByUuid(Integer userId) {
+        SearchInformation searchInformation = searchInformationRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin tìm kiếm cho userId: " + userId));
+
         return searchInformationMapper.toSearchInforRequest(searchInformation);
     }
 
