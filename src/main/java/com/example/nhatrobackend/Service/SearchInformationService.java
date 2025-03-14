@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface SearchInformationService {
     void saveSearchInformationByUserId(Integer userId, SearchInforRequest searchInforRequest); // Thay đổi tham số
 
-    SearchInforResponse updateSearchInformationByUuid(String searchInforUuid, SearchInforRequest searchInforRequest);
+    SearchInforResponse updateSearchInformationByUuid(Integer userId, SearchInforRequest searchInforRequest);
     SearchInforRequest getSearchInformationByUuid(Integer userId);
 }
