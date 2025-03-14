@@ -29,10 +29,10 @@ public class SearchInformationController {
                 .build());
     }
 
-    @GetMapping("/detail/{searchInforUuid}")
-    public ResponseEntity<ResponseWrapper<SearchInforRequest>> getSearchInformation(
-            @PathVariable String searchInforUuid) {
-        SearchInforRequest searchInforRequest = searchInformationService.getSearchInformationByUuid(searchInforUuid);
+    @GetMapping("/detail")
+    public ResponseEntity<ResponseWrapper<SearchInforRequest>> getSearchInformation() {
+        Integer userId = authenticationFacade.getCurrentUserId();
+        SearchInforRequest searchInforRequest = searchInformationService.getSearchInformationByUuid(userId);
 
         return ResponseEntity.ok(ResponseWrapper.<SearchInforRequest>builder()
                 .status("success")
