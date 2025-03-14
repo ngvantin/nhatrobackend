@@ -41,11 +41,11 @@ public class SearchInformationController {
                 .build());
     }
 
-    @PutMapping("/update/{searchInforUuid}")
+    @PutMapping("/update")
     public ResponseEntity<ResponseWrapper<SearchInforResponse>> updateSearchInformation(
-            @PathVariable String searchInforUuid,
             @RequestBody SearchInforRequest searchInforRequest) {
-        SearchInforResponse updatedSearchInforResponse = searchInformationService.updateSearchInformationByUuid(searchInforUuid, searchInforRequest);
+        Integer userId = authenticationFacade.getCurrentUserId();
+        SearchInforResponse updatedSearchInforResponse = searchInformationService.updateSearchInformationByUuid(userId, searchInforRequest);
 
         return ResponseEntity.ok(ResponseWrapper.<SearchInforResponse>builder()
                 .status("success")

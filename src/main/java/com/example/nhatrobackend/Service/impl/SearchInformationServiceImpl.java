@@ -38,8 +38,9 @@ public class SearchInformationServiceImpl implements SearchInformationService {
     }
 
     @Override
-    public SearchInforResponse updateSearchInformationByUuid(String searchInforUuid, SearchInforRequest searchInforRequest) {
-        SearchInformation existingSearchInformation = findByUuid(searchInforUuid);
+    public SearchInforResponse updateSearchInformationByUuid(Integer userId, SearchInforRequest searchInforRequest) {
+        SearchInformation existingSearchInformation = searchInformationRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin tìm kiếm cho userId: " + userId));
         searchInformationMapper.updateSearchInformationFromDTO(searchInforRequest, existingSearchInformation);
         SearchInformation updatedSearchInformation = searchInformationRepository.save(existingSearchInformation);
         return searchInformationMapper.toSearchInforResponse(updatedSearchInformation);
