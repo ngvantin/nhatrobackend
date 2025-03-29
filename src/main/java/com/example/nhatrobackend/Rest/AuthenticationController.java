@@ -12,10 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
@@ -80,7 +77,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ResponseWrapper<String>> resetPassword(@RequestBody String secretKey) {
+    public ResponseEntity<ResponseWrapper<String>> resetPassword(@RequestParam String secretKey) {
         var result =  authenticationService.resetPassword(secretKey);
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
@@ -95,7 +92,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
                 .data(result)
-                .message("Reset password thành công")
+                .message("Change password thành công")
                 .build());
     }
 

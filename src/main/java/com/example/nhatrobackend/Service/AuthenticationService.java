@@ -47,6 +47,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final  TokenService tokenService;
+    private final  MailService mailService;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -165,11 +166,12 @@ public class AuthenticationService {
         //save reset token to db
         tokenService.save(Token.builder().phoneNumber(user.getPhoneNumber()).resetToken(resetToken).build());
         // TODO send email to user
-        String confirmLink = String.format("curl --location 'http://localhost:80/auth/reset-password' \\\n" +
-                "--header 'accept: */*' \\\n" +
-                "--header 'Content-Type: application/json' \\\n" +
-                "--data '%s'", resetToken);
-        log.info("--> confirmLink: {}", confirmLink);
+        try {
+            mailService.sendConfirmLink(email, resetToken);
+        } catch (Exception e) {
+            log.error("Send email fail, errorMessage={}", e.getMessage());
+            throw new IllegalArgumentException("Send email fail, please try again!");
+        }
         return resetToken;
     }
 
@@ -179,8 +181,8 @@ public class AuthenticationService {
         var user = validateToken(secretKey);
 
         // check token by username
-//        tokenService.
-        return "Valid Reset Password";
+        tokenService.getByPhoneNumber(user.getPhoneNumber());
+        return "Reset";
     }
 
     public String changePassword(ResetPasswordDTO request) {
