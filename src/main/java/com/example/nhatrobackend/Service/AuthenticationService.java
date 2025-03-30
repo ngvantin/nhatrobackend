@@ -83,9 +83,8 @@ public class AuthenticationService {
                 .build();
     }
 
-    public TokenResponse refreshToken(HttpServletRequest request) {
+    public TokenResponse refreshToken(String refreshToken) {
         log.info("---------- refreshToken ----------");
-        final String refreshToken = request.getHeader(REFERER);
 
         if(StringUtils.isBlank(refreshToken)){
             throw new IllegalArgumentException("Token must be not blank");
@@ -105,16 +104,43 @@ public class AuthenticationService {
         token.setAccessToken(accessToken);
         tokenService.save(token);
 
-//        tokenService.save(Token.builder().phoneNumber(user.getPhoneNumber()).accessToken(accessToken).refreshToken(refreshToken).build());
-
-
-
         return TokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .userId(user.getUserId())
                 .build();
     }
+
+//    public TokenResponse refreshToken(HttpServletRequest request) {
+//        log.info("---------- refreshToken ----------");
+//        final String refreshToken = request.getHeader(REFERER);
+//
+//        if(StringUtils.isBlank(refreshToken)){
+//            throw new IllegalArgumentException("Token must be not blank");
+//        }
+//        final String userName = jwtService.extractUsername(refreshToken,REFRESH_TOKEN);
+//        var user = userService.findByPhoneNumber(userName);
+//        if(!jwtService.isValid(refreshToken,REFRESH_TOKEN,user)){
+//            throw new IllegalArgumentException("Not allow access with this token");
+//        }
+//
+//        // create new access token
+//        String accessToken = jwtService.generateToken(user);
+//
+//        log.info("---------- refreshToken create new access token ----------");
+//        // save token to db
+//        Token token = tokenService.getByPhoneNumber(user.getPhoneNumber());
+//        token.setAccessToken(accessToken);
+//        tokenService.save(token);
+//
+////        tokenService.save(Token.builder().phoneNumber(user.getPhoneNumber()).accessToken(accessToken).refreshToken(refreshToken).build());
+//
+//        return TokenResponse.builder()
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
+//                .userId(user.getUserId())
+//                .build();
+//    }
 
 
     public IntrospectResponse introspect (IntrospectRequest request)
