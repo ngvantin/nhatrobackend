@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.request.RefreshTokenRequest;
 import com.example.nhatrobackend.DTO.request.ResetPasswordDTO;
 import com.example.nhatrobackend.DTO.request.SignInRequest;
 import com.example.nhatrobackend.DTO.response.TokenResponse;
@@ -36,8 +37,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ResponseWrapper<TokenResponse>> refresh(HttpServletRequest request){
-        var result =  authenticationService.refreshToken(request);
+    public ResponseEntity<ResponseWrapper<TokenResponse>> refresh(@RequestBody RefreshTokenRequest request){
+        var result =  authenticationService.refreshToken(request.getRefreshToken());
         return ResponseEntity.ok(ResponseWrapper.<TokenResponse>builder()
                 .status("success")
                 .data(result)
@@ -45,13 +46,13 @@ public class AuthenticationController {
                 .build());
     }
 
-//    @PostMapping("/logout")
-//    public ResponseEntity<ResponseWrapper<String>> logout(HttpServletRequest request) {
-//        var result =  authenticationService.logout(request);
-//        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+//    @PostMapping("/refresh")
+//    public ResponseEntity<ResponseWrapper<TokenResponse>> refresh(HttpServletRequest request){
+//        var result =  authenticationService.refreshToken(request);
+//        return ResponseEntity.ok(ResponseWrapper.<TokenResponse>builder()
 //                .status("success")
 //                .data(result)
-//                .message("Logout thành công")
+//                .message("Refresh thành công")
 //                .build());
 //    }
 
@@ -116,42 +117,6 @@ public class AuthenticationController {
                 .build());
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(@RequestBody AuthenticationRequest request){
-//        var result = authenticationService.authenticate(request);
-//                return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
-//                .status("success")
-//                .data(result)
-//                .message("Đăng nhập thành công")
-//                .build());
-//    }
-//
-//    @PostMapping("/login")
-//    public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(
-//            @RequestBody AuthenticationRequest request,
-//            HttpServletResponse response) {
-//        // Gọi service để xử lý xác thực
-//        var result = authenticationService.authenticate(request);
-//
-//        // Tạo cookie để lưu JWT token
-//        Cookie cookie = new Cookie("jwtToken", result.getAccessToken());
-//        cookie.setHttpOnly(true); // Cookie chỉ được gửi qua HTTP, không thể truy cập bằng JavaScript
-//        cookie.setSecure(true);  // Chỉ gửi qua HTTPS
-//        cookie.setPath("/");     // Cookie được gửi kèm với mọi endpoint
-//        cookie.setMaxAge(24 * 60 * 60); // Thời gian sống: 1 ngày
-//
-//        // Thêm cookie vào response
-//        response.addCookie(cookie);
-//
-//        // Trả về response
-//        return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
-//                .status("success")
-//                .data(result)
-//                .message("Đăng nhập thành công")
-//                .build());
-//    }
-
-
     @PostMapping("/introspect")
     public ResponseEntity<ResponseWrapper<IntrospectResponse>> authenticate(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
@@ -210,4 +175,50 @@ public class AuthenticationController {
 //    public ResponseEntity<String> logout(HttpServletRequest request) {
 //        return new ResponseEntity<>(authenticationService.logout(request), OK);
 //    }
+
+    //    @PostMapping("/logout")
+//    public ResponseEntity<ResponseWrapper<String>> logout(HttpServletRequest request) {
+//        var result =  authenticationService.logout(request);
+//        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+//                .status("success")
+//                .data(result)
+//                .message("Logout thành công")
+//                .build());
+//    }
+
+    //    @PostMapping("/login")
+//    public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(@RequestBody AuthenticationRequest request){
+//        var result = authenticationService.authenticate(request);
+//                return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
+//                .status("success")
+//                .data(result)
+//                .message("Đăng nhập thành công")
+//                .build());
+//    }
+//
+//    @PostMapping("/login")
+//    public ResponseEntity<ResponseWrapper<AuthenticationResponse>> login(
+//            @RequestBody AuthenticationRequest request,
+//            HttpServletResponse response) {
+//        // Gọi service để xử lý xác thực
+//        var result = authenticationService.authenticate(request);
+//
+//        // Tạo cookie để lưu JWT token
+//        Cookie cookie = new Cookie("jwtToken", result.getAccessToken());
+//        cookie.setHttpOnly(true); // Cookie chỉ được gửi qua HTTP, không thể truy cập bằng JavaScript
+//        cookie.setSecure(true);  // Chỉ gửi qua HTTPS
+//        cookie.setPath("/");     // Cookie được gửi kèm với mọi endpoint
+//        cookie.setMaxAge(24 * 60 * 60); // Thời gian sống: 1 ngày
+//
+//        // Thêm cookie vào response
+//        response.addCookie(cookie);
+//
+//        // Trả về response
+//        return ResponseEntity.ok(ResponseWrapper.<AuthenticationResponse>builder()
+//                .status("success")
+//                .data(result)
+//                .message("Đăng nhập thành công")
+//                .build());
+//    }
+
 }

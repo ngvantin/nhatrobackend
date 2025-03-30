@@ -99,6 +99,14 @@ public class User implements UserDetails, Serializable {
     @OneToMany(mappedBy = "user")
     private Set<UserHasRole> roles = new HashSet<>();
 
+    // Người dùng này đang theo dõi ai (Following)
+    @OneToMany(mappedBy = "followingUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Follower> following = new HashSet<>();
+
+    // Người dùng này được ai theo dõi (Followers)
+    @OneToMany(mappedBy = "followedUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Follower> followers = new HashSet<>();
+
 
 //    @Override
 //    public String getPassword() {
