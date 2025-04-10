@@ -2,13 +2,11 @@ package com.example.nhatrobackend.Entity;
 
 
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
+import com.example.nhatrobackend.Entity.Field.MessageStatus;
 import com.example.nhatrobackend.Entity.Field.UserStatus;
 import com.example.nhatrobackend.Entity.Field.UserType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
@@ -81,6 +80,10 @@ public class User implements UserDetails, Serializable {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private MessageStatus messageStatus = MessageStatus.OFFLINE;
 
     // Quan hệ 1-N với Post
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
