@@ -9,9 +9,16 @@ import java.util.Optional;
 
 @Repository
 public interface ChatGroupRepository extends JpaRepository<ChatGroup,Long> {
-    Optional<ChatGroup> findBySenderIdAndRecipientId(Long senderId, Long recipientId);
+//    Optional<ChatGroup> findBySenderIdAndRecipientId(Long senderId, Long recipientId);
+//
+////    List<ChatGroup> findAllBySenderId(Long senderId);
+//    List<ChatGroup> findAllBySender_UserId(Long senderId);
+//
+//    Optional<ChatGroup> findBySenderIdOrRecipientId(Long senderId, Long recipientId);
 
-    List<ChatGroup> findAllBySenderId(Long senderId);
+    Optional<ChatGroup> findBySenderUserIdAndRecipientUserId(Long senderId, Long recipientId);
 
-    Optional<ChatGroup> findBySenderIdOrRecipientId(Long senderId, Long recipientId);
+    List<ChatGroup> findAllBySender_UserId(Long userId);
+
+    List<ChatGroup> findAllByRecipient_UserId(Long userId);
 }
