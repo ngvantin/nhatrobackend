@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.ResponseWrapper;
+import com.example.nhatrobackend.DTO.response.ChatGroupResponseDTO;
 import com.example.nhatrobackend.Entity.ChatGroup;
 import com.example.nhatrobackend.Entity.ChatMessage;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
@@ -19,11 +20,12 @@ import java.util.List;
 public class ChatGroupController {
     private final ChatGroupService chatGroupService;
     private final AuthenticationFacade authenticationFacade;
+
     @GetMapping
-    public ResponseEntity<ResponseWrapper<List<ChatGroup>>> findGroupMessages() {
+    public ResponseEntity<ResponseWrapper<List<ChatGroupResponseDTO>>> findGroupMessages() {
         Long senderId = Long.valueOf(authenticationFacade.getCurrentUserId());
-        List<ChatGroup> chatGroups = chatGroupService.findGroupMessages(senderId);
-        return ResponseEntity.ok(ResponseWrapper.<List<ChatGroup>>builder()
+        List<ChatGroupResponseDTO> chatGroups = chatGroupService.findGroupMessages(senderId);
+        return ResponseEntity.ok(ResponseWrapper.<List<ChatGroupResponseDTO>>builder()
                 .status("success")
                 .message("Các người dùng đã từng nhắn tin.")
                 .data(chatGroups)
