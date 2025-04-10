@@ -77,7 +77,7 @@ public class AuthenticationController {
                 .build());
     }
 
-    @PostMapping("/reset-password")
+    @GetMapping("/reset-password")
     public ResponseEntity<ResponseWrapper<String>> resetPassword(@RequestParam String secretKey) {
         var result =  authenticationService.resetPassword(secretKey);
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
