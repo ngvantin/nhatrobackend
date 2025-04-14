@@ -80,7 +80,7 @@ public class MailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
         Context context = new Context(); // Context từ Thymeleaf một template
 
-        String linkConfirm = String.format("%s/api/auth/reset-password?secretKey=%s", serverName, resetToken); // serverName sẽ thay thế placeholder %s đầu tiên
+        String linkConfirm = String.format("%s/reset-password?secretKey=%s", serverName, resetToken); // serverName sẽ thay thế placeholder %s đầu tiên
 
         // lưu trữ các cặp key-value
         Map<String, Object> properties = new HashMap<>();
