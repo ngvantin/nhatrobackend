@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.request.ForgotPasswordRequest;
 import com.example.nhatrobackend.DTO.request.RefreshTokenRequest;
 import com.example.nhatrobackend.DTO.request.ResetPasswordDTO;
 import com.example.nhatrobackend.DTO.request.SignInRequest;
@@ -68,8 +69,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ResponseWrapper<String>> forgotPassword(@RequestBody String email){
-        var result =  authenticationService.forgotPassword(email);
+    public ResponseEntity<ResponseWrapper<String>> forgotPassword(@RequestBody ForgotPasswordRequest request){
+        var result =  authenticationService.forgotPassword(request.getEmail());
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
                 .data(result)
