@@ -32,23 +32,23 @@ public class ChatMessageController {
     private final ChatMessageService chatMessageService;
     private final AuthenticationFacade authenticationFacade;
 
-//
-//    @MessageMapping("/chat")
-//    public void processMessage(@Payload MessageCreateRequest messageCreateRequest) {
-//        ChatMessage savedMsg = chatMessageService.save(messageCreateRequest);
-//        // messagingTemplate: gửi tin nhắn thông qua WebSocket.  ID của người nhận tin,  Endpoint WebSocket mà người nhận đang lắng nghe,
-//        //  ChatNotificationRequest được sử dụng để đóng gói dữ liệu tin nhắn cần gửi đến người nhận qua WebSocket
-//        messagingTemplate.convertAndSendToUser(
-//                messageCreateRequest.getRecipientId().toString(), "/queue/messages",
-//                new ChatNotificationRequest(
-//
-//                        savedMsg.getId(),
-//                        savedMsg.getSenderId(),
-//                        savedMsg.getRecipientId(),
-//                        savedMsg.getContent()
-//                )
-//        );
-//    }
+
+    @MessageMapping("/chat")
+    public void processMessage(@Payload MessageCreateRequest messageCreateRequest) {
+        ChatMessage savedMsg = chatMessageService.save(messageCreateRequest);
+        // messagingTemplate: gửi tin nhắn thông qua WebSocket.  ID của người nhận tin,  Endpoint WebSocket mà người nhận đang lắng nghe,
+        //  ChatNotificationRequest được sử dụng để đóng gói dữ liệu tin nhắn cần gửi đến người nhận qua WebSocket
+        messagingTemplate.convertAndSendToUser(
+                messageCreateRequest.getRecipientId().toString(), "/queue/messages",
+                new ChatNotificationRequest(
+
+                        savedMsg.getMessageId(),
+                        savedMsg.getSender().getUserId(),
+                        savedMsg.getRecipient().getUserId(),
+                        savedMsg.getContent()
+                )
+        );
+    }
 
 
     @GetMapping("/api/messages/{recipientId}")
