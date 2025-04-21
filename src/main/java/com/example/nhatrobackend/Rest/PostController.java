@@ -31,12 +31,18 @@ public class PostController {
     private final AuthenticationFacade authenticationFacade;
     private final UploadImageFileService uploadImageFileService;
     @GetMapping("/user/{userUuid}") // Thêm endpoint mới
-    public ResponseEntity<ResponseWrapper<List<SimilarPostResponse>>> getPostsByUserUuid(
-            @PathVariable String userUuid) {
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getPostsByUserUuid(
+            @PathVariable String userUuid,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<SimilarPostResponse> posts = postService.getPostsByUserUuid(userUuid);
+        Pageable pageable = PageRequest.of(page, size);
 
-        return ResponseEntity.ok(ResponseWrapper.<List<SimilarPostResponse>>builder()
+        Page<PostResponseDTO> posts = postService.getPostsByUserUuid(userUuid, pageable);
+
+//        List<PostResponseDTO> posts = postService.getPostsByUserUuid(userUuid);
+
+        return ResponseEntity.ok(ResponseWrapper.<Page<PostResponseDTO>>builder()
                 .status("success")
                 .data(posts)
                 .message("Các bài đăng của người dùng.")

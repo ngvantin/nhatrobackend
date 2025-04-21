@@ -43,11 +43,9 @@ public class PostServiceImpl implements PostService {
     private final ReportPostRepository reportPostRepository;
 
     @Override
-    public List<SimilarPostResponse> getPostsByUserUuid(String userUuid) {
-        List<Post> posts = postRepository.findByUser_UserUuid(userUuid);
-        return posts.stream()
-                .map(postMapper::toSimilarPostResponse)
-                .collect(Collectors.toList());
+    public Page<PostResponseDTO> getPostsByUserUuid(String userUuid, Pageable pageable) {
+        Page<Post> postPage = postRepository.findByUser_UserUuid(userUuid, pageable);
+        return postPage.map(postMapper::toPostResponseDTO);
     }
     @Override
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {

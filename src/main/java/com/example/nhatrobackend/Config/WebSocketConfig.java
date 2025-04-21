@@ -13,6 +13,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 import java.util.List;
 
+// Message broker là trung gian xử lý và định tuyến các tin nhắn trong ứng dụng WebSocket. Nó quyết định cách tin nhắn được gửi đến các client khác nhau.
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
