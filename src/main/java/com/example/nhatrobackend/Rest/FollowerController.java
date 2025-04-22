@@ -17,30 +17,30 @@ public class FollowerController {
     private final FollowerService followerService;
     private final AuthenticationFacade authenticationFacade;
 
-    @PostMapping("/{followedUserId}/follow")
-    public ResponseEntity<ResponseWrapper<String>> followUser(@PathVariable Integer followedUserId) {
+    @PostMapping("/{followedUserUuid}/follow")
+    public ResponseEntity<ResponseWrapper<String>> followUser(@PathVariable String followedUserUuid) {
         Integer currentUserId = authenticationFacade.getCurrentUserId();
-        String message = followerService.followUser(currentUserId, followedUserId);
+        String message = followerService.followUser(currentUserId, followedUserUuid);
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
                 .message(message)
                 .build());
     }
 
-    @DeleteMapping("/{followedUserId}/unfollow")
-    public ResponseEntity<ResponseWrapper<String>> unfollowUser(@PathVariable Integer followedUserId) {
+    @DeleteMapping("/{followedUserUuid}/unfollow")
+    public ResponseEntity<ResponseWrapper<String>> unfollowUser(@PathVariable String followedUserUuid) {
         Integer currentUserId = authenticationFacade.getCurrentUserId();
-        String message = followerService.unfollowUser(currentUserId, followedUserId);
+        String message = followerService.unfollowUser(currentUserId, followedUserUuid);
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status("success")
                 .message(message)
                 .build());
     }
 
-    @GetMapping("/{followedUserId}/is-following")
-    public ResponseEntity<ResponseWrapper<Boolean>> isFollowing(@PathVariable Integer followedUserId) {
+    @GetMapping("/{followedUserUuid}/is-following")
+    public ResponseEntity<ResponseWrapper<Boolean>> isFollowing(@PathVariable String followedUserUuid) {
         Integer currentUserId = authenticationFacade.getCurrentUserId();
-        boolean isFollowing = followerService.isFollowing(currentUserId, followedUserId);
+        boolean isFollowing = followerService.isFollowing(currentUserId, followedUserUuid);
         return ResponseEntity.ok(ResponseWrapper.<Boolean>builder()
                 .status("success")
                 .data(isFollowing)
