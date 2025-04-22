@@ -19,13 +19,14 @@ public class FollowerServiceImpl implements FollowerService {
 
     @Transactional
     @Override
-    public String followUser(Integer followingUserId, Integer followedUserId) {
-        if (followingUserId.equals(followedUserId)) {
-            throw new IllegalArgumentException("Không thể tự theo dõi chính mình.");
-        }
+    public String followUser(Integer followingUserId, String followedUserUuid) {
+
 
         User followingUser = userService.findByUserId(followingUserId);
-        User followedUser = userService.findByUserId(followedUserId);
+        User followedUser = userService.findByUserUuid(followedUserUuid);
+        if (followingUser.equals(followedUser)) {
+            throw new IllegalArgumentException("Không thể tự theo dõi chính mình.");
+        }
 
         if (!followerRepository.existsByFollowingUserAndFollowedUser(followingUser, followedUser)) {
             Follower follower = new Follower();
@@ -43,9 +44,9 @@ public class FollowerServiceImpl implements FollowerService {
 
     @Transactional
     @Override
-    public String unfollowUser(Integer followingUserId, Integer followedUserId) {
+    public String unfollowUser(Integer followingUserId, String followedUserUuid) {
         User followingUser = userService.findByUserId(followingUserId);
-        User followedUser = userService.findByUserId(followedUserId);
+        User followedUser = userService.findByUserUuid(followedUserUuid);
 
         if (followerRepository.existsByFollowingUserAndFollowedUser(followingUser, followedUser)) {
             followerRepository.deleteByFollowingUserAndFollowedUser(followingUser, followedUser);
@@ -59,9 +60,9 @@ public class FollowerServiceImpl implements FollowerService {
     }
 
     @Override
-    public boolean isFollowing(Integer followingUserId, Integer followedUserId) {
+    public boolean isFollowing(Integer followingUserId, String followedUserUuid) {
         User followingUser = userService.findByUserId(followingUserId);
-        User followedUser = userService.findByUserId(followedUserId);
+        User followedUser = userService.findByUserUuid(followedUserUuid);
         return followerRepository.existsByFollowingUserAndFollowedUser(followingUser, followedUser);
     }
 }
