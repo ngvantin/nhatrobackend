@@ -16,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -60,6 +57,24 @@ public class ChatMessageController {
                 .status("success")
                 .message("Các đoạn chat của 2 người dùng.")
                 .data(messageList)
+                .build());
+    }
+
+    @PostMapping("api/chat")
+    public ResponseEntity<ResponseWrapper<ChatNotificationRequest>> sendMessage(
+            @RequestBody MessageCreateRequest messageCreateRequest) {
+        ChatMessage savedMsg = chatMessageService.save(messageCreateRequest);
+        ChatNotificationRequest chatNotificationRequest= new ChatNotificationRequest(
+
+                savedMsg.getMessageId(),
+                savedMsg.getSender().getUserId(),
+                savedMsg.getRecipient().getUserId(),
+                savedMsg.getContent()
+        );
+        return ResponseEntity.ok(ResponseWrapper.<ChatNotificationRequest>builder()
+                .status("success")
+                .message("Tin nhắn đã được gửi.")
+                .data(chatNotificationRequest)
                 .build());
     }
 }
