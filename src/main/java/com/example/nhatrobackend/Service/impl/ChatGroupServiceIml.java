@@ -11,8 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,30 +25,61 @@ public class ChatGroupServiceIml implements ChatGroupService {
 
     @Override
     public Optional<String> getChatRoomId(Long senderId, Long recipientId, boolean createNewRoomIfNotExists) {
-        // Tìm kiếm ChatGroup dựa trên đối tượng User thay vì chỉ ID
-        Optional<ChatGroup> existingChatGroup = chatGroupRepository.findBySenderUserIdAndRecipientUserId(senderId, recipientId);
+        // Tìm kiếm ChatGroup theo cả hai hướng (sender-recipient hoặc recipient-sender)
+        Optional<ChatGroup> existingChatGroup = chatGroupRepository.findBySenderUserIdAndRecipientUserId(senderId, recipientId)
+                .or(() -> chatGroupRepository.findBySenderUserIdAndRecipientUserId(recipientId, senderId));
 
-        return existingChatGroup.map(ChatGroup::getChatGroupId).map(String::valueOf) // Sử dụng chatGroupId làm ID
-                .or(() -> {
-                    if (createNewRoomIfNotExists) {
-                        // Tìm User objects từ senderId và recipientId
-                        User sender = userService.findByUserId(Math.toIntExact(senderId));
-                        User recipient = userService.findByUserId(Math.toIntExact(recipientId));
+        if (existingChatGroup.isPresent()) {
+            return existingChatGroup.map(ChatGroup::getChatGroupId).map(String::valueOf);
+        } else {
+            if (createNewRoomIfNotExists) {
+                // Tìm User objects từ senderId và recipientId
+                User sender = userService.findByUserId(Math.toIntExact(senderId));
+                User recipient = userService.findByUserId(Math.toIntExact(recipientId));
 
-                        // Tạo một ChatGroup mới
-                        ChatGroup newChatGroup = ChatGroup.builder()
-                                .sender(sender)
-                                .recipient(recipient)
-                                .createdAt(LocalDateTime.now())
-                                .build();
+                // Tạo một ChatGroup mới
+                ChatGroup newChatGroup = ChatGroup.builder()
+                        .sender(sender)
+                        .recipient(recipient)
+                        .createdAt(LocalDateTime.now())
+                        .build();
 
-                        // Lưu ChatGroup mới và trả về ID của nó
-                        ChatGroup savedChatGroup = chatGroupRepository.save(newChatGroup);
-                        return Optional.of(String.valueOf(savedChatGroup.getChatGroupId()));
-                    }
-                    return Optional.empty();
-                });
+                // Lưu ChatGroup mới và trả về ID của nó
+                ChatGroup savedChatGroup = chatGroupRepository.save(newChatGroup);
+                return Optional.of(String.valueOf(savedChatGroup.getChatGroupId()));
+            } else {
+                return Optional.empty();
+            }
+        }
     }
+//
+//    @Override
+//    public Optional<String> getChatRoomId(Long senderId, Long recipientId, boolean createNewRoomIfNotExists) {
+//        // Tìm kiếm ChatGroup theo cả hai hướng (sender-recipient hoặc recipient-sender)
+//        Optional<ChatGroup> existingChatGroup = chatGroupRepository.findBySenderUserIdAndRecipientUserId(senderId, recipientId)
+//                .or(() -> chatGroupRepository.findBySenderUserIdAndRecipientUserId(recipientId, senderId));
+//
+//        return existingChatGroup.map(ChatGroup::getChatGroupId).map(String::valueOf) // Sử dụng chatGroupId làm ID
+//                .or(() -> {
+//                    if (createNewRoomIfNotExists) {
+//                        // Tìm User objects từ senderId và recipientId
+//                        User sender = userService.findByUserId(Math.toIntExact(senderId));
+//                        User recipient = userService.findByUserId(Math.toIntExact(recipientId));
+//
+//                        // Tạo một ChatGroup mới
+//                        ChatGroup newChatGroup = ChatGroup.builder()
+//                                .sender(sender)
+//                                .recipient(recipient)
+//                                .createdAt(LocalDateTime.now())
+//                                .build();
+//
+//                        // Lưu ChatGroup mới và trả về ID của nó
+//                        ChatGroup savedChatGroup = chatGroupRepository.save(newChatGroup);
+//                        return Optional.of(String.valueOf(savedChatGroup.getChatGroupId()));
+//                    }
+//                    return Optional.empty();
+//                });
+//    }
 
     @Override
     public Optional<ChatGroup> getChatRoom(Long senderId, Long recipientId, boolean createNewRoomIfNotExists) {
@@ -142,32 +172,44 @@ public class ChatGroupServiceIml implements ChatGroupService {
 //                })
 //                .collect(Collectors.toList());
 //    }
+@Override
+public List<ChatGroupResponseDTO> findGroupMessages(Long userId) {
+    // Lấy danh sách các ChatGroup mà userId là người gửi hoặc người nhận
+    List<ChatGroup> chatGroups = chatGroupRepository.findBySenderUserIdOrRecipientUserId(userId, userId);
 
-    @Override
-    public List<ChatGroupResponseDTO> findGroupMessages(Long userId) {
-        // Lấy tất cả các ChatGroup mà userId là sender hoặc recipient
-        List<ChatGroup> senderGroups = chatGroupRepository.findAllBySender_UserId(userId);
-        List<ChatGroup> recipientGroups = chatGroupRepository.findAllByRecipient_UserId(userId);
+    // Sử dụng Set để lưu trữ các User đã từng nhắn tin (tránh trùng lặp)
+    Set<Long> interactedUserIds = new HashSet<>();
 
-        // Kết hợp và loại bỏ trùng lặp (dựa trên cặp sender và recipient)
-        return Stream.concat(senderGroups.stream(), recipientGroups.stream())
-                .distinct() // Sử dụng equals() và hashCode() trong ChatGroup để loại bỏ trùng lặp
-                .map(chatGroup -> {
-                    User recipient;
-                    if (chatGroup.getSender().getUserId().equals(userId)) {
-                        recipient = chatGroup.getRecipient();
-                    } else {
-                        recipient = chatGroup.getSender();
-                    }
-                    ChatGroupResponseDTO dto = chatGroupMapper.toChatGroupResponseDTO(chatGroup);
-                    dto.setRecipientId(recipient.getUserId().longValue());
-                    dto.setFullName(recipient.getFullName());
-                    dto.setProfilePicture(recipient.getProfilePicture());
-                     dto.setMessageStatus(recipient.getMessageStatus()); // Nếu cần
-                    return dto;
-                })
-                .collect(Collectors.toList());
+    // Duyệt qua danh sách ChatGroup và thu thập ID của người dùng khác
+    for (ChatGroup chatGroup : chatGroups) {
+        if (chatGroup.getSender().getUserId().longValue() == userId) {
+            interactedUserIds.add(chatGroup.getRecipient().getUserId().longValue());
+        } else if (chatGroup.getRecipient().getUserId().longValue() == userId) {
+            interactedUserIds.add(chatGroup.getSender().getUserId().longValue());
+        }
     }
 
+    // Loại bỏ chính userId khỏi danh sách tương tác (nếu có)
+    interactedUserIds.remove(userId);
+
+    // Lấy thông tin chi tiết của các User đã tương tác và map sang DTO
+    List<ChatGroupResponseDTO> responseList = new ArrayList<>();
+    for (Long interactedUserId : interactedUserIds) {
+        User user = userService.findByUserId(Math.toIntExact(interactedUserId));
+        if (user != null) {
+            responseList.add(ChatGroupResponseDTO.builder()
+                    .id(interactedUserId) // Sử dụng userId của người đã tương tác làm ID trong DTO
+                    .recipientId(user.getUserId().longValue())
+                    .fullName(user.getFullName())
+                    .profilePicture(user.getProfilePicture())
+                    // Bạn có thể cần logic phức tạp hơn để lấy MessageStatus
+                    // Hiện tại, chúng ta có thể để mặc định hoặc lấy từ User entity
+                    .messageStatus(user.getMessageStatus())
+                    .build());
+        }
+    }
+
+    return responseList;
+}
 }
 

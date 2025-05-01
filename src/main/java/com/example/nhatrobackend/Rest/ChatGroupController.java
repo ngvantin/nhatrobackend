@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,13 +24,33 @@ public class ChatGroupController {
 
     @GetMapping
     public ResponseEntity<ResponseWrapper<List<ChatGroupResponseDTO>>> findGroupMessages() {
-        Long senderId = Long.valueOf(authenticationFacade.getCurrentUserId());
-        List<ChatGroupResponseDTO> chatGroups = chatGroupService.findGroupMessages(senderId);
+        Long userId = Long.valueOf(authenticationFacade.getCurrentUserId());
+        List<ChatGroupResponseDTO> chatGroups = chatGroupService.findGroupMessages(userId);
         return ResponseEntity.ok(ResponseWrapper.<List<ChatGroupResponseDTO>>builder()
                 .status("success")
                 .message("Các người dùng đã từng nhắn tin.")
                 .data(chatGroups)
                 .build());
+    }
+
+
+    @GetMapping("/room/{recipientId}")
+    public ResponseEntity<ResponseWrapper<String>> getChatRoomId(
+            @PathVariable Long recipientId,
+            @RequestParam(value = "createIfNotExist", defaultValue = "true") boolean createIfNotExist) {
+        Long senderId = Long.valueOf(authenticationFacade.getCurrentUserId());
+        Optional<String> chatRoomIdOptional = chatGroupService.getChatRoomId(senderId, recipientId, createIfNotExist);
+
+        return chatRoomIdOptional.map(chatRoomId -> ResponseEntity.ok(ResponseWrapper.<String>builder()
+                        .status("success")
+                        .message("Lấy ID phòng chat thành công.")
+                        .data(chatRoomId)
+                        .build()))
+                .orElseGet(() -> ResponseEntity.ok(ResponseWrapper.<String>builder()
+                        .status("success")
+                        .message("Không tìm thấy phòng chat.")
+                        .data(null) // Hoặc có thể trả về một giá trị khác tùy theo yêu cầu
+                        .build()));
     }
 }
 

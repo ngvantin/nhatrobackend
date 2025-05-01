@@ -21,4 +21,7 @@ public interface ChatGroupRepository extends JpaRepository<ChatGroup,Long> {
     List<ChatGroup> findAllBySender_UserId(Long userId);
 
     List<ChatGroup> findAllByRecipient_UserId(Long userId);
+
+    List<ChatGroup> findBySenderUserIdOrRecipientUserId(Long senderId, Long recipientId);
+
 }
