@@ -35,4 +35,6 @@ public interface UserService {
     Integer saveUser(User user);
     Page<UserLandlordResponse> getApprovedLandlords(Pageable pageable, String loggedInUserUuid);
     User findByUserId(Integer userId);
+
+    User save(User user);
 }
