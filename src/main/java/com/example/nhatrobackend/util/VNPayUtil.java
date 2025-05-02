@@ -6,8 +6,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class VNPayUtil {
@@ -66,5 +65,25 @@ public class VNPayUtil {
                                 URLEncoder.encode(entry.getValue()
                                 , StandardCharsets.US_ASCII))
                 .collect(Collectors.joining("&"));
+    }
+
+    public static String hashAllFields(Map<String, String> fields, String secretKey) {
+        List<String> fieldNames = new ArrayList<>(fields.keySet());
+        Collections.sort(fieldNames);
+        StringBuilder hashData = new StringBuilder();
+        Iterator<String> itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = itr.next();
+            String fieldValue = fields.get(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0) && !fieldName.equals("vnp_SecureHash")) {
+                hashData.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
+                hashData.append("=");
+                hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                if (itr.hasNext()) {
+                    hashData.append("&");
+                }
+            }
+        }
+        return hmacSHA512(secretKey, hashData.toString());
     }
 }
