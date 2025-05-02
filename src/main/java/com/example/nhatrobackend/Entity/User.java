@@ -85,6 +85,9 @@ public class User implements UserDetails, Serializable {
     @Enumerated(EnumType.STRING)
     private MessageStatus messageStatus = MessageStatus.OFFLINE;
 
+    @Column(name = "post_count", nullable = false, columnDefinition = "integer default 0")
+    private Integer postCount;
+
     // Quan hệ 1-N với Post
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Post> post;
