@@ -25,14 +25,20 @@ public class PaymentController {
                 .message("Thanh toán VNPAY")
                 .build());
     }
-//
-//    @GetMapping("/vn-pay-callback")
-//    public ResponseObject<PaymentDTO.VNPayResponse> payCallbackHandler(HttpServletRequest request) {
-//        String status = request.getParameter("vnp_ResponseCode");
-//        if (status.equals("00")) {
-//            return new ResponseObject<>(HttpStatus.OK, "Success", new PaymentDTO.VNPayResponse("00", "Success", ""));
-//        } else {
-//            return new ResponseObject<>(HttpStatus.BAD_REQUEST, "Failed", null);
-//        }
-//    }
+
+    @GetMapping("/vn-pay-callback")
+    public  ResponseEntity<ResponseWrapper<VNPayResponse>> payCallbackHandler(HttpServletRequest request) {
+        String status = request.getParameter("vnp_ResponseCode");
+        if (status.equals("00")) {
+            return ResponseEntity.ok(ResponseWrapper.<VNPayResponse>builder()
+                    .status("success")
+                    .message("Thanh toán VNPAY")
+                    .build());
+        } else {
+            return ResponseEntity.ok(ResponseWrapper.<VNPayResponse>builder()
+                    .status("fail")
+                    .message("Thanh toán VNPAY")
+                    .build());
+        }
+    }
 }
