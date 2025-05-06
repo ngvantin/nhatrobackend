@@ -30,6 +30,8 @@ public class PaymentController {
                 .build());
     }
 
+
+
     @GetMapping("/vn-pay-callback")
     public ResponseEntity<ResponseWrapper<String>> payCallbackHandler(HttpServletRequest request) {
         String result = paymentService.processVnPayCallback(request);
@@ -56,19 +58,4 @@ public class PaymentController {
                     .build());
         };
     }
-//    @GetMapping("/vn-pay-callback")
-//    public  ResponseEntity<ResponseWrapper<VNPayResponse>> payCallbackHandler(HttpServletRequest request) {
-//        String status = request.getParameter("vnp_ResponseCode");
-//        if (status.equals("00")) {
-//            return ResponseEntity.ok(ResponseWrapper.<VNPayResponse>builder()
-//                    .status("success")
-//                    .message("Thanh toán VNPAY")
-//                    .build());
-//        } else {
-//            return ResponseEntity.ok(ResponseWrapper.<VNPayResponse>builder()
-//                    .status("fail")
-//                    .message("Thanh toán VNPAY")
-//                    .build());
-//        }
-//    }
 }
