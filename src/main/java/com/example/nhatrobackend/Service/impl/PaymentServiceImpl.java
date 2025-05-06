@@ -29,19 +29,44 @@ public class PaymentServiceImpl implements PaymentService {
             300000L, 20,
             700000L, 50
     );
+//    @Override
+//    public VNPayResponse createVnPayPayment(PaymentRequest paymentRequest, HttpServletRequest request,Integer currentUserId) {
+//        long amount = paymentRequest.getAmount() * 100L;
+//        String bankCode = paymentRequest.getBankCode();
+//        Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
+//        vnpParamsMap.put("vnp_Amount", String.valueOf(amount));
+//        if (bankCode != null && !bankCode.isEmpty()) {
+//            vnpParamsMap.put("vnp_BankCode", bankCode);
+//        }
+//        vnpParamsMap.put("vnp_IpAddr", VNPayUtil.getIpAddress(request));
+//        vnpParamsMap.put("vnp_OrderInfo", "Mua " + PAYMENT_PACKAGES.getOrDefault(paymentRequest.getAmount().longValue(), 0) + " luot dang bai - UserID: " + currentUserId);
+//
+//        //build query url
+//        String queryUrl = VNPayUtil.getPaymentURL(vnpParamsMap, true);
+//        String hashData = VNPayUtil.getPaymentURL(vnpParamsMap, false);
+//        String vnpSecureHash = VNPayUtil.hmacSHA512(vnPayConfig.getSecretKey(), hashData);
+//        queryUrl += "&vnp_SecureHash=" + vnpSecureHash;
+//        String paymentUrl = vnPayConfig.getVnp_PayUrl() + "?" + queryUrl;
+//        return VNPayResponse.builder()
+//                .code("ok")
+//                .message("success")
+//                .paymentUrl(paymentUrl).build();
+//    }
+
     @Override
-    public VNPayResponse createVnPayPayment(PaymentRequest paymentRequest, HttpServletRequest request,Integer currentUserId) {
+    public VNPayResponse createVnPayPayment(PaymentRequest paymentRequest, HttpServletRequest request, Integer currentUserId) {
         long amount = paymentRequest.getAmount() * 100L;
         String bankCode = paymentRequest.getBankCode();
         Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
         vnpParamsMap.put("vnp_Amount", String.valueOf(amount));
+        // KHÔNG THÊM vnp_BankCode VÔ ĐIỀU KIỆN
         if (bankCode != null && !bankCode.isEmpty()) {
             vnpParamsMap.put("vnp_BankCode", bankCode);
         }
         vnpParamsMap.put("vnp_IpAddr", VNPayUtil.getIpAddress(request));
         vnpParamsMap.put("vnp_OrderInfo", "Mua " + PAYMENT_PACKAGES.getOrDefault(paymentRequest.getAmount().longValue(), 0) + " luot dang bai - UserID: " + currentUserId);
 
-        //build query url
+        // build query url
         String queryUrl = VNPayUtil.getPaymentURL(vnpParamsMap, true);
         String hashData = VNPayUtil.getPaymentURL(vnpParamsMap, false);
         String vnpSecureHash = VNPayUtil.hmacSHA512(vnPayConfig.getSecretKey(), hashData);
