@@ -134,7 +134,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .paymentAmount(amount * 100)
                 .transactionCode(transactionCode)
                 .responseCode("00")
-                .orderInfo(orderInfo)
+                .orderInfo("Mua "+ purchasedPosts+ " lượt đăng bài")
                 .paymentTime(LocalDateTime.now())
                 .build();
         paymentHistoryRepository.save(paymentHistory);
