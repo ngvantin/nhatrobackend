@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.response.PostStatsResponse;
 import com.example.nhatrobackend.DTO.response.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.*;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
@@ -18,17 +19,20 @@ import com.example.nhatrobackend.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
@@ -353,5 +357,88 @@ public class PostServiceImpl implements PostService {
                 .map(postMapper::toSimilarPostResponse) // Sử dụng MapStruct
                 .collect(Collectors.toList());
     }
+//
+//    @Override
+//    public PostStatsResponse getPostStatsByYear(int year) {
+//        List<Post> approvedPosts = postRepository.findByYearAndStatus(year, PostStatus.APPROVED);
+//        List<Post> rejectedPosts = postRepository.findByYearAndStatus(year, PostStatus.REJECTED);
+//
+//        List<Integer> approvedCounts = new ArrayList<>(List.of(new Integer[12]));
+//        List<Integer> rejectedCounts = new ArrayList<>(List.of(new Integer[12]));
+//        for (Post post : approvedPosts) {
+//            int month = post.getCreatedAt().getMonthValue() - 1; // Month value is 1-based
+//            approvedCounts.set(month, approvedCounts.get(month) == null ? 1 : approvedCounts.get(month) + 1);
+//        }
+//
+//        for (Post post : rejectedPosts) {
+//            int month = post.getCreatedAt().getMonthValue() - 1; // Month value is 1-based
+//            rejectedCounts.set(month, rejectedCounts.get(month) == null ? 1 : rejectedCounts.get(month) + 1);
+//        }
+//
+//        // Initialize null values to 0 for proper JSON serialization
+//        for (int i = 0; i < 12; i++) {
+//            if (approvedCounts.get(i) == null) {
+//                approvedCounts.set(i, 0);
+//            }
+//            if (rejectedCounts.get(i) == null) {
+//                rejectedCounts.set(i, 0);
+//            }
+//        }
+//
+//        PostStatsResponse response = new PostStatsResponse();
+//        response.setApprovedCounts(approvedCounts);
+//        response.setRejectedCounts(rejectedCounts);
+//
+//        return response;
+//    }
 
+    @Override
+    public PostStatsResponse getPostStatsByYear(int year) {
+        log.info("Fetching approved posts for year: {}", year);
+        List<Post> approvedPosts = postRepository.findByYearAndStatus(year, PostStatus.APPROVED);
+        log.info("Found {} approved posts.", approvedPosts.size());
+
+        log.info("Fetching rejected posts for year: {}", year);
+        List<Post> rejectedPosts = postRepository.findByYearAndStatus(year, PostStatus.REJECTED);
+        log.info("Found {} rejected posts.", rejectedPosts.size());
+
+        List<Integer> approvedCounts = new ArrayList<>(Collections.nCopies(12, 0));
+        List<Integer> rejectedCounts = new ArrayList<>(Collections.nCopies(12, 0));
+        log.info("Hi");
+        for (Post post : approvedPosts) {
+            log.info("Processing approved post created at: {}", post.getCreatedAt());
+            if (post.getCreatedAt() != null) {
+                int month = post.getCreatedAt().getMonthValue() - 1;
+                approvedCounts.set(month, approvedCounts.get(month) == null ? 1 : approvedCounts.get(month) + 1);
+            } else {
+                log.warn("Approved post has null createdAt!");
+            }
+        }
+
+        for (Post post : rejectedPosts) {
+            log.info("Processing rejected post created at: {}", post.getCreatedAt());
+            if (post.getCreatedAt() != null) {
+                int month = post.getCreatedAt().getMonthValue() - 1;
+                rejectedCounts.set(month, rejectedCounts.get(month) == null ? 1 : rejectedCounts.get(month) + 1);
+            } else {
+                log.warn("Rejected post has null createdAt!");
+            }
+        }
+
+        for (int i = 0; i < 12; i++) {
+            if (approvedCounts.get(i) == null) {
+                approvedCounts.set(i, 0);
+            }
+            if (rejectedCounts.get(i) == null) {
+                rejectedCounts.set(i, 0);
+            }
+        }
+
+        PostStatsResponse response = new PostStatsResponse();
+        response.setApprovedCounts(approvedCounts);
+        response.setRejectedCounts(rejectedCounts);
+
+        log.info("Returning PostStatsResponse: {}", response);
+        return response;
+    }
 }

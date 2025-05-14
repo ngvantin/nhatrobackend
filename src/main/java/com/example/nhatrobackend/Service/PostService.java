@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.response.PostStatsResponse;
 import com.example.nhatrobackend.DTO.response.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
@@ -33,4 +34,5 @@ public interface PostService {
     Page<PostAdminDTO> getAllReportedPosts(Pageable pageable);
     public List<SimilarPostResponse> getSimilarPosts(String postUuid);
     Page<PostResponseDTO> getPostsByUserUuid(String userUuid, Pageable pageable);
+    PostStatsResponse getPostStatsByYear(int year);
 }

@@ -65,4 +65,7 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
     List<Post> findByRoom_CityAndRoom_DistrictAndRoom_WardOrderByCreatedAtAsc(String city, String district, String ward);
 
     Page<Post> findByUser_UserUuid(String userUuid, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE YEAR(p.createdAt) = :year AND p.status = :status")
+    List<Post> findByYearAndStatus(@Param("year") int year, @Param("status") PostStatus status);
 }

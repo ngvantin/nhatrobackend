@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.response.PostStatsResponse;
 import com.example.nhatrobackend.DTO.response.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
@@ -451,6 +452,16 @@ public class PostController {
                 .status("success")
                 .data(postDetail)
                 .message("Thông tin bài đăng")
+                .build());
+    }
+
+    @GetMapping("/year/{year}")
+    public ResponseEntity<ResponseWrapper<PostStatsResponse>> getPostStatsByYear(@PathVariable int year) {
+        PostStatsResponse stats = postService.getPostStatsByYear(year);
+        return ResponseEntity.ok(ResponseWrapper.<PostStatsResponse>builder()
+                .status("success")
+                .data(stats)
+                .message("Thống kê số lượng bài viết theo trạng thái trong năm.")
                 .build());
     }
 
