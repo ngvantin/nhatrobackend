@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.util.UriComponentsBuilder;
+import java.net.URI;
 @RestController
 @RequestMapping("/api/v1/payment")
 @RequiredArgsConstructor
@@ -33,29 +34,20 @@ public class PaymentController {
 
 
     @GetMapping("/vn-pay-callback")
-    public ResponseEntity<ResponseWrapper<String>> payCallbackHandler(HttpServletRequest request) {
+    public ResponseEntity<Void> payCallbackHandler(HttpServletRequest request) {
+        // Xử lý callback từ VNPay
         String result = paymentService.processVnPayCallback(request);
         String[] parts = result.split("\\|");
         String status = parts[0];
         String message = parts.length > 1 ? parts[1] : "";
 
-        return switch (status) {
-            case "success" -> ResponseEntity.ok(ResponseWrapper.<String>builder()
-                    .status("success")
-                    .message("Thanh toán thành công. " + message)
-                    .build());
-            case "fail" -> ResponseEntity.ok(ResponseWrapper.<String>builder()
-                    .status("fail")
-                    .message("Thanh toán thất bại. " + message)
-                    .build());
-            case "error" -> ResponseEntity.badRequest().body(ResponseWrapper.<String>builder()
-                    .status("error")
-                    .message(message)
-                    .build());
-            default -> ResponseEntity.internalServerError().body(ResponseWrapper.<String>builder()
-                    .status("error")
-                    .message("Lỗi không xác định trong quá trình xử lý callback.")
-                    .build());
-        };
+        // Tạo URL chuyển hướng tới frontend với các tham số status và message
+        String redirectUrl = UriComponentsBuilder.fromHttpUrl("http://localhost:5173/users/payment-result")
+                .queryParam("status", status)
+                .queryParam("message", message)
+                .toUriString();
+
+        // Chuyển hướng người dùng tới frontend
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
     }
 }

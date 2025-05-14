@@ -32,6 +32,8 @@ public class ChatMessageController {
 
     @MessageMapping("/chat")
     public void processMessage(@Payload MessageCreateRequest messageCreateRequest) {
+        log.info("🔥 Nhận tin nhắn từ client qua WebSocket: {}", messageCreateRequest.getContent());
+
         ChatMessage savedMsg = chatMessageService.save(messageCreateRequest);
         // messagingTemplate: gửi tin nhắn thông qua WebSocket.  ID của người nhận tin,  Endpoint WebSocket mà người nhận đang lắng nghe,
         //  ChatNotificationRequest được sử dụng để đóng gói dữ liệu tin nhắn cần gửi đến người nhận qua WebSocket
