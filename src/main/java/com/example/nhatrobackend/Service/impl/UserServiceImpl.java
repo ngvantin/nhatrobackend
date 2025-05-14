@@ -4,7 +4,9 @@ import com.example.nhatrobackend.DTO.*;
 //import com.example.nhatrobackend.Entity.Account;
 import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
 import com.example.nhatrobackend.DTO.response.UserProfileDTO;
+import com.example.nhatrobackend.DTO.response.UserStatsResponse;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
+import com.example.nhatrobackend.Entity.Field.UserType;
 import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.UserMapper;
 //import com.example.nhatrobackend.Responsitory.AccountRepository;
@@ -291,5 +293,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         return userRepository.save(user);
+    }
+
+    @Override
+    public UserStatsResponse getUserTypeCounts() {
+        long landlordCount = userRepository.countByType(UserType.LANDLORD);
+        long tenantCount = userRepository.countByType(UserType.TENANT);
+        long totalLandlordTenant = userRepository.countAllLandlordAndTenant();
+
+        UserStatsResponse response = new UserStatsResponse();
+        response.setLandlordCount(landlordCount);
+        response.setTenantCount(tenantCount);
+        response.setTotalLandlordTenant(totalLandlordTenant);
+
+        return response;
     }
 }

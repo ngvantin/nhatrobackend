@@ -3,6 +3,7 @@ package com.example.nhatrobackend.Rest;
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
 import com.example.nhatrobackend.DTO.response.UserProfileDTO;
+import com.example.nhatrobackend.DTO.response.UserStatsResponse;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.UserService;
@@ -284,6 +285,16 @@ public class UserController {
         Page<UserLandlordResponse> landlords = userService.getApprovedLandlords(pageable, loggedInUserUuid); // Truyền loggedInUserUuid vào service
 
         return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách chủ trọ đã được phê duyệt thành công", landlords));
+    }
+
+    @GetMapping("/type-counts")
+    public ResponseEntity<ResponseWrapper<UserStatsResponse>> getUserTypeCounts() {
+        UserStatsResponse stats = userService.getUserTypeCounts();
+        return ResponseEntity.ok(ResponseWrapper.<UserStatsResponse>builder()
+                .status("success")
+                .data(stats)
+                .message("Thống kê số lượng người dùng theo loại.")
+                .build());
     }
 }
 

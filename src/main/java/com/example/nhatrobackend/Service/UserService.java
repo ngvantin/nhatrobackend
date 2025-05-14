@@ -3,6 +3,7 @@ package com.example.nhatrobackend.Service;
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
 import com.example.nhatrobackend.DTO.response.UserProfileDTO;
+import com.example.nhatrobackend.DTO.response.UserStatsResponse;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
 import com.example.nhatrobackend.Entity.User;
 import org.springframework.data.domain.Page;
@@ -37,4 +38,5 @@ public interface UserService {
     User findByUserId(Integer userId);
 
     User save(User user);
+    UserStatsResponse getUserTypeCounts();
 }
