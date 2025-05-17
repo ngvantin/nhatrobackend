@@ -1,8 +1,10 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+
 import com.example.nhatrobackend.DTO.response.PostStatsResponse;
 import com.example.nhatrobackend.DTO.response.SimilarPostResponse;
+import com.example.nhatrobackend.Entity.Field.EventType;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
@@ -336,7 +338,11 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-
+//    @SendNotification(
+//            templateId = "post_approval",
+//            type = EventType.POST_APPROVED,
+//            priority = NotificationEvent.Priority.HIGH
+//    )
     @PutMapping("/admin/approve/{postId}")
     public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> approvePost(@PathVariable int postId) {
         // Duyệt bài viết
