@@ -15,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDetailDTO {
+    private Integer userId;
      private String userUuid;
     private String fullName;
     private String profilePicture;

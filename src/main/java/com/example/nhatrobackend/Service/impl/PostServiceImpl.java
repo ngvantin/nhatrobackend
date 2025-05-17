@@ -1,11 +1,14 @@
 package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.response.NotificationResponse;
 import com.example.nhatrobackend.DTO.response.PostStatsResponse;
 import com.example.nhatrobackend.DTO.response.SimilarPostResponse;
 import com.example.nhatrobackend.Entity.*;
+import com.example.nhatrobackend.Entity.Field.EventType;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
+import com.example.nhatrobackend.Entity.Field.Status;
 import com.example.nhatrobackend.Mapper.PostImageMapper;
 import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Mapper.RoomMapper;
@@ -13,6 +16,7 @@ import com.example.nhatrobackend.Mapper.UserMapper;
 import com.example.nhatrobackend.Responsitory.FavoritePostRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.ReportPostRepository;
+import com.example.nhatrobackend.Service.NotificationService;
 import com.example.nhatrobackend.Service.PostService;
 import com.example.nhatrobackend.Service.RoomService;
 import com.example.nhatrobackend.Service.UserService;
@@ -26,10 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,6 +46,7 @@ public class PostServiceImpl implements PostService {
     private final PostImageMapper postImageMapper;
     private final FavoritePostRepository favoritePostRepository;
     private final ReportPostRepository reportPostRepository;
+    private final NotificationService notificationService;
 
     @Override
     public Page<PostResponseDTO> getPostsByUserUuid(String userUuid, Pageable pageable) {
@@ -241,7 +243,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDetailResponseDTO approvePost(int postId) {
-        // Tìm bài viết theo postUuid
+        // Tìm bài viết theo postId
         Optional<Post> optionalPost = postRepository.findById(postId);
 
         // Kiểm tra bài viết có tồn tại hay không
@@ -250,13 +252,62 @@ public class PostServiceImpl implements PostService {
 
             // Cập nhật trạng thái bài viết
             post.setStatus(PostStatus.APPROVED);
-            post.setUpdatedAt(LocalDateTime.now()); // Cập nhật thời gian sửa
+            post.setUpdatedAt(LocalDateTime.now());
 
             // Lưu lại bài viết đã cập nhật
-            postRepository.save(post);
+            Post savedPost = postRepository.save(post);
+
+            // Tạo và lưu notification vào database
+            Notification notification = Notification.builder()
+                    .title("Bài đăng đã được duyệt")
+                    .content("Bài đăng " + post.getTitle() + " của bạn đã được phê duyệt")
+                    .type(EventType.POST_APPROVED.name())
+                    .userId(post.getUser().getUserId())
+                    .postId(post.getPostId())
+                    .redirectUrl("/posts/" + post.getPostId())
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            // Lưu notification vào database
+            Notification savedNotification = notificationService.save(notification);
+
+            // Tạo NotificationResponse từ notification đã lưu
+            NotificationResponse notificationResponse = NotificationResponse.builder()
+                    .id(savedNotification.getId())
+                    .title(savedNotification.getTitle())
+                    .content(savedNotification.getContent())
+                    .type(savedNotification.getType())
+                    .userId(savedNotification.getUserId())
+                    .postId(savedNotification.getPostId())
+                    .createdAt(savedNotification.getCreatedAt())
+                    .isRead(savedNotification.isRead())
+                    .redirectUrl(savedNotification.getRedirectUrl())
+                    .build();
+
+            // Tạo và gửi notification event
+            NotificationEvent event = NotificationEvent.builder()
+                    .eventId(UUID.randomUUID().toString())
+                    .type(EventType.POST_APPROVED)
+                    .notification(notificationResponse)
+                    .timestamp(LocalDateTime.now())
+                    .metadata(Map.of(
+                            "postId", post.getPostId(),
+                            "userId", post.getUser().getUserId()
+                    ))
+                    .priority(NotificationEvent.Priority.HIGH)
+                    .status(Status.PENDING)
+                    .build();
+
+            // Gửi notification
+            notificationService.sendNotification(event);
+
+            // Log để debug
+            log.info("Notification saved to database with ID: {}", savedNotification.getId());
+            log.info("Notification event sent: {}", event);
 
             // Trả về response DTO
-            return postMapper.toPostDetailResponseDTO(post);  // Chuyển đổi thành DTO nếu cần
+            return postMapper.toPostDetailResponseDTO(savedPost);
         } else {
             throw new EntityNotFoundException("Post not found with ID: " + postId);
         }
