@@ -9,6 +9,7 @@ import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -63,6 +65,7 @@ public class UserController {
 
         // Gọi service để lấy thông tin người dùng
         UserProfileDTO userProfile = userService.getUserProfile(userUuid);
+        log.info("fix createdAt " + userProfile.getCreatedAt());
 
         return ResponseEntity.ok(ResponseWrapper.<UserProfileDTO>builder()
                 .status("success")
