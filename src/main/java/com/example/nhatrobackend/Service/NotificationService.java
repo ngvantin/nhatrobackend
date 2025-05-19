@@ -4,6 +4,7 @@ import com.example.nhatrobackend.DTO.NotificationEvent;
 import com.example.nhatrobackend.DTO.request.NotificationRequest;
 import com.example.nhatrobackend.DTO.response.NotificationResponse;
 import com.example.nhatrobackend.Entity.Notification;
+import org.springframework.data.domain.Page;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -12,6 +13,10 @@ import reactor.core.publisher.Mono;
  * Cung cấp các operation cơ bản và nâng cao cho việc quản lý thông báo.
  */
 public interface NotificationService {
+    // Lấy danh sách thông báo của user
+    Page<NotificationResponse> getUserNotifications(Integer userId, int page, int size);
+    // Đánh dấu tất cả thông báo đã đọc
+    void markAllAsRead(Integer userId);
 
     void sendNotification(NotificationEvent event);
     Flux<NotificationResponse> subscribeToUserNotifications(Integer userId);

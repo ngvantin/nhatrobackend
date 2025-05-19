@@ -16,7 +16,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -39,7 +42,34 @@ import static com.example.nhatrobackend.Config.RabbitMQConfig.NOTIFICATION_ROUTI
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final RabbitTemplate rabbitTemplate;
+
     private final Map<Integer, Sinks.Many<NotificationResponse>> userSinks = new ConcurrentHashMap<>();
+
+    @Override
+    public Page<NotificationResponse> getUserNotifications(Integer userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+
+        return notifications.map(this::mapToResponse);
+    }
+
+    private NotificationResponse mapToResponse(Notification notification) {
+        return NotificationResponse.builder()
+                .id(notification.getId())
+                .title(notification.getTitle())
+                .content(notification.getContent())
+                .type(notification.getType())
+                .userId(notification.getUserId())
+                .postId(notification.getPostId())
+                .createdAt(notification.getCreatedAt())
+                .isRead(notification.isRead())
+                .redirectUrl(notification.getRedirectUrl())
+                .build();
+    }
+    @Override
+    public void markAllAsRead(Integer userId) {
+        notificationRepository.markAllAsRead(userId);
+    }
 
     @Override
     public void sendNotification(NotificationEvent event) {
