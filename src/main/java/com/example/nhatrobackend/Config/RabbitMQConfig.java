@@ -13,18 +13,20 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 @Configuration
 public class RabbitMQConfig {
+    // Các hằng số định nghĩa tên của exchange, queue và routing key
     public static final String NOTIFICATION_EXCHANGE = "notification.exchange";
     public static final String NOTIFICATION_QUEUE = "notification.queue";
     public static final String NOTIFICATION_ROUTING_KEY = "notification.event";
 
+    // Tạo queue bền vững (durable) để lưu trữ thông báo
     @Bean
     public Queue notificationQueue() {
         return QueueBuilder.durable(NOTIFICATION_QUEUE).build();
     }
 
+    // Tạo direct exchange để định tuyến thông báo
     @Bean
     public Exchange notificationExchange() {
         return ExchangeBuilder.directExchange(NOTIFICATION_EXCHANGE)
@@ -32,6 +34,7 @@ public class RabbitMQConfig {
                 .build();
     }
 
+    // Tạo binding giữa queue và exchange với routing key
     @Bean
     public Binding notificationBinding() {
         return BindingBuilder.bind(notificationQueue())
@@ -40,11 +43,13 @@ public class RabbitMQConfig {
                 .noargs();
     }
 
+    // Cấu hình converter để chuyển đổi message thành JSON
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
+    // Cấu hình RabbitTemplate để gửi/nhận message
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
