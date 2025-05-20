@@ -33,7 +33,7 @@ public interface NotificationService {
 //    /**
 //     * Đánh dấu thông báo đã đọc
 //     */
-    void markNotificationAsRead(String notificationId);
+    void markNotificationAsRead(Long notificationId);
 
     Notification save(Notification notification);
 //

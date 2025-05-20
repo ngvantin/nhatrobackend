@@ -68,7 +68,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
     @Override
     public void markAllAsRead(Integer userId) {
-        notificationRepository.markAllAsRead(userId);
+        try {
+            notificationRepository.updateIsReadByUserIdAndIsRead(userId, true);
+            log.info("Marked all notifications as read for user: {}", userId);
+        } catch (Exception e) {
+            log.error("Error marking all notifications as read for user {}: {}", userId, e.getMessage());
+            throw new RuntimeException("Failed to mark all notifications as read", e);
+        }
     }
 
     @Override
@@ -110,11 +116,23 @@ public class NotificationServiceImpl implements NotificationService {
         ).asFlux();
     }
 
-        @Override
-    public void markNotificationAsRead(String notificationId) {
-        // Implementation for marking notification as read
-        // This would typically update a notification status in database
-        log.info("Marking notification as read: {}", notificationId);
+    @Override
+    public void markNotificationAsRead(Long notificationId) {
+        try {
+            // Verify notification exists
+            if (!notificationRepository.existsById(notificationId)) {
+                throw new EntityNotFoundException("Notification not found with id: " + notificationId);
+            }
+            
+            notificationRepository.markNotificationAsRead(notificationId);
+            log.info("Marked notification as read: {}", notificationId);
+        } catch (EntityNotFoundException e) {
+            log.error("Notification not found: {}", notificationId);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error marking notification as read {}: {}", notificationId, e.getMessage());
+            throw new RuntimeException("Failed to mark notification as read", e);
+        }
     }
 
     @Override

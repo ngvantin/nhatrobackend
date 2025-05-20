@@ -57,10 +57,9 @@ public class NotificationController {
     // API đánh dấu tất cả thông báo đã đọc
     @PostMapping("/mark-all-read")
     public ResponseEntity<ResponseWrapper<Void>> markAllAsRead() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Integer userId = Integer.parseInt(auth.getName());
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
 
-        notificationService.markAllAsRead(userId);
+        notificationService.markAllAsRead(currentUserId);
 
         return ResponseEntity.ok(ResponseWrapper.<Void>builder()
                 .status("success")
@@ -85,8 +84,12 @@ public class NotificationController {
      * Đánh dấu thông báo đã đọc
      */
     @PostMapping("/{notificationId}/read")
-    public void markNotificationAsRead(@PathVariable String notificationId) {
+    public ResponseEntity<ResponseWrapper<Void>> markNotificationAsRead(@PathVariable Long notificationId) {
         notificationService.markNotificationAsRead(notificationId);
+        return ResponseEntity.ok(ResponseWrapper.<Void>builder()
+                .status("success")
+                .message("Đã đánh dấu thông báo là đã đọc")
+                .build());
     }
 }
 //@Slf4j
