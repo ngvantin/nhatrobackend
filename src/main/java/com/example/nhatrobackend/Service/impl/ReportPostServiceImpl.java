@@ -1,10 +1,13 @@
 package com.example.nhatrobackend.Service.impl;
 
+import com.example.nhatrobackend.DTO.NotificationEvent;
 import com.example.nhatrobackend.DTO.ReportPostAdminDTO;
 import com.example.nhatrobackend.DTO.ReportPostDetailDTO;
 import com.example.nhatrobackend.DTO.ReportPostRequestDTO;
+import com.example.nhatrobackend.Entity.Field.EventType;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Entity.Field.ReportStatus;
+import com.example.nhatrobackend.Entity.Field.Status;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.ReportPost;
 import com.example.nhatrobackend.Entity.User;
@@ -24,7 +27,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -68,19 +73,24 @@ public class ReportPostServiceImpl implements ReportPostService {
     // dính lỗi khi sửa security xóa bảng account
     @Override
     public ReportPostDetailDTO getReportPostDetail(Integer reportId) {
-//        // Lấy ReportPost theo reportId
-//        Optional<ReportPost> optionalReportPost = reportPostRepository.findById(reportId);
-//
-//        if (!optionalReportPost.isPresent()) {
-//            throw new EntityNotFoundException("ReportPost not found with ID: " + reportId);
-//        }
-//
-//        ReportPost reportPost = optionalReportPost.get();
-//        Post post = reportPost.getPost(); // Lấy Post liên quan
-//
-//        // Chuyển đổi và trả về DTO
-//        return postMapper.toReportPostDetailDTO(post, reportPost);
-        return null;
+        // Lấy ReportPost theo reportId
+        Optional<ReportPost> optionalReportPost = reportPostRepository.findById(reportId);
+
+        if (!optionalReportPost.isPresent()) {
+            throw new EntityNotFoundException("ReportPost not found with ID: " + reportId);
+        }
+
+        ReportPost reportPost = optionalReportPost.get();
+        ReportPostDetailDTO reportPostDetailDTO = ReportPostDetailDTO.builder()
+                .reportId(reportPost.getReportId())
+                .reason(reportPost.getReason())
+                .details(reportPost.getDetails())
+                .createdAt(reportPost.getCreatedAt())
+                .build();
+
+        // Chuyển đổi và trả về DTO
+        return reportPostDetailDTO;
+
     }
 
     // Phương thức duyệt bài viết bị tố cáo
