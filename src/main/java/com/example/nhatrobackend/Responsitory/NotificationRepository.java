@@ -1,14 +1,12 @@
 package com.example.nhatrobackend.Responsitory;
 
-
-
-
 import com.example.nhatrobackend.Entity.Notification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -28,16 +26,25 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      * Đếm số thông báo chưa đọc của user
      * @param userId ID của user
      */
-    @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = ?1 AND n.isRead = false")
-    long countUnreadNotifications(Integer userId);
+    long countByUserIdAndIsReadFalse(Integer userId);
 
     /**
      * Đánh dấu tất cả thông báo của user là đã đọc
      * @param userId ID của user
      */
     @Modifying
-    @Query("UPDATE Notification n SET n.isRead = true WHERE n.userId = ?1")
-    void markAllAsRead(Integer userId);
+    @Transactional
+    @Query("UPDATE Notification n SET n.isRead = :isRead WHERE n.userId = :userId")
+    void updateIsReadByUserIdAndIsRead(Integer userId, boolean isRead);
+
+    /**
+     * Đánh dấu thông báo đã đọc
+     * @param notificationId ID của thông báo
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Notification n SET n.isRead = true WHERE n.id = :notificationId")
+    void markNotificationAsRead(Long notificationId);
 
     /**
      * Lấy thông báo theo loại và trạng thái
@@ -50,6 +57,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      * Xóa thông báo cũ hơn X ngày
      */
     @Modifying
-    @Query("DELETE FROM Notification n WHERE n.createdAt < ?1")
-    void deleteOldNotifications(LocalDateTime date);
+    @Transactional
+    void deleteByCreatedAtBefore(LocalDateTime date);
 }

@@ -330,6 +330,56 @@ public class PostServiceImpl implements PostService {
             // Lưu lại bài viết đã cập nhật
             postRepository.save(post);
 
+
+            // Tạo và lưu notification vào database
+            Notification notification = Notification.builder()
+                    .title("Bài đăng đã bị từ chối")
+                    .content("Bài đăng " + post.getTitle() + " của bạn đã bị từ chối")
+                    .type(EventType.POST_APPROVED.name())
+                    .userId(post.getUser().getUserId())
+                    .postId(post.getPostId())
+                    .redirectUrl("/posts/" + post.getPostId())
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            // Lưu notification vào database
+            Notification savedNotification = notificationService.save(notification);
+
+            // Tạo NotificationResponse từ notification đã lưu
+            NotificationResponse notificationResponse = NotificationResponse.builder()
+                    .id(savedNotification.getId())
+                    .title(savedNotification.getTitle())
+                    .content(savedNotification.getContent())
+                    .type(savedNotification.getType())
+                    .userId(savedNotification.getUserId())
+                    .postId(savedNotification.getPostId())
+                    .createdAt(savedNotification.getCreatedAt())
+                    .isRead(savedNotification.isRead())
+                    .redirectUrl(savedNotification.getRedirectUrl())
+                    .build();
+
+            // Tạo và gửi notification event
+            NotificationEvent event = NotificationEvent.builder()
+                    .eventId(UUID.randomUUID().toString())
+                    .type(EventType.POST_APPROVED)
+                    .notification(notificationResponse)
+                    .timestamp(LocalDateTime.now())
+                    .metadata(Map.of(
+                            "postId", post.getPostId(),
+                            "userId", post.getUser().getUserId()
+                    ))
+                    .priority(NotificationEvent.Priority.HIGH)
+                    .status(Status.PENDING)
+                    .build();
+
+            // Gửi notification
+            notificationService.sendNotification(event);
+
+            // Log để debug
+            log.info("Notification saved to database with ID: {}", savedNotification.getId());
+            log.info("Notification event sent: {}", event);
+
             // Trả về response DTO
             return postMapper.toPostDetailResponseDTO(post);  // Chuyển đổi thành DTO nếu cần
         } else {

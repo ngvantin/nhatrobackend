@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
+import com.example.nhatrobackend.DTO.response.UserPostCountDTO;
 import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.DTO.response.UserStatsResponse;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
@@ -297,6 +298,18 @@ public class UserController {
                 .status("success")
                 .data(stats)
                 .message("Thống kê số lượng người dùng theo loại.")
+                .build());
+    }
+
+    @GetMapping("/post-count")
+    public ResponseEntity<ResponseWrapper<UserPostCountDTO>> getUserPostCount() {
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
+        UserPostCountDTO postCount = userService.getUserPostCount(currentUserId);
+
+        return ResponseEntity.ok(ResponseWrapper.<UserPostCountDTO>builder()
+                .status("success")
+                .message("Lấy số lượng bài đăng")
+                .data(postCount)
                 .build());
     }
 }
