@@ -2,20 +2,27 @@ package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.DTO.*;
 //import com.example.nhatrobackend.Entity.Account;
+import com.example.nhatrobackend.DTO.response.NotificationResponse;
 import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
+import com.example.nhatrobackend.DTO.response.UserPostCountDTO;
 import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.DTO.response.UserStatsResponse;
+import com.example.nhatrobackend.Entity.Field.EventType;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
+import com.example.nhatrobackend.Entity.Field.Status;
 import com.example.nhatrobackend.Entity.Field.UserType;
+import com.example.nhatrobackend.Entity.Notification;
 import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.UserMapper;
 //import com.example.nhatrobackend.Responsitory.AccountRepository;
 import com.example.nhatrobackend.Responsitory.UserRepository;
 //import com.example.nhatrobackend.Service.AccountService;
+import com.example.nhatrobackend.Service.NotificationService;
 import com.example.nhatrobackend.Service.UploadImageFileService;
 import com.example.nhatrobackend.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -25,7 +32,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+
+import static com.example.nhatrobackend.Entity.Field.UserType.LANDLORD;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -33,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 //    private final AccountService accountService;
     private final UploadImageFileService uploadImageFileService;
+    private final NotificationService notificationService;
 
 //    private final AccountRepository accountRepository; // // dính lỗi khi sửa security xóa bảng account
 
@@ -232,25 +246,72 @@ public class UserServiceImpl implements UserService {
     // dính lỗi khi sửa security xóa bảng account
     @Override
     public UserDetailAdminDTO approveLandlord(Integer userId) {
-//        User user = findUserByIdOrThrow(userId);
-//
-//        // Kiểm tra trạng thái hiện tại
-//        if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
-//            throw new IllegalStateException("User is already approved as landlord.");
-//        }
-//
-//        // Cập nhật trạng thái thành APPROVED
-//        user.setIsLandlordActivated(LandlordStatus.APPROVED);
-//        user.setUpdatedAt(LocalDateTime.now());
-//
-//        // Lưu vào DB
-//        userRepository.save(user);
-//        Account account = accountService.findAccountByUserId(userId);
-//        account.setUserType(UserType.LANDLORD);
-//        accountRepository.save(account);
-//        // Trả về DTO
-//        return userMapper.toUserDetailAdminDTO(user);
-        return null;
+        User user = findByUserId(userId);
+
+        // Kiểm tra trạng thái hiện tại
+        if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
+            throw new IllegalStateException("User is already approved as landlord.");
+        }
+
+        // Cập nhật trạng thái thành APPROVED
+        user.setIsLandlordActivated(LandlordStatus.APPROVED);
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setType(LANDLORD);
+        // Lưu vào DB
+        userRepository.save(user);
+
+
+        // Tạo và lưu notification vào database
+        Notification notification = Notification.builder()
+                .title("Quyền chủ trọ đã được duyệt")
+                .content("Chúng tôi xin thông báo rằng yêu cầu cấp quyền chủ trọ của bạn đã được chấp thuận.")
+                .type(EventType.POST_APPROVED.name())
+                .userId(userId)
+                .postId(null)
+                .redirectUrl("/posts/")
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        // Lưu notification vào database
+        Notification savedNotification = notificationService.save(notification);
+
+        // Tạo NotificationResponse từ notification đã lưu
+        NotificationResponse notificationResponse = NotificationResponse.builder()
+                .id(savedNotification.getId())
+                .title(savedNotification.getTitle())
+                .content(savedNotification.getContent())
+                .type(savedNotification.getType())
+                .userId(savedNotification.getUserId())
+                .postId(savedNotification.getPostId())
+                .createdAt(savedNotification.getCreatedAt())
+                .isRead(savedNotification.isRead())
+                .redirectUrl(savedNotification.getRedirectUrl())
+                .build();
+
+        // Tạo và gửi notification event
+        NotificationEvent event = NotificationEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .type(EventType.LANDLORD_APPROVED)
+                .notification(notificationResponse)
+                .timestamp(LocalDateTime.now())
+                .metadata(Map.of(
+                        "postId", null,
+                        "userId", userId
+                ))
+                .priority(NotificationEvent.Priority.HIGH)
+                .status(Status.PENDING)
+                .build();
+
+        // Gửi notification
+        notificationService.sendNotification(event);
+
+        // Log để debug
+        log.info("Notification saved to database with ID: {}", savedNotification.getId());
+        log.info("Notification event sent: {}", event);
+
+        // Trả về DTO
+        return userMapper.toUserDetailAdminDTO(user);
     }
 
     @Override
@@ -264,6 +325,54 @@ public class UserServiceImpl implements UserService {
         // Lưu vào DB
         userRepository.save(user);
 
+        // Tạo và lưu notification vào database
+        Notification notification = Notification.builder()
+                .title("Quyền chủ trọ đã bị từ chối")
+                .content("Chúng tôi xin thông báo rằng yêu cầu cấp quyền chủ trọ của bạn đã bị từ chối. Hãy kiểm tra lại thông tin và đăng ký chủ trọ lại")
+                .type(EventType.POST_REPORTED.name())
+                .userId(userId)
+                .postId(null)
+                .redirectUrl("/posts/")
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        // Lưu notification vào database
+        Notification savedNotification = notificationService.save(notification);
+
+        // Tạo NotificationResponse từ notification đã lưu
+        NotificationResponse notificationResponse = NotificationResponse.builder()
+                .id(savedNotification.getId())
+                .title(savedNotification.getTitle())
+                .content(savedNotification.getContent())
+                .type(savedNotification.getType())
+                .userId(savedNotification.getUserId())
+                .postId(savedNotification.getPostId())
+                .createdAt(savedNotification.getCreatedAt())
+                .isRead(savedNotification.isRead())
+                .redirectUrl(savedNotification.getRedirectUrl())
+                .build();
+
+        // Tạo và gửi notification event
+        NotificationEvent event = NotificationEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .type(EventType.POST_APPROVED)
+                .notification(notificationResponse)
+                .timestamp(LocalDateTime.now())
+                .metadata(Map.of(
+                        "postId", null,
+                        "userId", userId
+                ))
+                .priority(NotificationEvent.Priority.HIGH)
+                .status(Status.PENDING)
+                .build();
+
+        // Gửi notification
+        notificationService.sendNotification(event);
+
+        // Log để debug
+        log.info("Notification saved to database with ID: {}", savedNotification.getId());
+        log.info("Notification event sent: {}", event);
         // Trả về DTO
         return userMapper.toUserDetailAdminDTO(user);
     }
@@ -297,7 +406,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserStatsResponse getUserTypeCounts() {
-        long landlordCount = userRepository.countByType(UserType.LANDLORD);
+        long landlordCount = userRepository.countByType(LANDLORD);
         long tenantCount = userRepository.countByType(UserType.TENANT);
         long totalLandlordTenant = userRepository.countAllLandlordAndTenant();
 
@@ -307,5 +416,18 @@ public class UserServiceImpl implements UserService {
         response.setTotalLandlordTenant(totalLandlordTenant);
 
         return response;
+    }
+
+    @Override
+    public UserPostCountDTO getUserPostCount(Integer userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        return UserPostCountDTO.builder()
+                .userId(user.getUserId())
+                .userUuid(user.getUserUuid())
+                .fullName(user.getFullName())
+                .postCount(user.getPostCount())
+                .build();
     }
 }

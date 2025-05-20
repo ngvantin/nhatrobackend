@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
+import com.example.nhatrobackend.DTO.response.UserPostCountDTO;
 import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.DTO.response.UserStatsResponse;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
@@ -39,4 +40,6 @@ public interface UserService {
 
     User save(User user);
     UserStatsResponse getUserTypeCounts();
+
+    UserPostCountDTO getUserPostCount(Integer userId);
 }
