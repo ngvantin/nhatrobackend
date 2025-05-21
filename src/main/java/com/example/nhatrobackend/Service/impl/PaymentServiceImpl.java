@@ -131,7 +131,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         PaymentHistory paymentHistory = PaymentHistory.builder()
                 .user(user)
-                .paymentAmount(amount * 100)
+                .paymentAmount(amount)
                 .transactionCode(transactionCode)
                 .responseCode("00")
                 .orderInfo("Mua "+ purchasedPosts+ " lượt đăng bài")
