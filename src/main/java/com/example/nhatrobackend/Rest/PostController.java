@@ -451,6 +451,23 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/admin/locked")
+    public ResponseEntity<ResponseWrapper<Page<PostAdminDTO>>> getLockedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        log.info("f--------------------- controller");
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostAdminDTO> posts = postService.getPostsForAdmin(PostStatus.LOCKED, pageable);
+
+        ResponseWrapper<Page<PostAdminDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài posts đã được phê duyệt thành công",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/admin/detail/{postId}")
     public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> getPostDetail(@PathVariable int postId) {
         PostDetailResponseDTO postDetail = postService.getPostAdminById(postId);
