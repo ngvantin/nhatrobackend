@@ -259,12 +259,28 @@ public class UserController {
 
     @PutMapping("/admin/approve-landlord/{userId}")
     public ResponseEntity<ResponseWrapper<UserDetailAdminDTO>> approveLandlord(@PathVariable Integer userId) {
-        UserDetailAdminDTO userDetail = userService.approveLandlord(userId);
-        return ResponseEntity.ok(ResponseWrapper.<UserDetailAdminDTO>builder()
-                .status("success")
-                .data(userDetail)
-                .message("Quyền chủ trọ đã được duyệt.")
-                .build());
+        try {
+            UserDetailAdminDTO userDetail = userService.approveLandlord(userId);
+            return ResponseEntity.ok(ResponseWrapper.<UserDetailAdminDTO>builder()
+                    .status("success")
+                    .data(userDetail)
+                    .message("Quyền chủ trọ đã được duyệt.")
+                    .build());
+        } catch (IllegalStateException e) {
+            log.error("Error approving landlord: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ResponseWrapper.<UserDetailAdminDTO>builder()
+                            .status("error")
+                            .message(e.getMessage())
+                            .build());
+        } catch (Exception e) {
+            log.error("Unexpected error approving landlord: {}", e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(ResponseWrapper.<UserDetailAdminDTO>builder()
+                            .status("error")
+                            .message("Có lỗi xảy ra khi duyệt quyền chủ trọ")
+                            .build());
+        }
     }
 
     @PutMapping("/admin/reject-landlord/{userId}")
