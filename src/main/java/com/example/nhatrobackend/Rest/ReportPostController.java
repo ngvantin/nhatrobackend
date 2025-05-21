@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -63,6 +64,29 @@ public class ReportPostController {
                 .build());
     }
 
+    @PutMapping("/admin/approve/{reportId}")
+    public ResponseEntity<ResponseWrapper<String>> approveReportPost(
+            @PathVariable Integer reportId) {
+
+        reportPostService.approveReportPost(reportId);
+        
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .message("Đã duyệt báo cáo và khóa bài viết thành công.")
+                .build());
+    }
+
+    @PutMapping("/admin/reject/{reportId}")
+    public ResponseEntity<ResponseWrapper<String>> rejectReportPost(
+            @PathVariable Integer reportId) {
+
+        reportPostService.rejectReportPost(reportId);
+
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .message("Đã từ chối báo cáo bài viết.")
+                .build());
+    }
 
 }
 
