@@ -11,6 +11,6 @@ public interface ReportPostService {
     ReportPost createReportPost(ReportPostRequestDTO requestDTO, String postUuid, String userUuid);
     Page<ReportPostAdminDTO> getAllReportedPosts(Pageable pageable);
     ReportPostDetailDTO getReportPostDetail(Integer reportId);
-    void approveReportPost(Integer reportId, String reason);
-    void rejectReportPost(Integer reportId, String reason);
+    void approveReportPost(Integer reportId);
+    void rejectReportPost(Integer reportId);
 }

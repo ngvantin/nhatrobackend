@@ -9,7 +9,8 @@ public enum EventType {
     PRICE_UPDATED("Cập nhật giá phòng"),
     ROOM_STATUS_CHANGED("Thay đổi trạng thái phòng"),
     USER_REGISTERED("Đăng ký tài khoản mới"),
-    SYSTEM_NOTIFICATION("Thông báo hệ thống");
+    SYSTEM_NOTIFICATION("Thông báo hệ thống"),
+    POST_LOCKED("Khóa bài đăng");
 
     private final String description;
 
