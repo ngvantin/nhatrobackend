@@ -28,6 +28,16 @@ public interface UserMapper {
 
     UserAdminDTO toUserAdminDTO(User user);
 
+//    @Mapping(target = "userId", source = "userId")
+//    @Mapping(target = "fullName", source = "fullName")
+//    @Mapping(target = "email", source = "email")
+//    @Mapping(target = "phoneNumber", source = "phoneNumber")
+//    @Mapping(target = "type", source = "type")
+//    @Mapping(target = "status", source = "status")
+//    @Mapping(target = "isLandlordActivated", source = "isLandlordActivated")
+//    @Mapping(target = "createdAt", source = "createdAt")
+//    @Mapping(target = "updatedAt", source = "updatedAt")
     UserDetailAdminDTO toUserDetailAdminDTO(User user);
+
     UserLandlordResponse toUserLandlordResponse(User user);
 }

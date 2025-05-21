@@ -29,12 +29,14 @@ import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.HashMap;
 
 import static com.example.nhatrobackend.Entity.Field.UserType.LANDLORD;
 
@@ -245,73 +247,93 @@ public class UserServiceImpl implements UserService {
 
     // dính lỗi khi sửa security xóa bảng account
     @Override
+    @Transactional
     public UserDetailAdminDTO approveLandlord(Integer userId) {
-        User user = findByUserId(userId);
+        try {
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
-        // Kiểm tra trạng thái hiện tại
-        if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
-            throw new IllegalStateException("User is already approved as landlord.");
+            // Kiểm tra trạng thái hiện tại
+            if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
+                throw new IllegalStateException("Người dùng đã được duyệt quyền chủ trọ trước đó.");
+            }
+
+            // Cập nhật trạng thái thành APPROVED
+            user.setIsLandlordActivated(LandlordStatus.APPROVED);
+            user.setUpdatedAt(LocalDateTime.now());
+            user.setType(LANDLORD);
+            
+            // Lưu vào DB
+            User savedUser = userRepository.save(user);
+            if (savedUser == null) {
+                throw new RuntimeException("Không thể lưu thông tin người dùng");
+            }
+
+            // Tạo và lưu notification vào database
+            Notification notification = Notification.builder()
+                    .title("Quyền chủ trọ đã được duyệt")
+                    .content("Chúng tôi xin thông báo rằng yêu cầu cấp quyền chủ trọ của bạn đã được chấp thuận.")
+                    .type(EventType.LANDLORD_APPROVED.name())
+                    .userId(userId)
+                    .postId(null)
+                    .redirectUrl("/posts/")
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            // Lưu notification vào database
+            Notification savedNotification = notificationService.save(notification);
+            if (savedNotification == null) {
+                log.warn("Không thể lưu notification cho user ID: {}", userId);
+            }
+
+            // Tạo NotificationResponse từ notification đã lưu
+            NotificationResponse notificationResponse = NotificationResponse.builder()
+                    .id(savedNotification.getId())
+                    .title(savedNotification.getTitle())
+                    .content(savedNotification.getContent())
+                    .type(savedNotification.getType())
+                    .userId(savedNotification.getUserId())
+                    .postId(savedNotification.getPostId())
+                    .createdAt(savedNotification.getCreatedAt())
+                    .isRead(savedNotification.isRead())
+                    .redirectUrl(savedNotification.getRedirectUrl())
+                    .build();
+
+            // Tạo và gửi notification event
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("postId", null);  // Use null directly since it's allowed in HashMap
+            metadata.put("userId", userId);  // Use Integer directly
+
+            NotificationEvent event = NotificationEvent.builder()
+                    .eventId(UUID.randomUUID().toString())
+                    .type(EventType.LANDLORD_APPROVED)
+                    .notification(notificationResponse)
+                    .timestamp(LocalDateTime.now())
+                    .metadata(metadata)
+                    .priority(NotificationEvent.Priority.HIGH)
+                    .status(Status.PENDING)
+                    .build();
+
+            // Gửi notification
+            notificationService.sendNotification(event);
+
+            // Log để debug
+            log.info("User approved as landlord successfully. User ID: {}", userId);
+            log.info("Notification saved to database with ID: {}", savedNotification.getId());
+            log.info("Notification event sent: {}", event);
+
+            // Chuyển đổi và trả về DTO
+            UserDetailAdminDTO userDetailDTO = userMapper.toUserDetailAdminDTO(savedUser);
+            if (userDetailDTO == null) {
+                throw new RuntimeException("Không thể chuyển đổi thông tin người dùng sang DTO");
+            }
+            return userDetailDTO;
+
+        } catch (Exception e) {
+            log.error("Error in approveLandlord: {}", e.getMessage(), e);
+            throw e;
         }
-
-        // Cập nhật trạng thái thành APPROVED
-        user.setIsLandlordActivated(LandlordStatus.APPROVED);
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setType(LANDLORD);
-        // Lưu vào DB
-        userRepository.save(user);
-
-
-        // Tạo và lưu notification vào database
-        Notification notification = Notification.builder()
-                .title("Quyền chủ trọ đã được duyệt")
-                .content("Chúng tôi xin thông báo rằng yêu cầu cấp quyền chủ trọ của bạn đã được chấp thuận.")
-                .type(EventType.POST_APPROVED.name())
-                .userId(userId)
-                .postId(null)
-                .redirectUrl("/posts/")
-                .isRead(false)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        // Lưu notification vào database
-        Notification savedNotification = notificationService.save(notification);
-
-        // Tạo NotificationResponse từ notification đã lưu
-        NotificationResponse notificationResponse = NotificationResponse.builder()
-                .id(savedNotification.getId())
-                .title(savedNotification.getTitle())
-                .content(savedNotification.getContent())
-                .type(savedNotification.getType())
-                .userId(savedNotification.getUserId())
-                .postId(savedNotification.getPostId())
-                .createdAt(savedNotification.getCreatedAt())
-                .isRead(savedNotification.isRead())
-                .redirectUrl(savedNotification.getRedirectUrl())
-                .build();
-
-        // Tạo và gửi notification event
-        NotificationEvent event = NotificationEvent.builder()
-                .eventId(UUID.randomUUID().toString())
-                .type(EventType.LANDLORD_APPROVED)
-                .notification(notificationResponse)
-                .timestamp(LocalDateTime.now())
-                .metadata(Map.of(
-                        "postId", null,
-                        "userId", userId
-                ))
-                .priority(NotificationEvent.Priority.HIGH)
-                .status(Status.PENDING)
-                .build();
-
-        // Gửi notification
-        notificationService.sendNotification(event);
-
-        // Log để debug
-        log.info("Notification saved to database with ID: {}", savedNotification.getId());
-        log.info("Notification event sent: {}", event);
-
-        // Trả về DTO
-        return userMapper.toUserDetailAdminDTO(user);
     }
 
     @Override
@@ -340,6 +362,7 @@ public class UserServiceImpl implements UserService {
         // Lưu notification vào database
         Notification savedNotification = notificationService.save(notification);
 
+
         // Tạo NotificationResponse từ notification đã lưu
         NotificationResponse notificationResponse = NotificationResponse.builder()
                 .id(savedNotification.getId())
@@ -354,15 +377,16 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         // Tạo và gửi notification event
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("postId", null);  // Use null directly since it's allowed in HashMap
+        metadata.put("userId", userId);  // Use Integer directly
+
         NotificationEvent event = NotificationEvent.builder()
                 .eventId(UUID.randomUUID().toString())
-                .type(EventType.POST_APPROVED)
+                .type(EventType.LANDLORD_APPROVED)
                 .notification(notificationResponse)
                 .timestamp(LocalDateTime.now())
-                .metadata(Map.of(
-                        "postId", null,
-                        "userId", userId
-                ))
+                .metadata(metadata)
                 .priority(NotificationEvent.Priority.HIGH)
                 .status(Status.PENDING)
                 .build();

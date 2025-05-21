@@ -257,6 +257,10 @@ public class PostServiceImpl implements PostService {
             // Lưu lại bài viết đã cập nhật
             Post savedPost = postRepository.save(post);
 
+            User user = post.getUser();
+            user.setPostCount(user.getPostCount()-1);
+            userService.save(user);
+
             // Tạo và lưu notification vào database
             Notification notification = Notification.builder()
                     .title("Bài đăng đã được duyệt")
