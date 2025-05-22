@@ -9,8 +9,12 @@ import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 @Repository
 public interface ReportPostRepository extends JpaRepository<ReportPost, Integer> {
     @Query("SELECT rp.post FROM ReportPost rp")
     Page<Post> findAllReportedPosts(Pageable pageable);
+
+    Optional<ReportPost> findByReportId(Integer reportId);
 }

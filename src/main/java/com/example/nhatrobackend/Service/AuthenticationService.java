@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.example.nhatrobackend.Entity.Field.UserStatus.ACTIVE;
 import static com.example.nhatrobackend.util.TokenType.*;
 import static org.springframework.http.HttpHeaders.REFERER;
 
@@ -73,6 +74,12 @@ public class AuthenticationService {
         if (!user.isEnabled()) {
             throw new IllegalArgumentException("User not active");
         }
+
+        if (user.getStatus()!= ACTIVE) {
+            throw new IllegalArgumentException("User has been locked");
+        }
+        user.setMessageStatus(MessageStatus.ONLINE);
+        userRepository.save(user);
 //
 //        List<String> roles = userService.getAllRolesByUserId(user.getId());
 //        List<SimpleGrantedAuthority> authorities = roles.stream().map(SimpleGrantedAuthority::new).toList();
@@ -302,7 +309,7 @@ public class AuthenticationService {
         }
 
         // Update user status to active
-        user.setStatus(UserStatus.ACTIVE);
+        user.setStatus(ACTIVE);
         userService.save(user);
 
         // Delete verification token

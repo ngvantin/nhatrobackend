@@ -78,7 +78,7 @@ public class ReportPostServiceImpl implements ReportPostService {
     @Override
     public ReportPostDetailDTO getReportPostDetail(Integer reportId) {
         // Lấy ReportPost theo reportId
-        Optional<ReportPost> optionalReportPost = reportPostRepository.findById(reportId);
+        Optional<ReportPost> optionalReportPost = reportPostRepository.findByReportId(reportId);
 
         if (!optionalReportPost.isPresent()) {
             throw new EntityNotFoundException("ReportPost not found with ID: " + reportId);

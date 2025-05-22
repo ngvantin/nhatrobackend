@@ -1,8 +1,11 @@
 package com.example.nhatrobackend.Config;
 
-import ch.qos.logback.core.model.ComponentModel;
 import org.mapstruct.MapperConfig;
+import org.mapstruct.ReportingPolicy;
 
-@MapperConfig(componentModel = "spring")
+@MapperConfig(
+    componentModel = "spring",
+    unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public interface MapStructConfig {
 }
