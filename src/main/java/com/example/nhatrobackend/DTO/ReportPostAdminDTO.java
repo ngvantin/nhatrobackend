@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ReportPostAdminDTO {
     private Integer reportId;
+    private Integer postId;
     private String reason;
     private String details;
     private ReportStatus status;

@@ -24,4 +24,7 @@ public class Token extends AbstractEntity<Integer> {
 
     @Column(name = "reset_token")
     private String resetToken;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
 }

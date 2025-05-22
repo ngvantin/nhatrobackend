@@ -1,10 +1,7 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
-import com.example.nhatrobackend.DTO.request.ForgotPasswordRequest;
-import com.example.nhatrobackend.DTO.request.RefreshTokenRequest;
-import com.example.nhatrobackend.DTO.request.ResetPasswordDTO;
-import com.example.nhatrobackend.DTO.request.SignInRequest;
+import com.example.nhatrobackend.DTO.request.*;
 import com.example.nhatrobackend.DTO.response.TokenResponse;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.AuthenticationService;
@@ -129,7 +126,27 @@ public class AuthenticationController {
                 .data(result)
                 .build());
     }
-//
+
+    @PostMapping("/register")
+    public ResponseEntity<ResponseWrapper<String>> register(@Valid @RequestBody RegisterRequestDTO request) {
+        var result = authenticationService.register(request);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(result)
+                .message("Verification email has been sent to your email address")
+                .build());
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<ResponseWrapper<String>> verifyEmail(@RequestParam String secretKey) {
+        var result = authenticationService.verifyEmail(secretKey);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(result)
+                .message("Email verified successfully")
+                .build());
+    }
+
 //    @PostMapping("/register")
 //    public ResponseEntity<ResponseWrapper<RegisterRequestDTO>> register(@Valid @RequestBody RegisterRequestDTO dto){
 //        authenticationService.register(dto);

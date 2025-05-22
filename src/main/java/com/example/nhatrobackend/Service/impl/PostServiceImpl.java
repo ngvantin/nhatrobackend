@@ -33,6 +33,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.nhatrobackend.Entity.Field.PostStatus.PENDING;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -132,7 +134,7 @@ public class PostServiceImpl implements PostService {
         roomService.saveRoom(room);
         post.setRoom(room);
         post.setUser(user);
-        post.setStatus(PostStatus.PENDING);
+        post.setStatus(PENDING);
         post.setCreatedAt(LocalDateTime.now());
         Post savePost = postRepository.save(post);
         return postMapper.toPostDetailResponseDTO(savePost);
@@ -189,6 +191,7 @@ public class PostServiceImpl implements PostService {
             post.getPostImages().clear(); // Xóa ảnh cũ
             post.getPostImages().addAll(updatedImages); // Thêm ảnh mới
         }
+        post.setStatus(PENDING);
 
         // **Lưu các thay đổi**
         Post updatedPost = postRepository.save(post);
