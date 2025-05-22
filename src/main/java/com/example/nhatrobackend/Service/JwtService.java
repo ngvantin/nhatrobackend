@@ -11,6 +11,7 @@ public interface JwtService {
     String generateToken(UserDetails user);
     String generateRefreshToken(UserDetails user);
     String generateResetToken(UserDetails user);
+    String generateVerificationToken(UserDetails user);
 
 //    String generateToken(String usename);
     String extractUsername(String token, TokenType type);

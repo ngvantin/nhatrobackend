@@ -52,6 +52,9 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.resetKey}")
     private String resetKey;
 
+    @Value("${jwt.verificationKey}")
+    private String verificationKey;
+
     @Override
     public String generateToken(UserDetails user) {
         return generateToken(new HashMap<>(), user); // HashMap được sử dụng để chứa các claims
@@ -67,6 +70,11 @@ public class JwtServiceImpl implements JwtService {
     public String generateResetToken(UserDetails user) {
 
         return generateResetToken(new HashMap<>(), user);
+    }
+
+    @Override
+    public String generateVerificationToken(UserDetails user) {
+        return generateVerificationToken(new HashMap<>(), user);
     }
 
     // Lấy username từ JWT.
@@ -89,7 +97,7 @@ public class JwtServiceImpl implements JwtService {
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis())) // Thời điểm phát hành token là thời điểm hiện tại.
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * expiryHour))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60* 24 * expiryHour))
                 .signWith(getKey(ACCESS_TOKEN), SignatureAlgorithm.HS256) // Ký token bằng khóa bí mật và thuật toán HS256.
                 .compact(); // Xây dựng và trả về chuỗi JWT.
     }
@@ -118,6 +126,15 @@ public class JwtServiceImpl implements JwtService {
                 .compact();
     }
 
+    private String generateVerificationToken(Map<String, Object> claims, UserDetails userDetails) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 hours
+                .signWith(getKey(VERIFICATION_TOKEN), SignatureAlgorithm.HS256)
+                .compact();
+    }
 
     private Key getKey(TokenType type) {
         log.info("---------- getKey JwtServiceImpl ----------");
@@ -131,6 +148,9 @@ public class JwtServiceImpl implements JwtService {
             }
             case RESET_TOKEN ->{
                 return Keys.hmacShaKeyFor(Decoders.BASE64.decode(resetKey));
+            }
+            case VERIFICATION_TOKEN ->{
+                return Keys.hmacShaKeyFor(Decoders.BASE64.decode(verificationKey));
             }
             default -> throw new IllegalArgumentException("Invalid token type");
 
