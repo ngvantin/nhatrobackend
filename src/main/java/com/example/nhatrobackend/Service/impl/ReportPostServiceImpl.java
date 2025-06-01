@@ -18,22 +18,23 @@ import com.example.nhatrobackend.Mapper.ReportPostMapper;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.ReportPostRepository;
 import com.example.nhatrobackend.Responsitory.UserRepository;
-import com.example.nhatrobackend.Service.NotificationService;
-import com.example.nhatrobackend.Service.PostService;
-import com.example.nhatrobackend.Service.ReportPostService;
-import com.example.nhatrobackend.Service.UserService;
+import com.example.nhatrobackend.Service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportPostServiceImpl implements ReportPostService {
@@ -44,6 +45,9 @@ public class ReportPostServiceImpl implements ReportPostService {
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private final NotificationService notificationService;
+    private final MailService mailService;
+    @Value("${spring.application.serverName}")
+    private String serverName;
 
     @Transactional
     public ReportPost createReportPost(ReportPostRequestDTO requestDTO, String postUuid, String userUuid) {
@@ -139,6 +143,10 @@ public class ReportPostServiceImpl implements ReportPostService {
 
         // Lưu notification vào database
         Notification savedNotification = notificationService.save(notification);
+        // Tạo và gửi notification event
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("postId", post.getPostId());  // Use null directly since it's allowed in HashMap
+        metadata.put("userId", post.getUser().getUserId());  // Use Integer directly
 
         // Tạo NotificationResponse từ notification đã lưu
         NotificationResponse notificationResponse = NotificationResponse.builder()
@@ -159,10 +167,7 @@ public class ReportPostServiceImpl implements ReportPostService {
                 .type(EventType.POST_LOCKED)
                 .notification(notificationResponse)
                 .timestamp(LocalDateTime.now())
-                .metadata(Map.of(
-                        "postId", post.getPostId(),
-                        "userId", post.getUser().getUserId()
-                ))
+                .metadata(metadata)
                 .priority(NotificationEvent.Priority.HIGH)
                 .status(Status.PENDING)
                 .build();
@@ -170,6 +175,14 @@ public class ReportPostServiceImpl implements ReportPostService {
         // Gửi notification
         notificationService.sendNotification(event);
 
+//        // Gửi email thông báo
+//        try {
+//            String postUrl = String.format("%s/posts/%d", serverName, user.getUserId());
+//            mailService.send(user.getEmail());
+//        } catch (Exception e) {
+//            log.error("Failed to send post rejection email", e);
+//            // Không throw exception vì đây không phải là lỗi nghiêm trọng
+//        }
     }
 
     @Override
