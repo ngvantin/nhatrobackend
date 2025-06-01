@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 /**
  * Interface định nghĩa các phương thức xử lý thông báo trong hệ thống nhà trọ.
  * Cung cấp các operation cơ bản và nâng cao cho việc quản lý thông báo.
@@ -36,6 +38,7 @@ public interface NotificationService {
     void markNotificationAsRead(Long notificationId);
 
     Notification save(Notification notification);
+    void sendNewPostNotificationToFollowers(Integer authorId, Integer postId, String postTitle);
 //
 //    /**
 //     * Lấy danh sách thông báo của một user

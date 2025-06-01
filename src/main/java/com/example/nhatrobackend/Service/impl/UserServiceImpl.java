@@ -17,12 +17,14 @@ import com.example.nhatrobackend.Mapper.UserMapper;
 //import com.example.nhatrobackend.Responsitory.AccountRepository;
 import com.example.nhatrobackend.Responsitory.UserRepository;
 //import com.example.nhatrobackend.Service.AccountService;
+import com.example.nhatrobackend.Service.MailService;
 import com.example.nhatrobackend.Service.NotificationService;
 import com.example.nhatrobackend.Service.UploadImageFileService;
 import com.example.nhatrobackend.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -33,10 +35,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import static com.example.nhatrobackend.Entity.Field.UserType.LANDLORD;
 
@@ -49,6 +53,10 @@ public class UserServiceImpl implements UserService {
 //    private final AccountService accountService;
     private final UploadImageFileService uploadImageFileService;
     private final NotificationService notificationService;
+
+    private final MailService mailService;
+    @Value("${spring.application.serverName}")
+    private String serverName;
 
 //    private final AccountRepository accountRepository; // // dính lỗi khi sửa security xóa bảng account
 
@@ -323,6 +331,15 @@ public class UserServiceImpl implements UserService {
             log.info("Notification saved to database with ID: {}", savedNotification.getId());
             log.info("Notification event sent: {}", event);
 
+            // Gửi email thông báo
+            try {
+                String postUrl = String.format("%s/posts/%d", serverName, user.getUserId());
+                mailService.sendLandlordApprovedNotification(user.getEmail());
+            } catch (Exception e) {
+                log.error("Failed to send post rejection email", e);
+                // Không throw exception vì đây không phải là lỗi nghiêm trọng
+            }
+
             // Chuyển đổi và trả về DTO
             UserDetailAdminDTO userDetailDTO = userMapper.toUserDetailAdminDTO(savedUser);
             if (userDetailDTO == null) {
@@ -397,6 +414,15 @@ public class UserServiceImpl implements UserService {
         // Log để debug
         log.info("Notification saved to database with ID: {}", savedNotification.getId());
         log.info("Notification event sent: {}", event);
+
+        // Gửi email thông báo
+        try {
+            String postUrl = String.format("%s/posts/%d", serverName, user.getUserId());
+            mailService.sendLandlordRejectedNotification(user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send post rejection email", e);
+            // Không throw exception vì đây không phải là lỗi nghiêm trọng
+        }
         // Trả về DTO
         return userMapper.toUserDetailAdminDTO(user);
     }
@@ -453,5 +479,21 @@ public class UserServiceImpl implements UserService {
                 .fullName(user.getFullName())
                 .postCount(user.getPostCount())
                 .build();
+    }
+
+    /**
+     * Lấy danh sách email của những người theo dõi một user
+     * @param userId ID của user cần lấy danh sách người theo dõi
+     * @return Danh sách email của những người theo dõi
+     */
+    @Override
+    public List<String> getFollowerEmails(Integer userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        return user.getFollowers().stream()
+                .map(follower -> follower.getFollowingUser().getEmail())
+                .filter(email -> email != null && !email.isEmpty())
+                .collect(Collectors.toList());
     }
 }

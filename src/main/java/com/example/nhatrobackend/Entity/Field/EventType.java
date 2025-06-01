@@ -10,7 +10,8 @@ public enum EventType {
     ROOM_STATUS_CHANGED("Thay đổi trạng thái phòng"),
     USER_REGISTERED("Đăng ký tài khoản mới"),
     SYSTEM_NOTIFICATION("Thông báo hệ thống"),
-    POST_LOCKED("Khóa bài đăng");
+    POST_LOCKED("Khóa bài đăng"),
+    NEW_POST_FROM_FOLLOWING("Bài viết mới");
 
     private final String description;
 

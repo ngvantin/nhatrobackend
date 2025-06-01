@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:remove="all">Xác nhận tài khoản của bạn</title>
+    <title th:remove="all" th:text="${title}">Thông báo</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style type="text/css">
@@ -128,23 +128,27 @@
                     <td class="main-content">
                         <!-- Title Section -->
                         <div class="title-section">
-                            <h1>Xác nhận tài khoản của bạn</h1>
+                            <h1 th:text="${header}">Thông báo</h1>
                             <div class="title-divider"></div>
                         </div>
 
                         <!-- Content Section -->
                         <div class="content-section">
-                            <p>Chào bạn,</p>
-                            <p>Cảm ơn bạn đã đăng ký tài khoản tại Nhà Trọ Rẻ. Vui lòng nhấp vào nút bên dưới để xác nhận địa chỉ email của bạn:</p>
+                            <p th:text="${content}">Nội dung thông báo</p>
                             
                             <!-- Button Section -->
-                            <div class="button-section">
-                                <a th:href="${linkConfirm}" class="button" style="color: #ffffff;">
-                                    Xác nhận tài khoản
+                            <div th:if="${buttonText}" class="button-section">
+                                <p>Bạn có thể xem chi tiết bằng cách nhấp vào nút bên dưới:</p>
+                                <a th:href="${buttonUrl}" class="button" style="color: #ffffff;" th:text="${buttonText}">
+                                    Xem chi tiết
                                 </a>
                             </div>
                         </div>
 
+                        <!-- Additional Info Section -->
+                        <div class="additional-info">
+                            <p>Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua email hỗ trợ hoặc số điện thoại hotline.</p>
+                        </div>
                     </td>
                 </tr>
 
@@ -175,4 +179,4 @@
     </tr>
 </table>
 </body>
-</html>
+</html> 

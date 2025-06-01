@@ -170,7 +170,7 @@ public class AuthenticationService {
         tokenService.save(Token.builder().phoneNumber(user.getPhoneNumber()).resetToken(resetToken).build());
         // TODO send email to user
         try {
-            mailService.sendConfirmLink(email, resetToken);
+            mailService.sendResetPasswordLink(email, resetToken);
         } catch (Exception e) {
             log.error("Send email fail, errorMessage={}", e.getMessage());
             throw new IllegalArgumentException("Send email fail, please try again!");
