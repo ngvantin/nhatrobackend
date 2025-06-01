@@ -4,9 +4,11 @@ import com.example.nhatrobackend.DTO.NotificationEvent;
 import com.example.nhatrobackend.DTO.request.NotificationRequest;
 import com.example.nhatrobackend.DTO.response.NotificationResponse;
 import com.example.nhatrobackend.Entity.Field.EventType;
+import com.example.nhatrobackend.Entity.Field.Status;
 import com.example.nhatrobackend.Entity.Notification;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.User;
+import com.example.nhatrobackend.Entity.Follower;
 import com.example.nhatrobackend.Responsitory.NotificationRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.UserRepository;
@@ -32,6 +34,8 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
+import java.util.Optional;
 
 import static com.example.nhatrobackend.Config.RabbitMQConfig.NOTIFICATION_EXCHANGE;
 import static com.example.nhatrobackend.Config.RabbitMQConfig.NOTIFICATION_ROUTING_KEY;
@@ -42,6 +46,7 @@ import static com.example.nhatrobackend.Config.RabbitMQConfig.NOTIFICATION_ROUTI
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final UserRepository userRepository;
 
     private final Map<Integer, Sinks.Many<NotificationResponse>> userSinks = new ConcurrentHashMap<>();
 
@@ -139,162 +144,70 @@ public class NotificationServiceImpl implements NotificationService {
     public Notification save(Notification notification) {
         return notificationRepository.save(notification);
     }
+
+    @Override
+    public void sendNewPostNotificationToFollowers(Integer authorId, Integer postId, String postTitle) {
+        log.info("Sending new post notification to followers of author: {}", authorId);
+
+        // Tìm người đăng bài viết
+        Optional<User> optionalAuthor = userRepository.findById(authorId);
+        if (optionalAuthor.isEmpty()) {
+            log.warn("Author not found with ID: {}", authorId);
+            return; // Không tìm thấy tác giả, dừng xử lý
+        }
+        User author = optionalAuthor.get();
+        Set<Follower> followers = author.getFollowers(); // Lấy danh sách người theo dõi
+
+        if (followers.isEmpty()) {
+            log.info("Author {} has no followers to notify.", authorId);
+            return; // Không có người theo dõi, dừng xử lý
+        }
+
+        String redirectUrl = String.format("/posts/%d", postId);
+        String notificationTitle = "Bài viết mới từ " + author.getFullName();
+        String notificationContent = author.getFullName() + " vừa đăng bài viết mới: \"" + postTitle + "\"";
+
+        for (Follower follower : followers) {
+            User followerUser = follower.getFollowingUser(); // Đây là người đang theo dõi
+
+            // Tạo notification cho từng người theo dõi
+            Notification notification = Notification.builder()
+                    .title(notificationTitle)
+                    .content(notificationContent)
+                    .type(EventType.NEW_POST_FROM_FOLLOWING.name()) // Sử dụng EventType phù hợp
+                    .userId(followerUser.getUserId()) // ID của người theo dõi
+                    .postId(postId)
+                    .redirectUrl(redirectUrl)
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            // Lưu notification vào database
+            Notification savedNotification = notificationRepository.save(notification);
+            log.info("Saved notification for follower {}: {}", followerUser.getUserId(), savedNotification.getId());
+
+            // Tạo và gửi notification event
+            NotificationResponse notificationResponse = mapToResponse(savedNotification);
+            NotificationEvent event = NotificationEvent.builder()
+                    .eventId(UUID.randomUUID().toString())
+                    .type(EventType.NEW_POST_FROM_FOLLOWING) // Sử dụng EventType phù hợp
+                    .notification(notificationResponse)
+                    .timestamp(LocalDateTime.now())
+                    .metadata(Map.of(
+                            "postId", postId,
+                            "authorId", authorId,
+                            "authorName", author.getFullName(),
+                            "followerId", followerUser.getUserId()
+                    ))
+                    .priority(NotificationEvent.Priority.MEDIUM) // Priority có thể tùy chỉnh
+                    .status(Status.PENDING) // Status có thể tùy chỉnh
+                    .build();
+
+            // Gửi notification (qua RabbitMQ và SSE)
+            sendNotification(event);
+            log.info("Sent notification event for follower {}: {}", followerUser.getUserId(), event.getEventId());
+        }
+        log.info("Finished sending new post notifications to followers of author: {}", authorId);
+    }
 }
-//
-//@Service
-//@RequiredArgsConstructor
-//@Slf4j
-//public class NotificationServiceImpl implements NotificationService {
-//    private final NotificationRepository notificationRepository;
-//    private final RabbitTemplate rabbitTemplate;
-////    private final WebhookService webhookService;
-//    private final PostRepository postRepository;
-//    private final UserRepository userRepository;
-//
-//    // Sinks for each user to handle SSE connections
-//    private final Map<Integer, Sinks.Many<NotificationResponse>> userSinks = new ConcurrentHashMap<>();
-//
-//    // RabbitMQ configuration
-//    private static final String NOTIFICATION_EXCHANGE = "notification.exchange";
-//    private static final String NOTIFICATION_ROUTING_KEY = "notification.event";
-//
-//    @Override
-//    public Mono<NotificationResponse> sendPostApprovalNotification(Integer postId) {
-//        return Mono.fromCallable(() -> {
-//            // Tạo thông báo duyệt bài
-//            NotificationRequest request = NotificationRequest.builder()
-//                    .type("POST_APPROVAL")
-//                    .title("Bài đăng đã được duyệt")
-//                    .content("Bài đăng của bạn đã được admin phê duyệt")
-//                    .postId(postId)
-//                    .build();
-//
-//            // Lưu vào database
-//            Notification notification = saveNotification(request);
-//
-//            // Gửi event qua RabbitMQ
-//            sendNotification(NotificationEvent.builder()
-//                    .eventId(UUID.randomUUID().toString())
-//                    .type(EventType.valueOf(notification.getType()))
-//                    .notification(mapToResponse(notification))
-//                    .timestamp(LocalDateTime.now())
-//                    .build());
-//
-//            return mapToResponse(notification);
-//        }).subscribeOn(Schedulers.boundedElastic());
-//    }
-//
-//    @Override
-//    public void sendNotification(NotificationEvent event) {
-//        try {
-//            // Gửi event tới RabbitMQ
-//            rabbitTemplate.convertAndSend(NOTIFICATION_EXCHANGE, NOTIFICATION_ROUTING_KEY, event);
-//
-//            // Nếu có sink cho user này, gửi notification qua SSE
-//            Integer userId = event.getNotification().getUserId();
-//            if (userSinks.containsKey(userId)) {
-//                userSinks.get(userId).tryEmitNext(event.getNotification());
-//            }
-//
-//            log.info("Sent notification event: {}", event);
-//        } catch (Exception e) {
-//            log.error("Error sending notification: {}", e.getMessage(), e);
-//            throw new RuntimeException("Failed to send notification", e);
-//        }
-//    }
-//
-//    /**
-//     * Lấy danh sách thông báo của user
-//     */
-//    @Override
-//    public Flux<NotificationResponse> getUserNotifications(Integer userId, int page, int size) {
-//        return Flux.fromIterable(
-//                notificationRepository.findByUserIdOrderByCreatedAtDesc(
-//                        userId,
-//                        PageRequest.of(page, size)
-//                ).getContent()
-//        ).map(this::mapToResponse);
-//    }
-//
-//    /**
-//     * Đánh dấu thông báo đã đọc
-//     */
-//    @Override
-//    public Mono<Void> markAsRead(Long notificationId, Integer userId) {
-//        return Mono.fromRunnable(() -> {
-//            Notification notification = notificationRepository.findById(notificationId)
-//                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông báo"));
-//
-//            if (!notification.getUserId().equals(userId)) {
-//                throw new AccessDeniedException("Không có quyền truy cập thông báo này");
-//            }
-//
-//            notification.setRead(true);
-//            notification.setUpdatedAt(LocalDateTime.now());
-//            notificationRepository.save(notification);
-//        }).subscribeOn(Schedulers.boundedElastic()).then();
-//    }
-//
-//    @Override
-//    public Flux<NotificationResponse> subscribeToUserNotifications(Integer userId) {
-//        // Create new sink if not exists
-//        Sinks.Many<NotificationResponse> sink = userSinks.computeIfAbsent(userId,
-//                k -> Sinks.many().multicast().onBackpressureBuffer());
-//
-//        return sink.asFlux();
-//    }
-//
-//    @Override
-//    public void markNotificationAsRead(String notificationId) {
-//        // Implementation for marking notification as read
-//        // This would typically update a notification status in database
-//        log.info("Marking notification as read: {}", notificationId);
-//    }
-//
-//    // Helper methods
-//
-//    /**
-//     * Lưu thông báo vào database
-//     */
-//    private Notification saveNotification(NotificationRequest request) {
-//        Notification notification = Notification.builder()
-//                .title(request.getTitle())
-//                .content(request.getContent())
-//                .type(request.getType())
-//                .userId(request.getUserId())
-//                .postId(request.getPostId())
-//                .redirectUrl(request.getRedirectUrl())
-//                .isRead(false)
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//
-//        return notificationRepository.save(notification);
-//    }
-//
-//    /**
-//     * Chuyển đổi từ Entity sang Response DTO
-//     */
-//    private NotificationResponse mapToResponse(Notification notification) {
-//        return NotificationResponse.builder()
-//                .id(notification.getId())
-//                .title(notification.getTitle())
-//                .content(notification.getContent())
-//                .type(notification.getType())
-//                .userId(notification.getUserId())
-//                .postId(notification.getPostId())
-//                .createdAt(notification.getCreatedAt())
-//                .isRead(notification.isRead())
-//                .redirectUrl(notification.getRedirectUrl())
-//                .build();
-//    }
-//
-//    /**
-//     * Xóa các thông báo cũ
-//     * Được gọi bởi scheduled task
-//     */
-//    @Scheduled(cron = "0 0 1 * * ?") // Chạy lúc 1 giờ sáng mỗi ngày
-//    public void cleanupOldNotifications() {
-//        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(30); // Xóa thông báo cũ hơn 30 ngày
-//        notificationRepository.deleteOldNotifications(cutoffDate);
-//    }
-//}
+
