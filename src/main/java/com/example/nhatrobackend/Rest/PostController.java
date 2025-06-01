@@ -338,11 +338,6 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-//    @SendNotification(
-//            templateId = "post_approval",
-//            type = EventType.POST_APPROVED,
-//            priority = NotificationEvent.Priority.HIGH
-//    )
     @PutMapping("/admin/approve/{postId}")
     public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> approvePost(@PathVariable int postId) {
         // Duyệt bài viết

@@ -16,14 +16,12 @@ import com.example.nhatrobackend.Mapper.UserMapper;
 import com.example.nhatrobackend.Responsitory.FavoritePostRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.ReportPostRepository;
-import com.example.nhatrobackend.Service.NotificationService;
-import com.example.nhatrobackend.Service.PostService;
-import com.example.nhatrobackend.Service.RoomService;
-import com.example.nhatrobackend.Service.UserService;
+import com.example.nhatrobackend.Service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +47,9 @@ public class PostServiceImpl implements PostService {
     private final FavoritePostRepository favoritePostRepository;
     private final ReportPostRepository reportPostRepository;
     private final NotificationService notificationService;
-
+    private final MailService mailService;
+    @Value("${spring.application.serverName}")
+    private String serverName;
     @Override
     public Page<PostResponseDTO> getPostsByUserUuid(String userUuid, Pageable pageable) {
         Page<Post> postPage = postRepository.findByUser_UserUuid(userUuid, pageable);
@@ -255,7 +255,7 @@ public class PostServiceImpl implements PostService {
 
             // Cập nhật trạng thái bài viết
             post.setStatus(PostStatus.APPROVED);
-            post.setUpdatedAt(LocalDateTime.now());
+//            post.setUpdatedAt(LocalDateTime.now());
 
             // Lưu lại bài viết đã cập nhật
             Post savedPost = postRepository.save(post);
@@ -313,6 +313,19 @@ public class PostServiceImpl implements PostService {
             log.info("Notification saved to database with ID: {}", savedNotification.getId());
             log.info("Notification event sent: {}", event);
 
+            // Gửi email thông báo
+            try {
+                String postUrl = String.format("%s/posts/%d", serverName, post.getPostId());
+                mailService.sendPostApprovedNotification(post.getUser().getEmail(), post.getTitle(), postUrl);
+            } catch (Exception e) {
+                log.error("Failed to send post rejection email", e);
+                // Không throw exception vì đây không phải là lỗi nghiêm trọng
+            }
+            notificationService.sendNewPostNotificationToFollowers(user.getUserId(),savedPost.getPostId(),savedPost.getTitle());
+            List<String> followerEmails = userService.getFollowerEmails(user.getUserId());
+            if(followerEmails !=null){
+                mailService.sendNewPostNotificationToFollowers(followerEmails,user.getFullName(),post.getTitle(),String.format("%s/posts/%d", serverName, post.getPostId()));
+            }
             // Trả về response DTO
             return postMapper.toPostDetailResponseDTO(savedPost);
         } else {
@@ -386,6 +399,16 @@ public class PostServiceImpl implements PostService {
             // Log để debug
             log.info("Notification saved to database with ID: {}", savedNotification.getId());
             log.info("Notification event sent: {}", event);
+
+
+            // Gửi email thông báo
+            try {
+                String postUrl = String.format("%s/posts/%d", serverName, post.getPostId());
+                mailService.sendPostRejectedNotification(post.getUser().getEmail(), post.getTitle(), postUrl);
+            } catch (Exception e) {
+                log.error("Failed to send post rejection email", e);
+                // Không throw exception vì đây không phải là lỗi nghiêm trọng
+            }
 
             // Trả về response DTO
             return postMapper.toPostDetailResponseDTO(post);  // Chuyển đổi thành DTO nếu cần
