@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:remove="all" th:text="${title}">Thông báo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style type="text/css">
+        /* Basic styling for better compatibility */
+        body {
+            margin: 0; 
+            padding: 0; 
+            background-color: #f4f4f4; 
+            font-family: Arial, sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            padding: 20px;
+            text-align: center;
+            background-color: #173849;
+            color: #ffffff;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin: 0;
+            font-weight: bold;
+        }
+        .main-content {
+            padding: 40px 30px;
+        }
+        .title-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .title-section h1 {
+             color: #173849;
+             font-size: 24px;
+             margin: 0;
+             padding: 0;
+        }
+        .title-divider {
+            width: 50px;
+            height: 3px;
+            background-color: #173849;
+            margin: 15px auto;
+        }
+        .content-section {
+            color: #333333;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .content-section p {
+             margin: 0 0 20px 0;
+        }
+        .button-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .button-section p {
+            color: #666666;
+            margin-bottom: 15px;
+        }
+        .button {
+            display: inline-block; 
+            background-color: #173849; 
+            color: #ffffff; 
+            text-decoration: none; 
+            padding: 12px 30px; 
+            border-radius: 5px; 
+            font-weight: bold;
+        }
+
+        .footer {
+            background-color: #173849;
+            padding: 30px 20px;
+            text-align: center;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .footer .copyright {
+             font-size: 12px;
+             border-top: 1px solid rgba(255,255,255,0.1);
+             padding-top: 15px;
+             margin-top: 15px;
+        }
+         .footer .social-links a {
+             display: inline-block;
+             margin: 0 10px;
+             color: #ffffff;
+             font-size: 20px;
+             text-decoration: none;
+         }
+    </style>
+</head>
+<body>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td>
+            <table class="container" role="presentation" align="center" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <!-- Header with Logo Text -->
+                <tr>
+                    <td class="header">
+                        <h1>Nhà Trọ Rẻ</h1>
+                    </td>
+                </tr>
+
+                <!-- Main Content -->
+                <tr>
+                    <td class="main-content">
+                        <!-- Title Section -->
+                        <div class="title-section">
+                            <h1 th:text="${header}">Thông báo</h1>
+                            <div class="title-divider"></div>
+                        </div>
+
+                        <!-- Content Section -->
+                        <div class="content-section">
+                            <p th:text="${content}">Nội dung thông báo</p>
+                            
+                            <!-- Button Section -->
+                            <div th:if="${buttonText}" class="button-section">
+                                <p>Bạn có thể xem chi tiết bằng cách nhấp vào nút bên dưới:</p>
+                                <a th:href="${buttonUrl}" class="button" style="color: #ffffff;" th:text="${buttonText}">
+                                    Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Additional Info Section -->
+                        <div class="additional-info">
+                            <p>Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua email hỗ trợ hoặc số điện thoại hotline.</p>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td class="footer">
+                        <!-- Social Media Links (Text) -->
+                        <div class="social-links" style="margin-bottom: 20px;">
+                             <a href="#">Facebook</a> |
+                             <a href="#">Twitter</a> |
+                             <a href="#">Instagram</a>
+                        </div>
+
+                        <!-- Contact Info -->
+                        <div style="margin-bottom: 15px;">
+                            <p>Hotline: 1900 1234</p>
+                            <p>Email: support@nhatrore.com</p>
+                        </div>
+
+                        <!-- Copyright -->
+                        <div class="copyright">
+                             <p>&copy; 2024 Nhà Trọ Rẻ. Tất cả các quyền được bảo lưu.</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html> 
