@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface UserService {
     boolean getApprovedUserByUuid(String userUuid);
@@ -42,4 +43,6 @@ public interface UserService {
     UserStatsResponse getUserTypeCounts();
 
     UserPostCountDTO getUserPostCount(Integer userId);
+
+    List<String> getFollowerEmails(Integer userId);
 }
