@@ -274,6 +274,7 @@ public class AuthenticationService {
 
         // Generate verification token
         String verificationToken = jwtService.generateVerificationToken(user);
+        log.info("---------- generateVerificationToken ----------" + verificationToken);
 
         // Save token
         tokenService.save(Token.builder()
@@ -314,58 +315,58 @@ public class AuthenticationService {
 
         // Delete verification token
         tokenService.delete(phoneNumber);
-
-
-        // Tạo và lưu notification vào database
-        Notification notification = Notification.builder()
-                .title("Chào mừng bạn!")
-                .content("Chúng tôi xin tặng bạn 5 lượt bài đăng miễn phí.")
-                .type(EventType.POST_REPORTED.name())
-                .userId(user.getUserId())
-                .postId(null)
-                .redirectUrl("/posts/")
-                .isRead(false)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        // Lưu notification vào database
-        Notification savedNotification = notificationService.save(notification);
-
-
-        // Tạo NotificationResponse từ notification đã lưu
-        NotificationResponse notificationResponse = NotificationResponse.builder()
-                .id(savedNotification.getId())
-                .title(savedNotification.getTitle())
-                .content(savedNotification.getContent())
-                .type(savedNotification.getType())
-                .userId(savedNotification.getUserId())
-                .postId(savedNotification.getPostId())
-                .createdAt(savedNotification.getCreatedAt())
-                .isRead(savedNotification.isRead())
-                .redirectUrl(savedNotification.getRedirectUrl())
-                .build();
-
-        // Tạo và gửi notification event
-        Map<String, Object> metadata = new HashMap<>();
-        metadata.put("postId", null);  // Use null directly since it's allowed in HashMap
-        metadata.put("userId", user.getUserId());  // Use Integer directly
-
-        NotificationEvent event = NotificationEvent.builder()
-                .eventId(UUID.randomUUID().toString())
-                .type(EventType.LANDLORD_APPROVED)
-                .notification(notificationResponse)
-                .timestamp(LocalDateTime.now())
-                .metadata(metadata)
-                .priority(NotificationEvent.Priority.HIGH)
-                .status(Status.PENDING)
-                .build();
-
-        // Gửi notification
-        notificationService.sendNotification(event);
-
-        // Log để debug
-        log.info("Notification saved to database with ID: {}", savedNotification.getId());
-        log.info("Notification event sent: {}", event);
+//
+//
+//        // Tạo và lưu notification vào database
+//        Notification notification = Notification.builder()
+//                .title("Chào mừng bạn!")
+//                .content("Chúng tôi xin tặng bạn 5 lượt bài đăng miễn phí.")
+//                .type(EventType.POST_REPORTED.name())
+//                .userId(user.getUserId())
+//                .postId(null)
+//                .redirectUrl("/posts/")
+//                .isRead(false)
+//                .createdAt(LocalDateTime.now())
+//                .build();
+//
+//        // Lưu notification vào database
+//        Notification savedNotification = notificationService.save(notification);
+//
+//
+//        // Tạo NotificationResponse từ notification đã lưu
+//        NotificationResponse notificationResponse = NotificationResponse.builder()
+//                .id(savedNotification.getId())
+//                .title(savedNotification.getTitle())
+//                .content(savedNotification.getContent())
+//                .type(savedNotification.getType())
+//                .userId(savedNotification.getUserId())
+//                .postId(savedNotification.getPostId())
+//                .createdAt(savedNotification.getCreatedAt())
+//                .isRead(savedNotification.isRead())
+//                .redirectUrl(savedNotification.getRedirectUrl())
+//                .build();
+//
+//        // Tạo và gửi notification event
+//        Map<String, Object> metadata = new HashMap<>();
+//        metadata.put("postId", null);  // Use null directly since it's allowed in HashMap
+//        metadata.put("userId", user.getUserId());  // Use Integer directly
+//
+//        NotificationEvent event = NotificationEvent.builder()
+//                .eventId(UUID.randomUUID().toString())
+//                .type(EventType.LANDLORD_APPROVED)
+//                .notification(notificationResponse)
+//                .timestamp(LocalDateTime.now())
+//                .metadata(metadata)
+//                .priority(NotificationEvent.Priority.HIGH)
+//                .status(Status.PENDING)
+//                .build();
+//
+//        // Gửi notification
+//        notificationService.sendNotification(event);
+//
+//        // Log để debug
+//        log.info("Notification saved to database with ID: {}", savedNotification.getId());
+//        log.info("Notification event sent: {}", event);
 
         return "Email verified successfully";
     }
