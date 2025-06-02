@@ -8,10 +8,13 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentHistoryRepository extends JpaRepository<PaymentHistory, Long> {
     List<PaymentHistory> findByUser_UserId(Integer userId); // Đổi tên method
+
+    Optional<PaymentHistory> findByPaymentIdAndUser_UserId(Long paymentId, Integer userId);
 
     @Query("SELECT FUNCTION('YEAR', p.paymentTime) as year, " +
            "FUNCTION('MONTH', p.paymentTime) as month, " +

@@ -1,11 +1,16 @@
 package com.example.nhatrobackend.Service.impl;
 
+import com.example.nhatrobackend.DTO.response.AdminPaymentHistoryResponse;
 import com.example.nhatrobackend.DTO.response.PaymentHistoryResponse;
 import com.example.nhatrobackend.Entity.PaymentHistory;
 import com.example.nhatrobackend.Mapper.PaymentHistoryMapper;
 import com.example.nhatrobackend.Responsitory.PaymentHistoryRepository;
 import com.example.nhatrobackend.Service.PaymentHistoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -63,5 +68,53 @@ public class PaymentHistoryServiceImpl implements PaymentHistoryService {
         }
         
         return result;
+    }
+
+    @Override
+    public PaymentHistoryResponse getPaymentDetailsById(Integer userId, Long paymentId) {
+        PaymentHistory paymentHistory = paymentHistoryRepository.findByPaymentIdAndUser_UserId(paymentId, userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch với ID: " + paymentId));
+        
+        return paymentHistoryMapper.toPaymentHistoryResponse(paymentHistory);
+    }
+
+
+    @Override
+    public Page<PaymentHistoryResponse> getAllPaymentHistories(int page, int size, String sortBy, String direction) {
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction.toUpperCase());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+        
+        Page<PaymentHistory> paymentHistories = paymentHistoryRepository.findAll(pageable);
+        return paymentHistories.map(paymentHistoryMapper::toPaymentHistoryResponse);
+    }
+
+    @Override
+    public AdminPaymentHistoryResponse getAdminPaymentDetailsById(Long paymentId) {
+        PaymentHistory paymentHistory = paymentHistoryRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch với ID: " + paymentId));
+        
+        return mapToAdminPaymentHistoryResponse(paymentHistory);
+    }
+
+    private AdminPaymentHistoryResponse mapToAdminPaymentHistoryResponse(PaymentHistory paymentHistory) {
+        if (paymentHistory == null) return null;
+        
+        AdminPaymentHistoryResponse response = new AdminPaymentHistoryResponse();
+        response.setPaymentId(paymentHistory.getPaymentId());
+        response.setOrderInfo(paymentHistory.getOrderInfo());
+        response.setPaymentAmount(paymentHistory.getPaymentAmount());
+        response.setTransactionCode(paymentHistory.getTransactionCode());
+        response.setPaymentTime(paymentHistory.getPaymentTime());
+        response.setResponseCode(paymentHistory.getResponseCode());
+        
+        // Map user information
+        if (paymentHistory.getUser() != null) {
+            response.setUserId(paymentHistory.getUser().getUserId());
+            response.setFullName(paymentHistory.getUser().getFullName());
+            response.setEmail(paymentHistory.getUser().getEmail());
+            response.setPhoneNumber(paymentHistory.getUser().getPhoneNumber());
+        }
+        
+        return response;
     }
 }

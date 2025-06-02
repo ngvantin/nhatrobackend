@@ -7,10 +7,17 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class PaymentHistoryResponse {
+public class AdminPaymentHistoryResponse {
     private Long paymentId;
     private String orderInfo;
     private Long paymentAmount;
     private String transactionCode;
     private LocalDateTime paymentTime;
-}
+    private String responseCode;
+    
+    // User information
+    private Integer userId;
+    private String fullName;
+    private String email;
+    private String phoneNumber;
+} 
