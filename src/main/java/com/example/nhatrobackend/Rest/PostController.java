@@ -483,5 +483,27 @@ public class PostController {
                 .build());
     }
 
+    @PutMapping("/anonymous/{postUuid}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> makePostAnonymous(@PathVariable String postUuid) {
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
+        PostDetailResponseDTO postDetail = postService.makePostAnonymous(postUuid, currentUserId);
+        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(postDetail)
+                .message("Bài đăng đã được chuyển sang trạng thái ẩn danh.")
+                .build());
+    }
+
+    @PutMapping("/unanonymous/{postUuid}")
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> makePostUnanonymous(@PathVariable String postUuid) {
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
+        PostDetailResponseDTO postDetail = postService.makePostUnanonymous(postUuid, currentUserId);
+        return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                .status("success")
+                .data(postDetail)
+                .message("Bài đăng đã được chuyển về trạng thái hiển thị.")
+                .build());
+    }
+
 }
 

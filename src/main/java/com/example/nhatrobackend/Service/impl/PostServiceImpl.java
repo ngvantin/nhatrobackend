@@ -572,4 +572,50 @@ public class PostServiceImpl implements PostService {
         log.info("Returning PostStatsResponse: {}", response);
         return response;
     }
+
+    @Override
+    @Transactional
+    public PostDetailResponseDTO makePostAnonymous(String postUuid, Integer currentUserId) {
+        Post post = findPostByUuidOrThrow(postUuid);
+
+        // Kiểm tra quyền sở hữu bài viết
+        if (!post.getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("Bạn không có quyền thực hiện thao tác này.");
+        }
+
+        // Kiểm tra trạng thái hiện tại của bài viết
+        if (post.getStatus() != PostStatus.APPROVED) {
+            throw new IllegalArgumentException("Chỉ có thể ẩn danh bài viết đã được duyệt.");
+        }
+
+        // Cập nhật trạng thái thành ẩn danh
+        post.setStatus(PostStatus.ANONYMOUS);
+        post.setUpdatedAt(LocalDateTime.now());
+
+        Post savedPost = postRepository.save(post);
+        return postMapper.toPostDetailResponseDTO(savedPost);
+    }
+
+    @Override
+    @Transactional
+    public PostDetailResponseDTO makePostUnanonymous(String postUuid, Integer currentUserId) {
+        Post post = findPostByUuidOrThrow(postUuid);
+
+        // Kiểm tra quyền sở hữu bài viết
+        if (!post.getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("Bạn không có quyền thực hiện thao tác này.");
+        }
+
+        // Kiểm tra trạng thái hiện tại của bài viết
+        if (post.getStatus() != PostStatus.ANONYMOUS) {
+            throw new IllegalArgumentException("Bài viết không ở trạng thái ẩn danh.");
+        }
+
+        // Cập nhật trạng thái thành đã duyệt
+        post.setStatus(PostStatus.APPROVED);
+        post.setUpdatedAt(LocalDateTime.now());
+
+        Post savedPost = postRepository.save(post);
+        return postMapper.toPostDetailResponseDTO(savedPost);
+    }
 }

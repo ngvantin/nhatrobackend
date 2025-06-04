@@ -5,5 +5,6 @@ public enum PostStatus {
     APPROVED,
     LOCKED,
     REJECTED,
-    ACTIVE; // dính lỗi khi sửa security xóa bảng account
+    ACTIVE,
+    ANONYMOUS; // Thêm trạng thái ẩn danh
     }

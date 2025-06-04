@@ -35,4 +35,6 @@ public interface PostService {
     public List<SimilarPostResponse> getSimilarPosts(String postUuid);
     Page<PostResponseDTO> getPostsByUserUuid(String userUuid, Pageable pageable);
     PostStatsResponse getPostStatsByYear(int year);
+    PostDetailResponseDTO makePostAnonymous(String postUuid, Integer currentUserId);
+    PostDetailResponseDTO makePostUnanonymous(String postUuid, Integer currentUserId);
 }
