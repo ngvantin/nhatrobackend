@@ -10,7 +10,7 @@ import com.example.nhatrobackend.Entity.Administrative.Ward;
 import java.util.List;
 
 public interface AdministrativeService {
-    List<String> getAllProvinces();
-    List<String> getDistrictsByProvince(String provinceCode);
-    List<String> getWardsByDistrict(String districtCode);
+    List<String> getAllProvinces(String keyword);
+    List<String> getDistrictsByProvince(String provinceName, String keyword);
+    List<String> getWardsByDistrict(String districtFullName, String keyword);
 }
