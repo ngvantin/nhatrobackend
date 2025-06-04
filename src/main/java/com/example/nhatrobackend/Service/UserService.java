@@ -45,4 +45,6 @@ public interface UserService {
     UserPostCountDTO getUserPostCount(Integer userId);
 
     List<String> getFollowerEmails(Integer userId);
+
+    String uploadCccdImages(String userUuid, MultipartFile frontCccd, MultipartFile backCccd) throws IOException;
 }
