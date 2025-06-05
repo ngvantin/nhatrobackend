@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
  * Repository để tương tác với bảng notifications trong database.
  * Cung cấp các phương thức truy vấn và cập nhật thông báo.
  */
+@Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     /**
      * Lấy danh sách thông báo của một user
@@ -59,4 +61,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Transactional
     void deleteByCreatedAtBefore(LocalDateTime date);
+
+    long countByUserIdAndIsRead(Integer userId, boolean isRead);
 }

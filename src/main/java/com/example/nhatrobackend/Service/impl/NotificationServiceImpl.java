@@ -13,6 +13,7 @@ import com.example.nhatrobackend.Responsitory.NotificationRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Responsitory.UserRepository;
 import com.example.nhatrobackend.Service.NotificationService;
+import com.example.nhatrobackend.Service.UserService;
 //import com.example.nhatrobackend.Service.WebhookService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final RabbitTemplate rabbitTemplate;
     private final UserRepository userRepository;
+//    private final UserService userService;
 
     private final Map<Integer, Sinks.Many<NotificationResponse>> userSinks = new ConcurrentHashMap<>();
 
@@ -208,6 +210,12 @@ public class NotificationServiceImpl implements NotificationService {
             log.info("Sent notification event for follower {}: {}", followerUser.getUserId(), event.getEventId());
         }
         log.info("Finished sending new post notifications to followers of author: {}", authorId);
+    }
+
+    @Override
+    public long getUnreadNotificationCountForUser(Integer userId) {
+        // Use the repository method to count unread notifications for the given user ID
+        return notificationRepository.countByUserIdAndIsRead(userId, false);
     }
 }
 
