@@ -18,4 +18,6 @@ public class ReportPostDetailDTO {
     private String reason;
     private String details;
     private LocalDateTime createdAt;
+    private String videoUrl;
+    private List<String> reportImages;
 }

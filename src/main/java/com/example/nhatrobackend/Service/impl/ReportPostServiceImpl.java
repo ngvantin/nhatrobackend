@@ -11,13 +11,14 @@ import com.example.nhatrobackend.Entity.Field.ReportStatus;
 import com.example.nhatrobackend.Entity.Field.Status;
 import com.example.nhatrobackend.Entity.Notification;
 import com.example.nhatrobackend.Entity.Post;
+import com.example.nhatrobackend.Entity.ReportImage;
 import com.example.nhatrobackend.Entity.ReportPost;
 import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Mapper.ReportPostMapper;
 import com.example.nhatrobackend.Responsitory.PostRepository;
+import com.example.nhatrobackend.Responsitory.ReportImageRepository;
 import com.example.nhatrobackend.Responsitory.ReportPostRepository;
-import com.example.nhatrobackend.Responsitory.UserRepository;
 import com.example.nhatrobackend.Service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -27,12 +28,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -46,11 +52,21 @@ public class ReportPostServiceImpl implements ReportPostService {
     private final PostRepository postRepository;
     private final NotificationService notificationService;
     private final MailService mailService;
+    private final UploadImageFileService uploadImageFileService;
+    private final ReportImageRepository reportImageRepository;
     @Value("${spring.application.serverName}")
     private String serverName;
 
+//    @Override
+//    public Page<ReportPost> getAllReportedPosts(Pageable pageable) {
+//        return reportPostRepository.findAllReportedPosts(pageable);
+//    }
+
+    @Override
     @Transactional
     public ReportPost createReportPost(ReportPostRequestDTO requestDTO, String postUuid, String userUuid) {
+        log.info("Creating report for post {} by user {}", postUuid, userUuid);
+
         // Lấy User và Post từ các service tương ứng
         User user = userService.getUserByUuid(userUuid);
         Post post = postService.getPostByUuid(postUuid);
@@ -60,17 +76,58 @@ public class ReportPostServiceImpl implements ReportPostService {
         reportPost.setReason(requestDTO.getReason());
         reportPost.setDetails(requestDTO.getDetails());
         reportPost.setCreatedAt(LocalDateTime.now());
+        reportPost.setUpdatedAt(LocalDateTime.now());
         reportPost.setUser(user);
         reportPost.setPost(post);
-        reportPost.setStatus(ReportStatus.PENDING); // Mặc định là PENDING
+        reportPost.setStatus(ReportStatus.PENDING);
 
-        // Lưu vào database
-        return reportPostRepository.save(reportPost);
+        // Upload video if provided
+        if (requestDTO.getVideo() != null && !requestDTO.getVideo().isEmpty()) {
+            try {
+                String videoUrl = uploadImageFileService.uploadImage(requestDTO.getVideo());
+                reportPost.setVideoUrl(videoUrl);
+                log.info("Uploaded video for report: {}", videoUrl);
+            } catch (IOException e) {
+                log.error("Failed to upload video for report", e);
+                // Handle exception appropriately, maybe re-throw or return an error response
+            }
+        }
+
+        // Save ReportPost first to get its ID
+        ReportPost savedReportPost = reportPostRepository.save(reportPost);
+        log.info("Saved report post with ID: {}", savedReportPost.getReportId());
+
+        // Upload images if provided
+        List<ReportImage> reportImages = new ArrayList<>();
+        if (requestDTO.getImages() != null && !requestDTO.getImages().isEmpty()) {
+            log.info("Uploading {} images for report", requestDTO.getImages().size());
+            for (MultipartFile imageFile : requestDTO.getImages()) {
+                if (imageFile != null && !imageFile.isEmpty()) {
+                    try {
+                        String imageUrl = uploadImageFileService.uploadImage(imageFile);
+                        ReportImage reportImage = new ReportImage(imageUrl, savedReportPost);
+                        reportImages.add(reportImage);
+                        log.info("Uploaded image for report: {}", imageUrl);
+                    } catch (IOException e) {
+                        log.error("Failed to upload image for report", e);
+                        // Handle exception appropriately
+                    }
+                }
+            }
+             // Save all report images in a batch (optional but can be more efficient)
+             reportImageRepository.saveAll(reportImages);
+             log.info("Saved {} report images", reportImages.size());
+        }
+
+        // The savedReportPost object should now have its ID and the reportImages list should be populated after saving the images
+        // If you need the reportImages list on the returned object immediately, you might need to refresh it or fetch it again.
+        // However, since it's a Transactional method and the entities are managed, they should be associated.
+
+        return savedReportPost;
     }
 
     @Override
     public Page<ReportPostAdminDTO> getAllReportedPosts(Pageable pageable) {
-
         // Lấy tất cả bài viết bị tố cáo từ repository, phân trang
         Page<ReportPost> reportPosts = reportPostRepository.findAll(pageable);
 
@@ -78,7 +135,6 @@ public class ReportPostServiceImpl implements ReportPostService {
         return reportPosts.map(reportPostMapper::reportPostToReportPostAdminDTO);
     }
 
-    // dính lỗi khi sửa security xóa bảng account
     @Override
     public ReportPostDetailDTO getReportPostDetail(Integer reportId) {
         // Lấy ReportPost theo reportId
@@ -89,11 +145,18 @@ public class ReportPostServiceImpl implements ReportPostService {
         }
 
         ReportPost reportPost = optionalReportPost.get();
+
+        // Map ReportPost entity to ReportPostDetailDTO
         ReportPostDetailDTO reportPostDetailDTO = ReportPostDetailDTO.builder()
                 .reportId(reportPost.getReportId())
                 .reason(reportPost.getReason())
                 .details(reportPost.getDetails())
                 .createdAt(reportPost.getCreatedAt())
+                .videoUrl(reportPost.getVideoUrl()) // Include video URL
+                .reportImages(reportPost.getReportImages() != null ? 
+                              reportPost.getReportImages().stream()
+                                  .map(ReportImage::getImageUrl)
+                                  .collect(Collectors.toList()) : new ArrayList<>()) // Include image URLs
                 .build();
 
         // Chuyển đổi và trả về DTO

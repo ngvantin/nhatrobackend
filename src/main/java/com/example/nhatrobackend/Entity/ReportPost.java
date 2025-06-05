@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -49,6 +50,11 @@ public class ReportPost {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
+    @Column(name = "video_url")
+    private String videoUrl;
+
+    @OneToMany(mappedBy = "reportPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportImage> reportImages;
 
 }
 
