@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -287,6 +288,32 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+
+    @GetMapping("/anonymous")
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getAnonymousPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size, HttpServletRequest request) {
+
+        //        String userUuid = authenticationFacade.getCurrentUserUuid();
+        // Lấy userUuid từ JWT token trong cookie
+        String userUuid = authenticationFacade.getCurrentUserUuid();
+
+        // Tạo Pageable từ các tham số page và size
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách các bài post với trạng thái APPROVED cho user
+        Page<PostResponseDTO> posts = postService.getPostsByStatusAndUser(PostStatus.ANONYMOUS,userUuid, pageable);
+
+        // Tạo ResponseWrapper với status, message và dữ liệu
+        ResponseWrapper<Page<PostResponseDTO>> response = new ResponseWrapper<>(
+                "success",
+                "Lấy danh sách bài posts bị từ chối thành công",
+                posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/pending")
     public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getPendingPosts(
             @RequestParam(defaultValue = "0") int page,
@@ -503,6 +530,99 @@ public class PostController {
                 .data(postDetail)
                 .message("Bài đăng đã được chuyển về trạng thái hiển thị.")
                 .build());
+    }
+
+    @PostMapping(value = "/create-with-images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseWrapper<PostDetailResponseDTO>> createPostWithImages(
+            @ModelAttribute CreatePostWithImagesDTO dto) {
+        try {
+            String userUuid = authenticationFacade.getCurrentUserUuid();
+            log.info("Starting post creation with images for user: {}", userUuid);
+            
+            // Upload post images
+            List<String> imageUrls = new ArrayList<>();
+            if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+                log.info("Uploading {} post images", dto.getImages().size());
+                for (MultipartFile file : dto.getImages()) {
+                    if (file != null && !file.isEmpty()) {
+                        log.info("Uploading post image: {}", file.getOriginalFilename());
+                        String fileUrl = uploadImageFileService.uploadImage(file);
+                        imageUrls.add(fileUrl);
+                        log.info("Successfully uploaded post image: {}", fileUrl);
+                    }
+                }
+            } else {
+                log.warn("No post images provided");
+            }
+
+            // Upload license images
+            String licensePcccUrl = null;
+            if (dto.getLicensePccc() != null && !dto.getLicensePccc().isEmpty()) {
+                log.info("Uploading PCCC license image: {}", dto.getLicensePccc().getOriginalFilename());
+                licensePcccUrl = uploadImageFileService.uploadImage(dto.getLicensePccc());
+                log.info("Successfully uploaded PCCC license image: {}", licensePcccUrl);
+            } else {
+                log.warn("No PCCC license image provided");
+            }
+
+            String licenseBusinessUrl = null;
+            if (dto.getLicenseBusiness() != null && !dto.getLicenseBusiness().isEmpty()) {
+                log.info("Uploading business license image: {}", dto.getLicenseBusiness().getOriginalFilename());
+                licenseBusinessUrl = uploadImageFileService.uploadImage(dto.getLicenseBusiness());
+                log.info("Successfully uploaded business license image: {}", licenseBusinessUrl);
+            } else {
+                log.warn("No business license image provided");
+            }
+
+            // Create PostRequestDTO from the uploaded images and other data
+            PostRequestDTO postRequestDTO = new PostRequestDTO();
+            postRequestDTO.setPostImages(imageUrls);
+            postRequestDTO.setTitle(dto.getTitle());
+            postRequestDTO.setDescription(dto.getDescription());
+            postRequestDTO.setDepositAmount(dto.getDepositAmount());
+            postRequestDTO.setVideoUrl(dto.getVideoUrl());
+            postRequestDTO.setPrice(dto.getPrice());
+            postRequestDTO.setArea(dto.getArea());
+            postRequestDTO.setFurnitureStatus(dto.getFurnitureStatus());
+            postRequestDTO.setNumberOfRooms(dto.getNumberOfRooms());
+            postRequestDTO.setElectricityPrice(dto.getElectricityPrice());
+            postRequestDTO.setWaterPrice(dto.getWaterPrice());
+            postRequestDTO.setCity(dto.getCity());
+            postRequestDTO.setDistrict(dto.getDistrict());
+            postRequestDTO.setWard(dto.getWard());
+            postRequestDTO.setStreet(dto.getStreet());
+            postRequestDTO.setHouseNumber(dto.getHouseNumber());
+            postRequestDTO.setLicensePcccUrl(licensePcccUrl);
+            postRequestDTO.setLicenseBusinessUrl(licenseBusinessUrl);
+
+            log.info("Creating post with {} images, PCCC URL: {}, Business License URL: {}", 
+                    imageUrls.size(), licensePcccUrl, licenseBusinessUrl);
+
+            // Create the post using existing service
+            PostDetailResponseDTO postDetailResponseDTO = postService.createPost(postRequestDTO, userUuid);
+
+            log.info("Successfully created post with ID: {}", postDetailResponseDTO.getPostId());
+
+            return ResponseEntity.ok(ResponseWrapper.<PostDetailResponseDTO>builder()
+                    .status("success")
+                    .data(postDetailResponseDTO)
+                    .message("Bài đăng đã được tạo thành công.")
+                    .build());
+        } catch (IOException e) {
+            log.error("Error uploading images: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseWrapper.<PostDetailResponseDTO>builder()
+                            .status("error")
+                            .message("Lỗi khi upload ảnh: " + e.getMessage())
+                            .build());
+        } catch (Exception e) {
+            log.error("Error creating post: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseWrapper.<PostDetailResponseDTO>builder()
+                            .status("error")
+                            .message("Lỗi khi tạo bài đăng: " + e.getMessage())
+                            .build());
+        }
     }
 
 }

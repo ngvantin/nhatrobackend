@@ -42,6 +42,7 @@ public class AdministrativeServiceImpl implements AdministrativeService {
 //    }
 
     // Lấy tất cả các tỉnh (Province)
+    @Override
     public List<String> getAllProvinces(String keyword) {
         List<Province> provinces;
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -56,6 +57,7 @@ public class AdministrativeServiceImpl implements AdministrativeService {
     }
 
     // Lấy tên các quận (District) theo mã tỉnh (provinceCode)
+    @Override
     public List<String> getDistrictsByProvince(String provinceName, String keyword) {
         List<District> districts;
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -70,6 +72,7 @@ public class AdministrativeServiceImpl implements AdministrativeService {
     }
 
     // Lấy tên các phường (Ward) theo mã quận (districtCode)
+    @Override
     public List<String> getWardsByDistrict(String districtFullName, String keyword) {
         List<Ward> wards;
         if (keyword != null && !keyword.trim().isEmpty()) {
