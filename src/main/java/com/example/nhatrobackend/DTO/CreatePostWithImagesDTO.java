@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CreatePostWithImagesDTO {
     private List<MultipartFile> images;
+    private MultipartFile video;
     private String title;
     private String description;
     private double depositAmount;

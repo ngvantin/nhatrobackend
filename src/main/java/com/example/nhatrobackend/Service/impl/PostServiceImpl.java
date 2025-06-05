@@ -9,6 +9,10 @@ import com.example.nhatrobackend.Entity.Field.EventType;
 import com.example.nhatrobackend.Entity.Field.FurnitureStatus;
 import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Entity.Field.Status;
+import com.example.nhatrobackend.Entity.Notification;
+import com.example.nhatrobackend.Entity.Post;
+import com.example.nhatrobackend.Entity.Room;
+import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.PostImageMapper;
 import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Mapper.RoomMapper;
@@ -48,6 +52,7 @@ public class PostServiceImpl implements PostService {
     private final ReportPostRepository reportPostRepository;
     private final NotificationService notificationService;
     private final MailService mailService;
+    private final SearchInformationService searchInformationService;
     @Value("${spring.application.serverName}")
     private String serverName;
     @Override
@@ -321,11 +326,75 @@ public class PostServiceImpl implements PostService {
                 log.error("Failed to send post rejection email", e);
                 // Không throw exception vì đây không phải là lỗi nghiêm trọng
             }
-            notificationService.sendNewPostNotificationToFollowers(user.getUserId(),savedPost.getPostId(),savedPost.getTitle());
+
+            // Gửi thông báo cho người theo dõi
+            notificationService.sendNewPostNotificationToFollowers(user.getUserId(), savedPost.getPostId(), savedPost.getTitle());
             List<String> followerEmails = userService.getFollowerEmails(user.getUserId());
-            if(followerEmails !=null){
-                mailService.sendNewPostNotificationToFollowers(followerEmails,user.getFullName(),post.getTitle(),String.format("%s/posts/%d", serverName, post.getPostId()));
+            if(followerEmails != null && !followerEmails.isEmpty()) {
+                mailService.sendNewPostNotificationToFollowers(followerEmails, user.getFullName(), post.getTitle(), String.format("%s/posts/%d", serverName, post.getPostId()));
             }
+
+            // Gửi thông báo cho người dùng có tiêu chí tìm kiếm phù hợp
+            Room room = post.getRoom();
+            if (room != null) {
+                List<String> matchingUserEmails = searchInformationService.findMatchingUserEmailsForRoom(room);
+                if (matchingUserEmails != null && !matchingUserEmails.isEmpty()) {
+                    String location = String.format("%s, %s, %s", room.getWard(), room.getDistrict(), room.getCity());
+                    mailService.sendMatchingPostNotification(
+                        matchingUserEmails,
+                        post.getTitle(),
+                        String.format("%s/posts/%d", serverName, post.getPostId()),
+                        location
+                    );
+
+                    // Gửi notification cho từng người dùng phù hợp
+                    for (String email : matchingUserEmails) {
+                        User matchingUser = userService.getUserByEmail(email);
+                        if (matchingUser != null) {
+                            Notification matchingNotification = Notification.builder()
+                                .title("Có phòng trọ phù hợp với yêu cầu của bạn")
+                                .content(String.format("Phòng trọ \"%s\" tại %s phù hợp với yêu cầu tìm kiếm của bạn.", post.getTitle(), location))
+                                .type(EventType.MATCHING_POST.name())
+                                .userId(matchingUser.getUserId())
+                                .postId(post.getPostId())
+                                .redirectUrl(String.format("/posts/%d", post.getPostId()))
+                                .isRead(false)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+
+                            Notification savedMatchingNotification = notificationService.save(matchingNotification);
+                            NotificationResponse matchingNotificationResponse = NotificationResponse.builder()
+                                .id(savedMatchingNotification.getId())
+                                .title(savedMatchingNotification.getTitle())
+                                .content(savedMatchingNotification.getContent())
+                                .type(savedMatchingNotification.getType())
+                                .userId(savedMatchingNotification.getUserId())
+                                .postId(savedMatchingNotification.getPostId())
+                                .createdAt(savedMatchingNotification.getCreatedAt())
+                                .isRead(savedMatchingNotification.isRead())
+                                .redirectUrl(savedMatchingNotification.getRedirectUrl())
+                                .build();
+
+                            NotificationEvent matchingEvent = NotificationEvent.builder()
+                                .eventId(UUID.randomUUID().toString())
+                                .type(EventType.MATCHING_POST)
+                                .notification(matchingNotificationResponse)
+                                .timestamp(LocalDateTime.now())
+                                .metadata(Map.of(
+                                    "postId", post.getPostId(),
+                                    "userId", matchingUser.getUserId(),
+                                    "location", location
+                                ))
+                                .priority(NotificationEvent.Priority.HIGH)
+                                .status(Status.PENDING)
+                                .build();
+
+                            notificationService.sendNotification(matchingEvent);
+                        }
+                    }
+                }
+            }
+
             // Trả về response DTO
             return postMapper.toPostDetailResponseDTO(savedPost);
         } else {
