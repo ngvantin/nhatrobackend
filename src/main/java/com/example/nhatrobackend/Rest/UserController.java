@@ -13,12 +13,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -327,6 +330,33 @@ public class UserController {
                 .message("Lấy số lượng bài đăng")
                 .data(postCount)
                 .build());
+    }
+
+    @PostMapping(value = "/register-landlord-upload-cccd", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseWrapper<String>> uploadCccdImages(
+            @ModelAttribute CccdUploadDTO dto) {
+        try {
+            // Lấy userUuid từ JWT token
+            String userUuid = authenticationFacade.getCurrentUserUuid();
+
+            // Upload ảnh và cập nhật thông tin user
+            String message = userService.uploadCccdImages(
+                userUuid,
+                dto.getFrontCccd(),
+                dto.getBackCccd()
+            );
+
+            return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                    .status("success")
+                    .message(message)
+                    .build());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseWrapper.<String>builder()
+                            .status("error")
+                            .message("Lỗi khi upload ảnh: " + e.getMessage())
+                            .build());
+        }
     }
 }
 

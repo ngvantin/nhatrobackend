@@ -42,28 +42,48 @@ public class AdministrativeServiceImpl implements AdministrativeService {
 //    }
 
     // Lấy tất cả các tỉnh (Province)
-    public List<String> getAllProvinces() {
-        List<Province> provinces = provinceRepository.findAll();
+    @Override
+    public List<String> getAllProvinces(String keyword) {
+        List<Province> provinces;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            provinces = provinceRepository.findByNameContainingIgnoreCaseAndAccents(keyword);
+        } else {
+            provinces = provinceRepository.findAll();
+        }
         return provinces.stream()
-                .map(Province::getName)  // Lấy tên tỉnh từ đối tượng Province
-                .collect(Collectors.toList());  // Trả về danh sách tên tỉnh
-
+                .map(Province::getName)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     // Lấy tên các quận (District) theo mã tỉnh (provinceCode)
-    public List<String> getDistrictsByProvince(String provinceName) {
-        List<District> districts = districtRepository.findByProvince_Name(provinceName);
+    @Override
+    public List<String> getDistrictsByProvince(String provinceName, String keyword) {
+        List<District> districts;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            districts = districtRepository.findByProvinceNameAndFullNameContainingIgnoreCaseAndAccents(provinceName, keyword);
+        } else {
+            districts = districtRepository.findByProvince_Name(provinceName);
+        }
         return districts.stream()
-                .map(District::getFullName)  // Lấy tên quận từ đối tượng District
-                .collect(Collectors.toList());  // Trả về danh sách tên quận
+                .map(District::getFullName)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     // Lấy tên các phường (Ward) theo mã quận (districtCode)
-    public List<String> getWardsByDistrict(String districtFullName) {
-        List<Ward> wards = wardRepository.findByDistrict_FullName(districtFullName);
+    @Override
+    public List<String> getWardsByDistrict(String districtFullName, String keyword) {
+        List<Ward> wards;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            wards = wardRepository.findByDistrictFullNameAndFullNameContainingIgnoreCaseAndAccents(districtFullName, keyword);
+        } else {
+            wards = wardRepository.findByDistrict_FullName(districtFullName);
+        }
         return wards.stream()
-                .map(Ward::getFullName)  // Lấy tên phường từ đối tượng Ward
-                .collect(Collectors.toList());  // Trả về danh sách tên phường
+                .map(Ward::getFullName)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
 }

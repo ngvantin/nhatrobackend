@@ -496,4 +496,37 @@ public class UserServiceImpl implements UserService {
                 .filter(email -> email != null && !email.isEmpty())
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public String uploadCccdImages(String userUuid, MultipartFile frontCccd, MultipartFile backCccd) throws IOException {
+
+        // Lấy user từ database
+        User user = userRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+
+        // Kiểm tra trạng thái hiện tại
+        if (user.getIsLandlordActivated() == LandlordStatus.APPROVED) {
+            throw new RuntimeException("Người dùng đã là chủ trọ");
+        }
+
+        // Kiểm tra trạng thái hiện tại
+        if (user.getIsLandlordActivated() == LandlordStatus.PENDING_APPROVAL) {
+            throw new RuntimeException("Người dùng đã đăng ký. Hãy chờ xét duyệt.");
+        }
+        // Upload ảnh lên Cloudinary
+        String frontCccdUrl = uploadImageFileService.uploadImage(frontCccd);
+        String backCccdUrl = uploadImageFileService.uploadImage(backCccd);
+
+        // Cập nhật thông tin user
+        user.setFrontCccdUrl(frontCccdUrl);
+        user.setBackCccdUrl(backCccdUrl);
+        user.setIsLandlordActivated(LandlordStatus.PENDING_APPROVAL);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu lại thay đổi
+        userRepository.save(user);
+
+        return "Đăng ký quyền chủ trọ thành công, vui lòng chờ phê duyệt.";
+
+    }
 }
