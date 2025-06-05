@@ -5,6 +5,7 @@ import com.example.nhatrobackend.DTO.request.*;
 import com.example.nhatrobackend.DTO.response.TokenResponse;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.AuthenticationService;
+import com.example.nhatrobackend.Service.NotificationService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -21,12 +22,14 @@ import java.text.ParseException;
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final AuthenticationFacade authenticationFacade;
-
+    private final NotificationService notificationService;
     // khi sửa security xóa bảng account
     @PostMapping("/login")
     public ResponseEntity<ResponseWrapper<TokenResponse>> login(@RequestBody SignInRequest request) {
 //        return new ResponseEntity<>(authenticationService.authenticate(request), OK);
-            var result = authenticationService.authenticate(request);
+        TokenResponse result = authenticationService.authenticate(request);
+        long unreadNotificationCount = notificationService.getUnreadNotificationCountForUser(result.getUserId());
+        result.setUnreadNotificationCount(unreadNotificationCount);
             return ResponseEntity.ok(ResponseWrapper.<TokenResponse>builder()
             .status("success")
             .data(result)
