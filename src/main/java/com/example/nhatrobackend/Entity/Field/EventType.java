@@ -11,7 +11,9 @@ public enum EventType {
     USER_REGISTERED("Đăng ký tài khoản mới"),
     SYSTEM_NOTIFICATION("Thông báo hệ thống"),
     POST_LOCKED("Khóa bài đăng"),
-    NEW_POST_FROM_FOLLOWING("Bài viết mới");
+    NEW_POST_FROM_FOLLOWING("Bài viết mới"),
+    LANDLORD_REJECTED("Từ chối tài khoản chủ trọ"),
+    MATCHING_POST("Bài đăng được đề xuất");
 
     private final String description;
 

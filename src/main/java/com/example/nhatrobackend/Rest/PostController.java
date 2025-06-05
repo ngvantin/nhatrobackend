@@ -537,7 +537,7 @@ public class PostController {
             @ModelAttribute CreatePostWithImagesDTO dto) {
         try {
             String userUuid = authenticationFacade.getCurrentUserUuid();
-            log.info("Starting post creation with images for user: {}", userUuid);
+            log.info("Starting post creation with images and video for user: {}", userUuid);
             
             // Upload post images
             List<String> imageUrls = new ArrayList<>();
@@ -545,7 +545,7 @@ public class PostController {
                 log.info("Uploading {} post images", dto.getImages().size());
                 for (MultipartFile file : dto.getImages()) {
                     if (file != null && !file.isEmpty()) {
-                        log.info("Uploading post image: {}", file.getOriginalFilename());
+                        log.info("Attempting to upload post image: {}", file.getOriginalFilename());
                         String fileUrl = uploadImageFileService.uploadImage(file);
                         imageUrls.add(fileUrl);
                         log.info("Successfully uploaded post image: {}", fileUrl);
@@ -555,10 +555,20 @@ public class PostController {
                 log.warn("No post images provided");
             }
 
+            // Upload video
+            String videoUrl = null;
+            if (dto.getVideo() != null && !dto.getVideo().isEmpty()) {
+                log.info("Attempting to upload video: {}", dto.getVideo().getOriginalFilename());
+                videoUrl = uploadImageFileService.uploadImage(dto.getVideo());
+                log.info("Successfully uploaded video: {}", videoUrl);
+            } else {
+                log.warn("No video provided");
+            }
+
             // Upload license images
             String licensePcccUrl = null;
             if (dto.getLicensePccc() != null && !dto.getLicensePccc().isEmpty()) {
-                log.info("Uploading PCCC license image: {}", dto.getLicensePccc().getOriginalFilename());
+                log.info("Attempting to upload PCCC license image: {}", dto.getLicensePccc().getOriginalFilename());
                 licensePcccUrl = uploadImageFileService.uploadImage(dto.getLicensePccc());
                 log.info("Successfully uploaded PCCC license image: {}", licensePcccUrl);
             } else {
@@ -567,20 +577,20 @@ public class PostController {
 
             String licenseBusinessUrl = null;
             if (dto.getLicenseBusiness() != null && !dto.getLicenseBusiness().isEmpty()) {
-                log.info("Uploading business license image: {}", dto.getLicenseBusiness().getOriginalFilename());
+                log.info("Attempting to upload business license image: {}", dto.getLicenseBusiness().getOriginalFilename());
                 licenseBusinessUrl = uploadImageFileService.uploadImage(dto.getLicenseBusiness());
                 log.info("Successfully uploaded business license image: {}", licenseBusinessUrl);
             } else {
                 log.warn("No business license image provided");
             }
 
-            // Create PostRequestDTO from the uploaded images and other data
+            // Create PostRequestDTO from the uploaded files and other data
             PostRequestDTO postRequestDTO = new PostRequestDTO();
             postRequestDTO.setPostImages(imageUrls);
+            postRequestDTO.setVideoUrl(videoUrl);
             postRequestDTO.setTitle(dto.getTitle());
             postRequestDTO.setDescription(dto.getDescription());
             postRequestDTO.setDepositAmount(dto.getDepositAmount());
-            postRequestDTO.setVideoUrl(dto.getVideoUrl());
             postRequestDTO.setPrice(dto.getPrice());
             postRequestDTO.setArea(dto.getArea());
             postRequestDTO.setFurnitureStatus(dto.getFurnitureStatus());
@@ -595,8 +605,8 @@ public class PostController {
             postRequestDTO.setLicensePcccUrl(licensePcccUrl);
             postRequestDTO.setLicenseBusinessUrl(licenseBusinessUrl);
 
-            log.info("Creating post with {} images, PCCC URL: {}, Business License URL: {}", 
-                    imageUrls.size(), licensePcccUrl, licenseBusinessUrl);
+            log.info("Creating post with {} images, video URL: {}, PCCC URL: {}, Business License URL: {}", 
+                    imageUrls.size(), videoUrl, licensePcccUrl, licenseBusinessUrl);
 
             // Create the post using existing service
             PostDetailResponseDTO postDetailResponseDTO = postService.createPost(postRequestDTO, userUuid);
@@ -609,11 +619,11 @@ public class PostController {
                     .message("Bài đăng đã được tạo thành công.")
                     .build());
         } catch (IOException e) {
-            log.error("Error uploading images: {}", e.getMessage(), e);
+            log.error("Error uploading files: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ResponseWrapper.<PostDetailResponseDTO>builder()
                             .status("error")
-                            .message("Lỗi khi upload ảnh: " + e.getMessage())
+                            .message("Lỗi khi upload file: " + e.getMessage())
                             .build());
         } catch (Exception e) {
             log.error("Error creating post: {}", e.getMessage(), e);

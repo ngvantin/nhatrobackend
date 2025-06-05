@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
@@ -24,10 +25,10 @@ public class ReportPostController {
 
     private final AuthenticationFacade authenticationFacade;
 
-    @PostMapping("/create/{postUuid}")
+    @PostMapping(value = "/create/{postUuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseWrapper<String>> createReportPost(
             @PathVariable String postUuid,
-            @RequestBody ReportPostRequestDTO requestDTO, HttpServletRequest request) {
+            @ModelAttribute ReportPostRequestDTO requestDTO, HttpServletRequest request) {
 
         //        String userUuid = authenticationFacade.getCurrentUserUuid();
         // Lấy userUuid từ JWT token trong cookie

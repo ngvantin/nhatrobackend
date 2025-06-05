@@ -39,6 +39,7 @@ public interface NotificationService {
 
     Notification save(Notification notification);
     void sendNewPostNotificationToFollowers(Integer authorId, Integer postId, String postTitle);
+    long getUnreadNotificationCountForUser(Integer userId);
 //
 //    /**
 //     * Lấy danh sách thông báo của một user

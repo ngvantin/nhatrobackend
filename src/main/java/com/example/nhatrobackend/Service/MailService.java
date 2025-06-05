@@ -226,4 +226,33 @@ public class MailService {
         }
         log.info("Finished sending new post notification emails.");
     }
+
+    /**
+     * Send notification to users with matching search criteria
+     */
+    public void sendMatchingPostNotification(List<String> matchingUserEmails, String postTitle, String postUrl, String location) {
+        log.info("Sending matching post notification email to {} users", matchingUserEmails.size());
+        String title = "Có phòng trọ phù hợp với yêu cầu của bạn";
+        String header = "Phòng trọ mới phù hợp với yêu cầu tìm kiếm";
+        String content = String.format("Chúng tôi tìm thấy phòng trọ \"%s\" tại %s phù hợp với yêu cầu tìm kiếm của bạn.", postTitle, location);
+        String buttonText = "Xem chi tiết";
+
+        for (String emailTo : matchingUserEmails) {
+            try {
+                sendNotificationEmail(
+                    emailTo,
+                    title,
+                    header,
+                    content,
+                    buttonText,
+                    postUrl
+                );
+                log.debug("Sent matching post email to user: {}", emailTo);
+            } catch (MessagingException | UnsupportedEncodingException e) {
+                log.error("Failed to send matching post email to user {}: {}", emailTo, e.getMessage(), e);
+                // Continue to the next email even if one fails
+            }
+        }
+        log.info("Finished sending matching post notification emails.");
+    }
 }

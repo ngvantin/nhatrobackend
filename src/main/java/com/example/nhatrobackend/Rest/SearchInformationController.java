@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.request.SearchCriteriaDTO;
 import com.example.nhatrobackend.DTO.request.SearchInforRequest;
 import com.example.nhatrobackend.DTO.response.SearchInforResponse;
 import com.example.nhatrobackend.Entity.SearchInformation;
@@ -9,6 +10,8 @@ import com.example.nhatrobackend.Service.SearchInformationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/search-information")
@@ -51,6 +54,18 @@ public class SearchInformationController {
                 .status("success")
                 .data(updatedSearchInforResponse)
                 .message("Thông tin tìm kiếm đã được cập nhật.")
+                .build());
+    }
+
+    @PostMapping("/find-matching-users")
+    public ResponseEntity<ResponseWrapper<List<String>>> findMatchingUserEmails(
+            @RequestBody SearchCriteriaDTO searchCriteriaDTO) {
+        List<String> matchingEmails = searchInformationService.findMatchingUserEmails(searchCriteriaDTO);
+
+        return ResponseEntity.ok(ResponseWrapper.<List<String>>builder()
+                .status("success")
+                .data(matchingEmails)
+                .message("Danh sách email của người dùng phù hợp với tiêu chí tìm kiếm.")
                 .build());
     }
 }
