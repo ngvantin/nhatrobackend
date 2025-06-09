@@ -547,7 +547,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<SimilarPostResponse> getSimilarPosts(String postUuid) {
         Post post = findPostByUuidOrThrow(postUuid); // Gọi hàm riêng
-        List<Post> similarPosts = postRepository.findByRoom_CityAndRoom_DistrictAndRoom_WardOrderByCreatedAtAsc(
+        List<Post> similarPosts = postRepository.findByRoom_CityAndRoom_DistrictAndRoom_WardOrderByCreatedAtDesc(
                 post.getRoom().getCity(),
                 post.getRoom().getDistrict(),
                 post.getRoom().getWard()

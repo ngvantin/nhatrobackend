@@ -11,6 +11,7 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(config = MapStructConfig.class)
 public interface UserMapper {
+    @Mapping(target = "isOnline", source = "messageStatus")
     UserDetailDTO toUserDetailDTO(User user);
     @Mapping(target = "userId", ignore = true) // Bỏ qua id vì nó được tự động sinh
     @Mapping(target = "createdAt", ignore = true) // Trường được set thủ công

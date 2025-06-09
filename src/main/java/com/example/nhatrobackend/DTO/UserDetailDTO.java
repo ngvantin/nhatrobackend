@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.DTO;
 
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
+import com.example.nhatrobackend.Entity.Field.MessageStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,4 +22,5 @@ public class UserDetailDTO {
     private String profilePicture;
     private String phoneNumber;
     private LocalDateTime createdAt;
+    private MessageStatus isOnline;
 }
