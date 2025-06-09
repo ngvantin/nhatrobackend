@@ -33,6 +33,7 @@ public interface PostService {
     PostDetailResponseDTO getPostAdminById(int postId);
     Page<PostAdminDTO> getAllReportedPosts(Pageable pageable);
     public List<SimilarPostResponse> getSimilarPosts(String postUuid);
+//    List<SimilarPostResponse> getSimilarPostsDesc(String postUuid);
     Page<PostResponseDTO> getPostsByUserUuid(String userUuid, Pageable pageable);
     PostStatsResponse getPostStatsByYear(int year);
     PostDetailResponseDTO makePostAnonymous(String postUuid, Integer currentUserId);

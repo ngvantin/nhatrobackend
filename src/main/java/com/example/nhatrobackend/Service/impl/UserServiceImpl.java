@@ -128,6 +128,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileDTO getUserProfile(String userUuid) {
+        log.info("--fix---: " + userUuid);
+
         User user = userRepository.findByUserUuid(userUuid)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 

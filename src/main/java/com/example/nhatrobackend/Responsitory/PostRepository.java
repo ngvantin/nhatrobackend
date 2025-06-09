@@ -62,7 +62,7 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
 
     // Lọc bài post theo trạng thái và phân trang
     Page<Post> findByStatus(PostStatus status, Pageable pageable);
-    List<Post> findByRoom_CityAndRoom_DistrictAndRoom_WardOrderByCreatedAtAsc(String city, String district, String ward);
+    List<Post> findByRoom_CityAndRoom_DistrictAndRoom_WardOrderByCreatedAtDesc(String city, String district, String ward);
 
     Page<Post> findByUser_UserUuid(String userUuid, Pageable pageable);
 
