@@ -235,7 +235,7 @@ public class AuthenticationService {
 
     @Transactional
     public String register(RegisterRequestDTO request) {
-        // Check if email or phone number already exists
+      //   Check if email or phone number already exists
         try {
             User existingUser = userService.getUserByEmail(request.getEmail());
             if (existingUser != null) {

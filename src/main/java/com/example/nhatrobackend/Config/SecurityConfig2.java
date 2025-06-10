@@ -36,7 +36,9 @@ public class SecurityConfig2 {
             "/api/post/filter",
             "/api/post/{postUuid}/user",
             "/api/auth/**",
-            "/api/administrative/**"};
+            "/api/administrative/**",
+            "/api/v1/chatbot/**"
+    };
 
 
     // chuỗi các bộ lọc bảo mật

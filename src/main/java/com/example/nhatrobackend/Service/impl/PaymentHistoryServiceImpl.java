@@ -29,7 +29,7 @@ public class PaymentHistoryServiceImpl implements PaymentHistoryService {
 
     @Override
     public List<PaymentHistoryResponse> getPaymentHistoriesByUserId(Integer userId) {
-        List<PaymentHistory> paymentHistories = paymentHistoryRepository.findByUser_UserId(userId);
+        List<PaymentHistory> paymentHistories = paymentHistoryRepository.findByUser_UserIdOrderByPaymentTimeDesc(userId);
         return paymentHistoryMapper.toPaymentHistoryResponses(paymentHistories);
     }
 

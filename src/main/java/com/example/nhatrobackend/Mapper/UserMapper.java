@@ -17,6 +17,7 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true) // Trường được set thủ công
     User toEntity(OtpVerificationDTO dto);
 
+    @Mapping(target = "isOnline", source = "messageStatus")
     UserProfileDTO toUserProfileDTO(User user);
 
     @Mapping(target = "frontCccdUrl", source = "frontCccdUrl")
