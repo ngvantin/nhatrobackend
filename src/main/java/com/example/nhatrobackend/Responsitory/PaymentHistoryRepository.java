@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface PaymentHistoryRepository extends JpaRepository<PaymentHistory, Long> {
-    List<PaymentHistory> findByUser_UserId(Integer userId); // Đổi tên method
+    List<PaymentHistory> findByUser_UserIdOrderByPaymentTimeDesc(Integer userId); // Đổi tên method
 
     Optional<PaymentHistory> findByPaymentIdAndUser_UserId(Long paymentId, Integer userId);
 

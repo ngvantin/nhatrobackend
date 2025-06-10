@@ -57,7 +57,7 @@ public class PostServiceImpl implements PostService {
     private String serverName;
     @Override
     public Page<PostResponseDTO> getPostsByUserUuid(String userUuid, Pageable pageable) {
-        Page<Post> postPage = postRepository.findByUser_UserUuid(userUuid, pageable);
+        Page<Post> postPage = postRepository.findByUser_UserUuidOrderByCreatedAtDesc(userUuid, pageable);
         return postPage.map(postMapper::toPostResponseDTO);
     }
     @Override
@@ -66,7 +66,7 @@ public class PostServiceImpl implements PostService {
 //        Page<Post> postPage = postRepository.findAll(pageable);
 
         // Lấy danh sách bài viết theo trạng thái và phân trang từ repository
-        Page<Post> postPage = postRepository.findByStatus(PostStatus.APPROVED, pageable);
+        Page<Post> postPage = postRepository.findByStatusOrderByCreatedAtDesc(PostStatus.APPROVED, pageable);
         // Sử dụng mapStruct để chuyển đổi từng Post thành PostResponseDTO
         return postPage.map(postMapper::toPostResponseDTO);
     }
@@ -234,7 +234,7 @@ public class PostServiceImpl implements PostService {
         Integer userId = user.getUserId(); // Lấy userId từ User
 
         // Lọc các bài post có trạng thái APPROVED và userId tương ứng
-        Page<Post> postPage = postRepository.findByStatusAndUser_UserId(status, userId, pageable);
+        Page<Post> postPage = postRepository.findByStatusAndUser_UserIdOrderByCreatedAtDesc(status, userId, pageable);
 
         // Chuyển đổi từ Post sang PostResponseDTO
         return postPage.map(postMapper::toPostResponseDTO);
@@ -504,7 +504,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<PostAdminDTO> getPostsForAdmin(PostStatus status, Pageable pageable) {
         // Lấy danh sách bài viết theo trạng thái và phân trang từ repository
-        Page<Post> postPage = postRepository.findByStatus(status, pageable);
+        Page<Post> postPage = postRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
 
         // Tạo danh sách PostAdminDTO từ danh sách Post
         Page<PostAdminDTO> postAdminDTOs = postPage.map(this::convertToPostAdminDTO);
@@ -520,7 +520,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<PostAdminDTO> getAllReportedPosts(Pageable pageable) {
         // Lấy danh sách bài viết bị tố cáo từ repository
-        Page<Post> postPage = reportPostRepository.findAllReportedPosts(pageable);
+        Page<Post> postPage = reportPostRepository.findAllReportedPostsOrderByCreatedAtDesc(pageable);
 
         // Ánh xạ từ Post sang PostAdminDTO
         return postPage.map(this::convertToPostAdminDTO);

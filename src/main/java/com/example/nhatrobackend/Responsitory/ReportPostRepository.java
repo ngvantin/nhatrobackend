@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface ReportPostRepository extends JpaRepository<ReportPost, Integer> {
     @Query("SELECT rp.post FROM ReportPost rp")
-    Page<Post> findAllReportedPosts(Pageable pageable);
+    Page<Post> findAllReportedPostsOrderByCreatedAtDesc(Pageable pageable);
 
     Optional<ReportPost> findByReportId(Integer reportId);
 }

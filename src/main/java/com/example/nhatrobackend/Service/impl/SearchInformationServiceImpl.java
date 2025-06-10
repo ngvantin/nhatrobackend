@@ -92,4 +92,9 @@ public class SearchInformationServiceImpl implements SearchInformationService {
                 .distinct()
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public boolean hasSearchInformation(Integer userId) {
+        return searchInformationRepository.findByUser_UserId(userId).isPresent();
+    }
 }

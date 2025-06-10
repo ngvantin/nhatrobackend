@@ -28,4 +28,11 @@ public interface SearchInformationService {
      * @return Danh sách email của người dùng phù hợp
      */
     List<String> findMatchingUserEmailsForRoom(Room room);
+
+    /**
+     * Kiểm tra xem người dùng đã có thông tin tìm kiếm hay chưa
+     * @param userId ID của người dùng
+     * @return true nếu người dùng đã có thông tin tìm kiếm, false nếu chưa có
+     */
+    boolean hasSearchInformation(Integer userId);
 }

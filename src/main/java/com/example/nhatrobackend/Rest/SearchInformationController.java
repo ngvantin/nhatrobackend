@@ -68,4 +68,16 @@ public class SearchInformationController {
                 .message("Danh sách email của người dùng phù hợp với tiêu chí tìm kiếm.")
                 .build());
     }
+
+    @GetMapping("/has-search-information")
+    public ResponseEntity<ResponseWrapper<Boolean>> hasSearchInformation() {
+        Integer userId = authenticationFacade.getCurrentUserId();
+        boolean hasSearchInfo = searchInformationService.hasSearchInformation(userId);
+
+        return ResponseEntity.ok(ResponseWrapper.<Boolean>builder()
+                .status("success")
+                .data(hasSearchInfo)
+                .message(hasSearchInfo ? "Người dùng đã có thông tin tìm kiếm." : "Người dùng chưa có thông tin tìm kiếm.")
+                .build());
+    }
 }

@@ -175,7 +175,7 @@ public class ChatGroupServiceIml implements ChatGroupService {
 @Override
 public List<ChatGroupResponseDTO> findGroupMessages(Long userId) {
     // Lấy danh sách các ChatGroup mà userId là người gửi hoặc người nhận
-    List<ChatGroup> chatGroups = chatGroupRepository.findBySenderUserIdOrRecipientUserId(userId, userId);
+    List<ChatGroup> chatGroups = chatGroupRepository.findBySenderUserIdOrRecipientUserIdOrderByCreatedAtDesc(userId, userId);
 
     // Sử dụng Set để lưu trữ các User đã từng nhắn tin (tránh trùng lặp)
     Set<Long> interactedUserIds = new HashSet<>();

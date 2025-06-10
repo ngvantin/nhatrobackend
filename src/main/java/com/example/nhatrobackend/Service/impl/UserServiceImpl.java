@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserLandlordResponse> getApprovedLandlords(Pageable pageable, String loggedInUserUuid) { // Thêm tham số loggedInUserUuid
-        Page<User> userPage = userRepository.findByIsLandlordActivated(LandlordStatus.APPROVED, pageable);
+        Page<User> userPage = userRepository.findByIsLandlordActivatedOrderByCreatedAtDesc(LandlordStatus.APPROVED, pageable);
         return userPage.map(user -> convertToUserLandlordResponse(user, loggedInUserUuid));
     }
 
@@ -196,7 +196,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserAdminDTO> getUsersByStatus(LandlordStatus status, Pageable pageable) {
         // Lấy danh sách người dùng theo trạng thái
-        Page<User> userPage = userRepository.findByIsLandlordActivated(status, pageable);
+        Page<User> userPage = userRepository.findByIsLandlordActivatedOrderByCreatedAtDesc(status, pageable);
 
         // Chuyển đổi danh sách User thành danh sách UserAdminDTO
         return userPage.map(this::convertToUserAdminDTO);
@@ -210,7 +210,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserAdminDTO> getAllUsersExcludingModerator(Pageable pageable) {
         // Lấy danh sách người dùng, loại trừ trạng thái MODERATOR
-        Page<User> userPage = userRepository.findByIsLandlordActivatedNot(LandlordStatus.MODERATOR, pageable);
+        Page<User> userPage = userRepository.findByIsLandlordActivatedNotOrderByCreatedAtDesc(LandlordStatus.MODERATOR, pageable);
 
         // Chuyển đổi danh sách User sang UserAdminDTO
         return userPage.map(this::convertToUserAdminDTO);

@@ -44,7 +44,7 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
     void deleteByPostId(int postId);
 
     // Lọc bài viết có trạng thái APPROVED và userId tương ứng
-    Page<Post> findByStatusAndUser_UserId(PostStatus status, Integer userId, Pageable pageable);
+    Page<Post> findByStatusAndUser_UserIdOrderByCreatedAtDesc(PostStatus status, Integer userId, Pageable pageable);
 
 //    @Query("SELECT p FROM Post p JOIN p.room r WHERE " +
 //            "(:keyword IS NULL OR LOWER(r.city) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
@@ -61,10 +61,10 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
     Page<Post> findPostsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     // Lọc bài post theo trạng thái và phân trang
-    Page<Post> findByStatus(PostStatus status, Pageable pageable);
+    Page<Post> findByStatusOrderByCreatedAtDesc(PostStatus status, Pageable pageable);
     List<Post> findByRoom_CityAndRoom_DistrictAndRoom_WardOrderByCreatedAtDesc(String city, String district, String ward);
 
-    Page<Post> findByUser_UserUuid(String userUuid, Pageable pageable);
+    Page<Post> findByUser_UserUuidOrderByCreatedAtDesc(String userUuid, Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE YEAR(p.createdAt) = :year AND p.status = :status")
     List<Post> findByYearAndStatus(@Param("year") int year, @Param("status") PostStatus status);
