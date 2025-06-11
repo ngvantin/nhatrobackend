@@ -38,4 +38,13 @@ public interface PostService {
     PostStatsResponse getPostStatsByYear(int year);
     PostDetailResponseDTO makePostAnonymous(String postUuid, Integer currentUserId);
     PostDetailResponseDTO makePostUnanonymous(String postUuid, Integer currentUserId);
+    Page<PostResponseDTO> searchRoomsFlexible(
+            Double minPrice,
+            Double maxPrice,
+            Double minArea,
+            Double maxArea,
+            String city,
+            String district,
+            String ward,
+            Pageable pageable);
 }
