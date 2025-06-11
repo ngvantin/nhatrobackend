@@ -117,6 +117,85 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Page<PostResponseDTO> searchRoomsFlexible(
+            Double minPrice,
+            Double maxPrice,
+            Double minArea,
+            Double maxArea,
+            String city,
+            String district,
+            String ward,
+            Pageable pageable) {
+        
+        // Chuẩn hóa địa chỉ
+        String normalizedCity = normalizeAddress(city);
+        String normalizedDistrict = normalizeAddress(district);
+        String normalizedWard = normalizeAddress(ward);
+
+        log.info("Normalized addresses - City: {}, District: {}, Ward: {}", 
+                normalizedCity, normalizedDistrict, normalizedWard);
+
+        // Tìm kiếm với các điều kiện linh hoạt
+        Page<Post> postPage = postRepository.findPostsByRoomCriteria(
+                minPrice,
+                maxPrice,
+                minArea,
+                maxArea,
+                null, // furnitureStatus
+                normalizedCity,
+                normalizedDistrict,
+                normalizedWard,
+                null, // keyword
+                pageable
+        );
+
+        // Nếu không tìm thấy kết quả, thử tìm kiếm với điều kiện lỏng hơn
+        if (!postPage.hasContent()) {
+            log.info("No results found with exact match, trying with partial match");
+            postPage = postRepository.findPostsByRoomCriteria(
+                    minPrice,
+                    maxPrice,
+                    minArea,
+                    maxArea,
+                    null,
+                    city != null ? "%" + city + "%" : null,
+                    district != null ? "%" + district + "%" : null,
+                    ward != null ? "%" + ward + "%" : null,
+                    null,
+                    pageable
+            );
+        }
+
+        return postPage.map(postMapper::toPostResponseDTO);
+    }
+
+    private String normalizeAddress(String address) {
+        if (address == null) return null;
+        
+        // Loại bỏ các ký tự đặc biệt và khoảng trắng thừa
+        String normalized = address.trim()
+                .replaceAll("\\s+", " ")
+                .replaceAll("[.,]", "")
+                .toLowerCase();
+        
+        // Xử lý các trường hợp đặc biệt
+        normalized = normalized
+                .replace("tp.", "hồ chí minh")
+                .replace("tp ", "hồ chí minh ")
+                .replace("thành phố hồ chí minh", "hồ chí minh")
+                .replace("thành phố ", "")
+                .replace("quan ", "quận ")
+                .replace("phuong ", "phường ")
+                .replace("hcm", "hồ chí minh");
+
+        // Xử lý số phường/quận
+        normalized = normalized.replaceAll("phường\\s*(\\d+)", "phường $1");
+        normalized = normalized.replaceAll("quận\\s*(\\d+)", "quận $1");
+        
+        return normalized;
+    }
+
+    @Override
     public UserDetailDTO getUserByPostUuid(String postUuid) {
         Optional<Post> optionalPost = postRepository.findByPostUuid(postUuid);
         if(optionalPost.isPresent()){

@@ -177,32 +177,30 @@ public class OpenAIService {
                 Double maxPrice = args.getMaxPrice();
                 Double minArea = args.getMinArea();
                 Double maxArea = args.getMaxArea();
-                String furnitureStatus = args.getFurnitureStatus();
                 String city = args.getCity();
                 String district = args.getDistrict();
                 String ward = args.getWard();
-                String keyword = args.getKeyword();
                 int pageNumber = args.getPageNumber() != null ? args.getPageNumber() : 1;
                 int pageSize = args.getPageSize() != null ? args.getPageSize() : 10;
 
-                log.info("[Chatbot] Calling filterPosts with: minPrice={}, maxPrice={}, minArea={}, maxArea={}, furnitureStatus={}, city={}, district={}, ward={}, keyword={}, pageNumber={}, pageSize={}",
-                        minPrice, maxPrice, minArea, maxArea, furnitureStatus, city, district, ward, keyword, pageNumber, pageSize
+                log.info("[Chatbot] Calling searchRoomsFlexible with: minPrice={}, maxPrice={}, minArea={}, maxArea={}, city={}, district={}, ward={}, pageNumber={}, pageSize={}",
+                        minPrice, maxPrice, minArea, maxArea, city, district, ward, pageNumber, pageSize
                 );
-                var result = postService.filterPosts(
+                
+                var result = postService.searchRoomsFlexible(
                         minPrice,
                         maxPrice,
                         minArea,
                         maxArea,
-                        furnitureStatus != null ? FurnitureStatus.valueOf(furnitureStatus) : null,
                         city,
                         district,
                         ward,
-                        keyword,
                         PageRequest.of(pageNumber - 1, pageSize)
                 );
+                
                 // Convert the response to JSON string
                 String jsonResponse = mapper.writeValueAsString(result);
-                log.info("[Chatbot] Response from filterPosts: {}", jsonResponse);
+                log.info("[Chatbot] Response from searchRoomsFlexible: {}", jsonResponse);
 
                 return jsonResponse;
             default:

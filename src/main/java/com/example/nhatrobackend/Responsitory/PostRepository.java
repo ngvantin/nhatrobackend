@@ -25,9 +25,9 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
             "(:minArea IS NULL OR r.area >= :minArea) AND " +
             "(:maxArea IS NULL OR r.area <= :maxArea) AND " +
             "(:furnitureStatus IS NULL OR r.furnitureStatus = :furnitureStatus) AND " +
-            "(r.city = :city OR :city IS NULL) AND " +
-            "(r.district = :district OR :district IS NULL) AND " +
-            "(r.ward = :ward OR :ward IS NULL) AND " +
+            "(:city IS NULL OR LOWER(r.city) LIKE LOWER(CONCAT('%', :city, '%'))) AND " +
+            "(:district IS NULL OR LOWER(r.district) LIKE LOWER(CONCAT('%', :district, '%'))) AND " +
+            "(:ward IS NULL OR LOWER(r.ward) LIKE LOWER(CONCAT('%', :ward, '%'))) AND " +
             "(:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Post> findPostsByRoomCriteria(
             @Param("minPrice") Double minPrice,
@@ -39,7 +39,7 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
             @Param("district") String district,
             @Param("ward") String ward,
             @Param("keyword") String keyword,
-            Pageable pageable); // Thêm tham số Pageable
+            Pageable pageable);
 
     void deleteByPostId(int postId);
 

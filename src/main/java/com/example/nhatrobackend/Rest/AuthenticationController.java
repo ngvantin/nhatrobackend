@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.request.*;
+import com.example.nhatrobackend.DTO.request.RegisterRequestDTO;
 import com.example.nhatrobackend.DTO.response.TokenResponse;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.AuthenticationService;

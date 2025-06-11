@@ -72,7 +72,7 @@ public class User implements UserDetails, Serializable {
     @Column(name = "front_cccd_url", length = 255)
     private String frontCccdUrl;
 
-    @Column(name = "back_cccd_url", length = 100)
+    @Column(name = "back_cccd_url")
     private String backCccdUrl;
 
     @Column(name = "created_at", nullable = false)

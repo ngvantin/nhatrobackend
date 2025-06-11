@@ -26,7 +26,7 @@ public class ChatBotService {
         Conversation conversation = new Conversation();
         conversation.setConversationId(conversationId);
         conversation.setUserId(userId);
-        conversation.setTitle("Bus Route Search");
+        conversation.setTitle("Post Search");
 
         conversationRepository.save(conversation);
         return conversationId;
