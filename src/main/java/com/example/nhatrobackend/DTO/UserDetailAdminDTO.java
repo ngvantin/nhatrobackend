@@ -22,4 +22,10 @@ public class UserDetailAdminDTO {
     private LandlordStatus isLandlordActivated;
     private String frontCccdUrl;
     private String backCccdUrl;
+    private String address;
+    private String cccdNumber;
+    private String gender;
+    private String nationality;
+    private String hometown;
+    private LocalDate cccdIssueDate;
 }

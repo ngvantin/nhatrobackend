@@ -32,13 +32,17 @@ public interface UserMapper {
 
 //    @Mapping(target = "userId", source = "userId")
 //    @Mapping(target = "fullName", source = "fullName")
-//    @Mapping(target = "email", source = "email")
+//    @Mapping(target = "dateOfBirth", source = "dateOfBirth")
 //    @Mapping(target = "phoneNumber", source = "phoneNumber")
-//    @Mapping(target = "type", source = "type")
-//    @Mapping(target = "status", source = "status")
 //    @Mapping(target = "isLandlordActivated", source = "isLandlordActivated")
-//    @Mapping(target = "createdAt", source = "createdAt")
-//    @Mapping(target = "updatedAt", source = "updatedAt")
+//    @Mapping(target = "frontCccdUrl", source = "frontCccdUrl")
+//    @Mapping(target = "backCccdUrl", source = "backCccdUrl")
+//    @Mapping(target = "address", source = "address")
+//    @Mapping(target = "cccdNumber", source = "cccdNumber")
+//    @Mapping(target = "gender", source = "gender")
+//    @Mapping(target = "nationality", source = "nationality")
+//    @Mapping(target = "hometown", source = "hometown")
+//    @Mapping(target = "cccdIssueDate", source = "cccdIssueDate")
     UserDetailAdminDTO toUserDetailAdminDTO(User user);
 
     UserLandlordResponse toUserLandlordResponse(User user);
