@@ -500,8 +500,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String uploadCccdImages(String userUuid, MultipartFile frontCccd, MultipartFile backCccd) throws IOException {
-
+    public String uploadCccdImages(String userUuid, MultipartFile frontCccd, MultipartFile backCccd, CccdUploadDTO dto) throws IOException {
         // Lấy user từ database
         User user = userRepository.findByUserUuid(userUuid)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
@@ -515,6 +514,12 @@ public class UserServiceImpl implements UserService {
         if (user.getIsLandlordActivated() == LandlordStatus.PENDING_APPROVAL) {
             throw new RuntimeException("Người dùng đã đăng ký. Hãy chờ xét duyệt.");
         }
+
+        // Kiểm tra số CCCD đã tồn tại chưa
+        if (userRepository.findByCccdNumber(dto.getCccdNumber()).isPresent()) {
+            throw new RuntimeException("Số CCCD đã được đăng ký bởi người dùng khác");
+        }
+
         // Upload ảnh lên Cloudinary
         String frontCccdUrl = uploadImageFileService.uploadImage(frontCccd);
         String backCccdUrl = uploadImageFileService.uploadImage(backCccd);
@@ -524,11 +529,20 @@ public class UserServiceImpl implements UserService {
         user.setBackCccdUrl(backCccdUrl);
         user.setIsLandlordActivated(LandlordStatus.PENDING_APPROVAL);
         user.setUpdatedAt(LocalDateTime.now());
+        
+        // Cập nhật thông tin CCCD
+        user.setFullName(dto.getFullName());
+        user.setDateOfBirth(dto.getDateOfBirth());
+        user.setAddress(dto.getAddress());
+        user.setCccdNumber(dto.getCccdNumber());
+        user.setGender(dto.getGender());
+        user.setNationality(dto.getNationality());
+        user.setHometown(dto.getHometown());
+        user.setCccdIssueDate(dto.getCccdIssueDate());
 
         // Lưu lại thay đổi
         userRepository.save(user);
 
         return "Đăng ký quyền chủ trọ thành công, vui lòng chờ phê duyệt.";
-
     }
 }

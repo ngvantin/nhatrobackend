@@ -75,6 +75,21 @@ public class User implements UserDetails, Serializable {
     @Column(name = "back_cccd_url")
     private String backCccdUrl;
 
+    @Column(name = "cccd_number", length = 12, unique = true)
+    private String cccdNumber;
+
+    @Column(name = "gender", length = 10)
+    private String gender;
+
+    @Column(name = "nationality", length = 50)
+    private String nationality;
+
+    @Column(name = "hometown", length = 255)
+    private String hometown;
+
+    @Column(name = "cccd_issue_date")
+    private LocalDate cccdIssueDate;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
