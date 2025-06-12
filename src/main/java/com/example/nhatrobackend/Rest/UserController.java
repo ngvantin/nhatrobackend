@@ -343,7 +343,8 @@ public class UserController {
             String message = userService.uploadCccdImages(
                 userUuid,
                 dto.getFrontCccd(),
-                dto.getBackCccd()
+                dto.getBackCccd(),
+                dto
             );
 
             return ResponseEntity.ok(ResponseWrapper.<String>builder()

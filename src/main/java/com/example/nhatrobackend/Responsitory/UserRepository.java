@@ -27,4 +27,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.type IN ('LANDLORD', 'TENANT')")
     long countAllLandlordAndTenant();
+
+    Optional<User> findByCccdNumber(String cccdNumber);
 }
