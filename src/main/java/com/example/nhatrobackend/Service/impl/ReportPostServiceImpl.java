@@ -128,8 +128,8 @@ public class ReportPostServiceImpl implements ReportPostService {
 
     @Override
     public Page<ReportPostAdminDTO> getAllReportedPosts(Pageable pageable) {
-        // Lấy tất cả bài viết bị tố cáo từ repository, phân trang
-        Page<ReportPost> reportPosts = reportPostRepository.findAll(pageable);
+        // Lấy tất cả bài viết bị tố cáo có trạng thái PENDING từ repository, phân trang
+        Page<ReportPost> reportPosts = reportPostRepository.findByStatusOrderByCreatedAtDesc(ReportStatus.PENDING, pageable);
 
         // Sử dụng MapStruct để chuyển đổi từ ReportPost sang ReportPostDTO
         return reportPosts.map(reportPostMapper::reportPostToReportPostAdminDTO);

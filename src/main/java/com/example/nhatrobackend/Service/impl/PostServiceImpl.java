@@ -117,24 +117,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostResponseDTO> searchRoomsFlexible(
-            Double minPrice,
-            Double maxPrice,
-            Double minArea,
-            Double maxArea,
-            String city,
-            String district,
-            String ward,
-            Pageable pageable) {
+    public Page<PostResponseDTO> searchRoomsFlexible(Double minPrice, Double maxPrice, Double minArea, Double maxArea, String city, String district, String ward, Pageable pageable) {
         
         // Chuẩn hóa địa chỉ
         String normalizedCity = normalizeAddress(city);
         String normalizedDistrict = normalizeAddress(district);
         String normalizedWard = normalizeAddress(ward);
-
         log.info("Normalized addresses - City: {}, District: {}, Ward: {}", 
                 normalizedCity, normalizedDistrict, normalizedWard);
-
         // Tìm kiếm với các điều kiện linh hoạt
         Page<Post> postPage = postRepository.findPostsByRoomCriteria(
                 minPrice,
@@ -211,17 +201,37 @@ public class PostServiceImpl implements PostService {
     public PostDetailResponseDTO createPost(PostRequestDTO postRequestDTO, String userUuid) {
         User user = userService.findByUserUuid(userUuid);
         if(!userService.getApprovedUserByUuid(userUuid)){
-            throw new IllegalArgumentException("Chưa đăng kí tài khoản Chủ cho thuê, không thể đăng bài.");
+            throw new IllegalArgumentException("Chưa đăng ký tài khoản Chủ cho thuê, không thể đăng bài.");
         }
+        
+        // Create and save room first
         Room room = roomMapper.toRoom(postRequestDTO);
-        Post post = postMapper.toPostWithImages(postRequestDTO,user);
         roomService.saveRoom(room);
-        post.setRoom(room);
-        post.setUser(user);
+        
+        // Create post without images first
+        Post post = new Post();
+        post.setTitle(postRequestDTO.getTitle());
+        post.setDescription(postRequestDTO.getDescription());
+        post.setDepositAmount(postRequestDTO.getDepositAmount());
+        post.setVideoUrl(postRequestDTO.getVideoUrl());
         post.setStatus(PENDING);
         post.setCreatedAt(LocalDateTime.now());
-        Post savePost = postRepository.save(post);
-        return postMapper.toPostDetailResponseDTO(savePost);
+        post.setRoom(room);
+        post.setUser(user);
+        
+        // Save post first to get the ID
+        Post savedPost = postRepository.save(post);
+        
+        // Now create and save post images with the saved post reference
+        if (postRequestDTO.getPostImages() != null && !postRequestDTO.getPostImages().isEmpty()) {
+            List<PostImage> postImages = postRequestDTO.getPostImages().stream()
+                .map(imageUrl -> new PostImage(imageUrl, savedPost))
+                .collect(Collectors.toList());
+            savedPost.setPostImages(postImages);
+            postRepository.save(savedPost);
+        }
+        
+        return postMapper.toPostDetailResponseDTO(savedPost);
     }
 
     @Override
