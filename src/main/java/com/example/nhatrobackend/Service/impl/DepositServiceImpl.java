@@ -53,7 +53,7 @@ public class DepositServiceImpl implements DepositService {
         // Tạo URL thanh toán VNPay
         long amount = depositRequest.getAmount().longValue() * 100L;
         String bankCode = depositRequest.getBankCode();
-        Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
+        Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfigDeposit();
         vnpParamsMap.put("vnp_Amount", String.valueOf(amount));
         if (bankCode != null && !bankCode.isEmpty()) {
             vnpParamsMap.put("vnp_BankCode", bankCode);
