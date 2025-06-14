@@ -1,12 +1,16 @@
 package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.Config.VNPAYConfig;
+import com.example.nhatrobackend.DTO.DepositResponseDTO;
+import com.example.nhatrobackend.DTO.PostResponseDTO;
+import com.example.nhatrobackend.DTO.UserDepositDTO;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
 import com.example.nhatrobackend.Entity.Deposit;
 import com.example.nhatrobackend.Entity.Field.DepositStatus;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.User;
+import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Responsitory.DepositRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Service.DepositService;
@@ -15,11 +19,15 @@ import com.example.nhatrobackend.util.VNPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +36,7 @@ public class DepositServiceImpl implements DepositService {
     private final UserService userService;
     private final PostRepository postRepository;
     private final DepositRepository depositRepository;
+    private final PostMapper postMapper;
 
     @Override
     public VNPayResponse createDepositPayment(DepositRequest depositRequest, HttpServletRequest request, Integer currentUserId) {
@@ -183,5 +192,37 @@ public class DepositServiceImpl implements DepositService {
             }
         }
         return "Giao dịch thanh toán thất bại.";
+    }
+
+    @Override
+    public Page<PostResponseDTO> getDepositedPosts(Integer userId, Pageable pageable) {
+        // Lấy danh sách các bài post mà người dùng đã đặt cọc
+        Page<Deposit> deposits = depositRepository.findByUser_UserIdOrderByCreatedAtDesc(userId, pageable);
+        
+        // Chuyển đổi từ Deposit sang PostResponseDTO
+        return deposits.map(deposit -> postMapper.toPostResponseDTO(deposit.getPost()));
+    }
+
+    @Override
+    public Page<PostResponseDTO> getPostsWithDepositsByOtherUsers(Integer currentUserId, Pageable pageable) {
+        // Get all posts that have deposits from other users
+        Page<Post> posts = depositRepository.findPostsWithDepositsByOtherUsers(currentUserId, pageable);
+        
+        // Convert to DTO using MapStruct
+        return posts.map(postMapper::toPostResponseDTO);
+    }
+
+    @Override
+    public List<UserDepositDTO> getUsersWithDepositsByPostId(Integer postId) {
+        List<Deposit> deposits = depositRepository.findByPost_PostId(postId);
+        return deposits.stream()
+                .map(deposit -> UserDepositDTO.builder()
+                        .postId(postId)
+                        .userId(deposit.getUser().getUserId())
+                        .userUuid(deposit.getUser().getUserUuid())
+                        .fullName(deposit.getUser().getFullName())
+                        .profilePicture(deposit.getUser().getProfilePicture())
+                        .build())
+                .collect(Collectors.toList());
     }
 } 

@@ -1,12 +1,22 @@
 package com.example.nhatrobackend.Service;
 
+import com.example.nhatrobackend.DTO.PostResponseDTO;
+import com.example.nhatrobackend.DTO.UserDepositDTO;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface DepositService {
     VNPayResponse createDepositPayment(DepositRequest depositRequest, HttpServletRequest request, Integer currentUserId);
     String processDepositCallback(HttpServletRequest request);
     Object getDepositDetails(Integer depositId, Integer currentUserId);
     Object confirmDeposit(Integer depositId, Integer currentUserId, Boolean isConfirmed);
+    Page<PostResponseDTO> getDepositedPosts(Integer userId, Pageable pageable);
+//    Page<DepositResponseDTO> getDepositsByUser(Integer userId, Pageable pageable);
+    Page<PostResponseDTO> getPostsWithDepositsByOtherUsers(Integer currentUserId, Pageable pageable);
+    List<UserDepositDTO> getUsersWithDepositsByPostId(Integer postId);
 } 

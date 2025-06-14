@@ -1,18 +1,25 @@
 package com.example.nhatrobackend.Rest;
 
+import com.example.nhatrobackend.DTO.DepositResponseDTO;
+import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.DTO.ResponseWrapper;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
+import com.example.nhatrobackend.DTO.UserDepositDTO;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.DepositService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/deposit")
@@ -68,6 +75,59 @@ public class DepositController {
                 .status("success")
                 .data(depositService.confirmDeposit(depositId, currentUserId, isConfirmed))
                 .message("Xác nhận đơn đặt cọc")
+                .build());
+    }
+
+    @GetMapping("/posts")
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getDepositedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
+        Pageable pageable = PageRequest.of(page, size);
+        
+        return ResponseEntity.ok(ResponseWrapper.<Page<PostResponseDTO>>builder()
+                .status("success")
+                .data(depositService.getDepositedPosts(currentUserId, pageable))
+                .message("Lấy danh sách bài đăng đã đặt cọc thành công")
+                .build());
+    }
+//
+//    @GetMapping("/user/{userId}")
+//    public ResponseEntity<ResponseWrapper<Page<DepositResponseDTO>>> getDepositsByUser(
+//            @PathVariable Integer userId,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        Page<DepositResponseDTO> deposits = depositService.getDepositsByUser(userId, pageable);
+//        return ResponseEntity.ok(ResponseWrapper.<Page<DepositResponseDTO>>builder()
+//                .status("success")
+//                .data(deposits)
+//                .message("Danh sách đặt cọc của người dùng.")
+//                .build());
+//    }
+
+    @GetMapping("/posts-with-deposits")
+    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getPostsWithDepositsByOtherUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostResponseDTO> posts = depositService.getPostsWithDepositsByOtherUsers(currentUserId, pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<PostResponseDTO>>builder()
+                .status("success")
+                .data(posts)
+                .message("Danh sách bài đăng có người khác đặt cọc.")
+                .build());
+    }
+
+    @GetMapping("/post/{postId}/users")
+    public ResponseEntity<ResponseWrapper<List<UserDepositDTO>>> getUsersWithDepositsByPostId(
+            @PathVariable Integer postId) {
+        List<UserDepositDTO> users = depositService.getUsersWithDepositsByPostId(postId);
+        return ResponseEntity.ok(ResponseWrapper.<List<UserDepositDTO>>builder()
+                .status("success")
+                .data(users)
+                .message("Danh sách người dùng đã đặt cọc cho bài đăng.")
                 .build());
     }
 } 
