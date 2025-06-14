@@ -53,6 +53,7 @@ public class PostServiceImpl implements PostService {
     private final NotificationService notificationService;
     private final MailService mailService;
     private final SearchInformationService searchInformationService;
+
     @Value("${spring.application.serverName}")
     private String serverName;
     @Override

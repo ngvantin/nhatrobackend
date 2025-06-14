@@ -1,12 +1,8 @@
 package com.example.nhatrobackend.Rest;
 
-import com.example.nhatrobackend.DTO.DepositDetailDTO;
-import com.example.nhatrobackend.DTO.DepositResponseDTO;
-import com.example.nhatrobackend.DTO.PostResponseDTO;
-import com.example.nhatrobackend.DTO.ResponseWrapper;
+import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
-import com.example.nhatrobackend.DTO.UserDepositDTO;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.DepositService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -140,6 +137,56 @@ public class DepositController {
                 .status("success")
                 .data(depositDetails)
                 .message("Thông tin chi tiết đặt cọc.")
+                .build());
+    }
+
+    @PostMapping("/{depositId}/confirm/tenant")
+    public ResponseEntity<ResponseWrapper<String>> confirmByTenant(
+            @PathVariable Integer depositId) {
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
+        String message = depositService.confirmByTenant(depositId, currentUserId);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(message)
+                .message(message)
+                .build());
+    }
+
+    @PostMapping("/{depositId}/confirm/landlord")
+    public ResponseEntity<ResponseWrapper<String>> confirmByLandlord(
+            @PathVariable Integer depositId) {
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
+        String message = depositService.confirmByLandlord(depositId, currentUserId);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(message)
+                .message(message)
+                .build());
+    }
+
+    @PostMapping(value = "/{depositId}/complaint/tenant", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseWrapper<String>> complaintByTenant(
+            @PathVariable Integer depositId,
+            @ModelAttribute DepositComplaintRequestDTO requestDTO) {
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
+        String message = depositService.complaintByTenant(depositId, currentUserId, requestDTO);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(message)
+                .message(message)
+                .build());
+    }
+
+    @PostMapping(value = "/{depositId}/complaint/landlord", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseWrapper<String>> complaintByLandlord(
+            @PathVariable Integer depositId,
+            @ModelAttribute DepositComplaintRequestDTO requestDTO) {
+        Integer currentUserId = authenticationFacade.getCurrentUserId();
+        String message = depositService.complaintByLandlord(depositId, currentUserId, requestDTO);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(message)
+                .message(message)
                 .build());
     }
 } 
