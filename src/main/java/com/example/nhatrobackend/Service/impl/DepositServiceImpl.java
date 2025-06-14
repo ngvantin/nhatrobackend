@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.Config.VNPAYConfig;
+import com.example.nhatrobackend.DTO.DepositDetailDTO;
 import com.example.nhatrobackend.DTO.DepositResponseDTO;
 import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.DTO.UserDepositDTO;
@@ -14,6 +15,7 @@ import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Responsitory.DepositRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Service.DepositService;
+import com.example.nhatrobackend.Service.NotificationService;
 import com.example.nhatrobackend.Service.UserService;
 import com.example.nhatrobackend.util.VNPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -217,12 +220,38 @@ public class DepositServiceImpl implements DepositService {
         List<Deposit> deposits = depositRepository.findByPost_PostId(postId);
         return deposits.stream()
                 .map(deposit -> UserDepositDTO.builder()
+                        .depositId(deposit.getDepositId())
                         .postId(postId)
+                        .postUuid(deposit.getPost().getPostUuid())
                         .userId(deposit.getUser().getUserId())
                         .userUuid(deposit.getUser().getUserUuid())
                         .fullName(deposit.getUser().getFullName())
                         .profilePicture(deposit.getUser().getProfilePicture())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public DepositDetailDTO getDepositDetailsById(Integer depositId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc với ID: " + depositId));
+        
+        User depositor = deposit.getUser();
+        User landlord = deposit.getPost().getUser();
+        
+        return DepositDetailDTO.builder()
+                .depositId(deposit.getDepositId())
+                .createdAt(deposit.getCreatedAt())
+                // Thông tin người đặt cọc
+                .depositorId(depositor.getUserId())
+                .depositorFullName(depositor.getFullName())
+                .depositorEmail(depositor.getEmail())
+                .depositorPhoneNumber(depositor.getPhoneNumber())
+                // Thông tin chủ trọ
+                .landlordId(landlord.getUserId())
+                .landlordFullName(landlord.getFullName())
+                .landlordEmail(landlord.getEmail())
+                .landlordPhoneNumber(landlord.getPhoneNumber())
+                .build();
     }
 } 

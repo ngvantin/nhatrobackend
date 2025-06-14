@@ -19,7 +19,7 @@ public class Deposit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "deposit_id")
-    private Integer depositId;
+    private int depositId;
 
     @Column(name = "deposit_uuid", nullable = false, unique = true, length = 36)
     @Builder.Default
