@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -51,13 +52,31 @@ public class Deposit {
     private LocalDateTime holdUntil; // Thời hạn giữ chỗ
 
     @Column(name = "landlord_confirmed")
-    private Boolean landlordConfirmed; // Xác nhận từ chủ trọ
+    private Boolean landlordConfirmed = false;
 
     @Column(name = "tenant_confirmed")
     private Boolean tenantConfirmed; // Xác nhận từ người thuê
 
     @Column(name = "cancellation_reason")
     private String cancellationReason; // Lý do hủy (nếu có)
+
+    @Column(name = "tenant_complaint_reason", columnDefinition = "TEXT")
+    private String tenantComplaintReason;
+
+    @Column(name = "tenant_complaint_video_url")
+    private String tenantComplaintVideoUrl;
+
+    @Column(name = "landlord_complaint_reason", columnDefinition = "TEXT")
+    private String landlordComplaintReason;
+
+    @Column(name = "landlord_complaint_video_url")
+    private String landlordComplaintVideoUrl;
+
+    @OneToMany(mappedBy = "deposit", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DepositTenantComplaintImage> tenantComplaintImages;
+
+    @OneToMany(mappedBy = "deposit", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DepositLandlordComplaintImage> landlordComplaintImages;
 
     @Column(name = "created_at", nullable = false)
     @Builder.Default

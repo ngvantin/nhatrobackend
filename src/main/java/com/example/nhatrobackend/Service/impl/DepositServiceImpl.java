@@ -1,21 +1,19 @@
 package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.Config.VNPAYConfig;
-import com.example.nhatrobackend.DTO.DepositDetailDTO;
-import com.example.nhatrobackend.DTO.DepositResponseDTO;
-import com.example.nhatrobackend.DTO.PostResponseDTO;
-import com.example.nhatrobackend.DTO.UserDepositDTO;
+import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
-import com.example.nhatrobackend.Entity.Deposit;
+import com.example.nhatrobackend.Entity.*;
 import com.example.nhatrobackend.Entity.Field.DepositStatus;
-import com.example.nhatrobackend.Entity.Post;
-import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Responsitory.DepositRepository;
+import com.example.nhatrobackend.Responsitory.DepositTenantComplaintImageRepository;
+import com.example.nhatrobackend.Responsitory.DepositLandlordComplaintImageRepository;
 import com.example.nhatrobackend.Responsitory.PostRepository;
 import com.example.nhatrobackend.Service.DepositService;
 import com.example.nhatrobackend.Service.NotificationService;
+import com.example.nhatrobackend.Service.UploadImageFileService;
 import com.example.nhatrobackend.Service.UserService;
 import com.example.nhatrobackend.util.VNPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,8 +23,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,11 @@ public class DepositServiceImpl implements DepositService {
     private final PostRepository postRepository;
     private final DepositRepository depositRepository;
     private final PostMapper postMapper;
+    private final NotificationService notificationService;
+    private final UploadImageFileService uploadImageFileService;
+    private final DepositTenantComplaintImageRepository tenantComplaintImageRepository;
+    private final DepositLandlordComplaintImageRepository landlordComplaintImageRepository;
+
 
     @Override
     public VNPayResponse createDepositPayment(DepositRequest depositRequest, HttpServletRequest request, Integer currentUserId) {
@@ -253,5 +259,147 @@ public class DepositServiceImpl implements DepositService {
                 .landlordEmail(landlord.getEmail())
                 .landlordPhoneNumber(landlord.getPhoneNumber())
                 .build();
+    }
+
+    @Override
+    public String confirmByTenant(Integer depositId, Integer currentUserId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc với ID: " + depositId));
+        
+        // Kiểm tra xem người dùng hiện tại có phải là người đặt cọc không
+        if (!deposit.getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("Bạn không có quyền xác nhận đơn đặt cọc này");
+        }
+        
+        // Cập nhật trạng thái xác nhận từ người thuê
+        deposit.setTenantConfirmed(true);
+        deposit.setUpdatedAt(LocalDateTime.now());
+        
+        // Nếu cả hai bên đã xác nhận, cập nhật trạng thái đặt cọc
+        if (deposit.getLandlordConfirmed() != null && deposit.getLandlordConfirmed()) {
+            deposit.setStatus(DepositStatus.CONFIRMED);
+        }
+        
+        depositRepository.save(deposit);
+        return "Xác nhận đặt cọc từ người thuê thành công.";
+    }
+
+    @Override
+    public String confirmByLandlord(Integer depositId, Integer currentUserId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc với ID: " + depositId));
+        
+        // Kiểm tra xem người dùng hiện tại có phải là chủ trọ không
+        if (!deposit.getPost().getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("Bạn không có quyền xác nhận đơn đặt cọc này");
+        }
+        
+        // Cập nhật trạng thái xác nhận từ chủ trọ
+        deposit.setLandlordConfirmed(true);
+        deposit.setUpdatedAt(LocalDateTime.now());
+        
+        // Nếu cả hai bên đã xác nhận, cập nhật trạng thái đặt cọc
+        if (deposit.getTenantConfirmed() != null && deposit.getTenantConfirmed()) {
+            deposit.setStatus(DepositStatus.CONFIRMED);
+        }
+        
+        depositRepository.save(deposit);
+        return "Xác nhận đặt cọc từ chủ trọ thành công.";
+    }
+
+    @Override
+    @Transactional
+    public String complaintByTenant(Integer depositId, Integer currentUserId, DepositComplaintRequestDTO requestDTO) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đặt cọc"));
+
+        // Kiểm tra xem người dùng hiện tại có phải là người đặt cọc không
+        if (!deposit.getUser().getUserId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền khiếu nại đặt cọc này");
+        }
+
+        // Cập nhật thông tin khiếu nại
+        deposit.setTenantComplaintReason(requestDTO.getReason());
+        deposit.setUpdatedAt(LocalDateTime.now());
+
+        // Upload video nếu có
+        if (requestDTO.getVideo() != null && !requestDTO.getVideo().isEmpty()) {
+            try {
+                String videoUrl = uploadImageFileService.uploadImage(requestDTO.getVideo());
+                deposit.setTenantComplaintVideoUrl(videoUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Lỗi khi upload video khiếu nại", e);
+            }
+        }
+
+        // Lưu deposit để có ID
+        Deposit savedDeposit = depositRepository.save(deposit);
+
+        // Upload và lưu ảnh nếu có
+        if (requestDTO.getImages() != null && !requestDTO.getImages().isEmpty()) {
+            List<DepositTenantComplaintImage> complaintImages = new ArrayList<>();
+            for (MultipartFile imageFile : requestDTO.getImages()) {
+                if (imageFile != null && !imageFile.isEmpty()) {
+                    try {
+                        String imageUrl = uploadImageFileService.uploadImage(imageFile);
+                        DepositTenantComplaintImage complaintImage = new DepositTenantComplaintImage(imageUrl, savedDeposit);
+                        complaintImages.add(complaintImage);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Lỗi khi upload ảnh khiếu nại", e);
+                    }
+                }
+            }
+            tenantComplaintImageRepository.saveAll(complaintImages);
+        }
+
+        return "Gửi khiếu nại từ người thuê thành công.";
+    }
+
+    @Override
+    @Transactional
+    public String complaintByLandlord(Integer depositId, Integer currentUserId, DepositComplaintRequestDTO requestDTO) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đặt cọc"));
+
+        // Kiểm tra xem người dùng hiện tại có phải là chủ trọ không
+        if (!deposit.getPost().getUser().getUserId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền khiếu nại đặt cọc này");
+        }
+
+        // Cập nhật thông tin khiếu nại
+        deposit.setLandlordComplaintReason(requestDTO.getReason());
+        deposit.setUpdatedAt(LocalDateTime.now());
+
+        // Upload video nếu có
+        if (requestDTO.getVideo() != null && !requestDTO.getVideo().isEmpty()) {
+            try {
+                String videoUrl = uploadImageFileService.uploadImage(requestDTO.getVideo());
+                deposit.setLandlordComplaintVideoUrl(videoUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Lỗi khi upload video khiếu nại", e);
+            }
+        }
+
+        // Lưu deposit để có ID
+        Deposit savedDeposit = depositRepository.save(deposit);
+
+        // Upload và lưu ảnh nếu có
+        if (requestDTO.getImages() != null && !requestDTO.getImages().isEmpty()) {
+            List<DepositLandlordComplaintImage> complaintImages = new ArrayList<>();
+            for (MultipartFile imageFile : requestDTO.getImages()) {
+                if (imageFile != null && !imageFile.isEmpty()) {
+                    try {
+                        String imageUrl = uploadImageFileService.uploadImage(imageFile);
+                        DepositLandlordComplaintImage complaintImage = new DepositLandlordComplaintImage(imageUrl, savedDeposit);
+                        complaintImages.add(complaintImage);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Lỗi khi upload ảnh khiếu nại", e);
+                    }
+                }
+            }
+            landlordComplaintImageRepository.saveAll(complaintImages);
+        }
+
+        return "Gửi khiếu nại từ chủ trọ thành công.";
     }
 } 
