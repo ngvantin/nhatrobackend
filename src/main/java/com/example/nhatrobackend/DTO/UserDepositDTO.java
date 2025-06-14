@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDepositDTO {
+    private Integer depositId;
     private int postId;
+    private String postUuid;
     private Integer userId;
     private String userUuid;
     private String fullName;

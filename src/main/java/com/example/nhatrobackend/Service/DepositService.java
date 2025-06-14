@@ -1,5 +1,6 @@
 package com.example.nhatrobackend.Service;
 
+import com.example.nhatrobackend.DTO.DepositDetailDTO;
 import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.DTO.UserDepositDTO;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
@@ -19,4 +20,5 @@ public interface DepositService {
 //    Page<DepositResponseDTO> getDepositsByUser(Integer userId, Pageable pageable);
     Page<PostResponseDTO> getPostsWithDepositsByOtherUsers(Integer currentUserId, Pageable pageable);
     List<UserDepositDTO> getUsersWithDepositsByPostId(Integer postId);
+    DepositDetailDTO getDepositDetailsById(Integer depositId);
 } 

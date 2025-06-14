@@ -1,5 +1,6 @@
 package com.example.nhatrobackend.Rest;
 
+import com.example.nhatrobackend.DTO.DepositDetailDTO;
 import com.example.nhatrobackend.DTO.DepositResponseDTO;
 import com.example.nhatrobackend.DTO.PostResponseDTO;
 import com.example.nhatrobackend.DTO.ResponseWrapper;
@@ -56,15 +57,15 @@ public class DepositController {
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
     }
 
-    @GetMapping("/{depositId}")
-    public ResponseEntity<ResponseWrapper<?>> getDepositDetails(@PathVariable Integer depositId) {
-        Integer currentUserId = authenticationFacade.getCurrentUserId();
-        return ResponseEntity.ok(ResponseWrapper.builder()
-                .status("success")
-                .data(depositService.getDepositDetails(depositId, currentUserId))
-                .message("Chi tiết đơn đặt cọc")
-                .build());
-    }
+//    @GetMapping("/{depositId}")
+//    public ResponseEntity<ResponseWrapper<?>> getDepositDetails(@PathVariable Integer depositId) {
+//        Integer currentUserId = authenticationFacade.getCurrentUserId();
+//        return ResponseEntity.ok(ResponseWrapper.builder()
+//                .status("success")
+//                .data(depositService.getDepositDetails(depositId, currentUserId))
+//                .message("Chi tiết đơn đặt cọc")
+//                .build());
+//    }
 
     @PostMapping("/{depositId}/confirm")
     public ResponseEntity<ResponseWrapper<?>> confirmDeposit(
@@ -128,6 +129,17 @@ public class DepositController {
                 .status("success")
                 .data(users)
                 .message("Danh sách người dùng đã đặt cọc cho bài đăng.")
+                .build());
+    }
+
+    @GetMapping("/{depositId}/details")
+    public ResponseEntity<ResponseWrapper<DepositDetailDTO>> getDepositDetails(
+            @PathVariable Integer depositId) {
+        DepositDetailDTO depositDetails = depositService.getDepositDetailsById(depositId);
+        return ResponseEntity.ok(ResponseWrapper.<DepositDetailDTO>builder()
+                .status("success")
+                .data(depositDetails)
+                .message("Thông tin chi tiết đặt cọc.")
                 .build());
     }
 } 
