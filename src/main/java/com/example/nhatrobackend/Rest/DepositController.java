@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Rest;
 
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.request.DepositRefundRequest;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
 import com.example.nhatrobackend.Entity.Field.DepositStatus;
@@ -78,32 +79,18 @@ public class DepositController {
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getDepositedPosts(
+    public ResponseEntity<ResponseWrapper<Page<PostWithDepositDTO>>> getDepositedPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Integer currentUserId = authenticationFacade.getCurrentUserId();
         Pageable pageable = PageRequest.of(page, size);
 
-        return ResponseEntity.ok(ResponseWrapper.<Page<PostResponseDTO>>builder()
+        return ResponseEntity.ok(ResponseWrapper.<Page<PostWithDepositDTO>>builder()
                 .status("success")
                 .data(depositService.getDepositedPosts(currentUserId, pageable))
                 .message("Lấy danh sách bài đăng đã đặt cọc thành công")
                 .build());
     }
-//
-//    @GetMapping("/user/{userId}")
-//    public ResponseEntity<ResponseWrapper<Page<DepositResponseDTO>>> getDepositsByUser(
-//            @PathVariable Integer userId,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//        Page<DepositResponseDTO> deposits = depositService.getDepositsByUser(userId, pageable);
-//        return ResponseEntity.ok(ResponseWrapper.<Page<DepositResponseDTO>>builder()
-//                .status("success")
-//                .data(deposits)
-//                .message("Danh sách đặt cọc của người dùng.")
-//                .build());
-//    }
 
     @GetMapping("/posts-with-deposits")
     public ResponseEntity<ResponseWrapper<Page<PostResponseDTO>>> getPostsWithDepositsByOtherUsers(
@@ -240,6 +227,18 @@ public class DepositController {
                 .status("success")
                 .data(deposits)
                 .message("Danh sách đặt cọc với trạng thái " + DepositStatus.CANCELLED)
+                .build());
+    }
+
+    @PostMapping("/refund")
+    public ResponseEntity<ResponseWrapper<String>> refundDeposit(
+            @RequestBody DepositRefundRequest request,
+            HttpServletRequest httpRequest) {
+        String result = depositService.refundDeposit(request, httpRequest);
+        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                .status("success")
+                .data(result)
+                .message(result)
                 .build());
     }
 } 

@@ -24,4 +24,5 @@ public interface DepositRepository extends JpaRepository<Deposit, Integer> {
     List<Deposit> findByPost_PostId(Integer postId);
     
     Page<Deposit> findByStatus(DepositStatus status, Pageable pageable);
+
 } 

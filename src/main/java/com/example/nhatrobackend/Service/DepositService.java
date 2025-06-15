@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
+import com.example.nhatrobackend.DTO.request.DepositRefundRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
 import com.example.nhatrobackend.Entity.Field.DepositStatus;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +16,7 @@ public interface DepositService {
     String processDepositCallback(HttpServletRequest request);
     Object getDepositDetails(Integer depositId, Integer currentUserId);
     Object confirmDeposit(Integer depositId, Integer currentUserId, Boolean isConfirmed);
-    Page<PostResponseDTO> getDepositedPosts(Integer userId, Pageable pageable);
+    Page<PostWithDepositDTO> getDepositedPosts(Integer userId, Pageable pageable);
     //    Page<DepositResponseDTO> getDepositsByUser(Integer userId, Pageable pageable);
     Page<PostResponseDTO> getPostsWithDepositsByOtherUsers(Integer currentUserId, Pageable pageable);
     List<UserDepositDTO> getUsersWithDepositsByPostId(Integer postId);
@@ -26,4 +27,5 @@ public interface DepositService {
     String complaintByLandlord(Integer depositId, Integer currentUserId, DepositComplaintRequestDTO requestDTO);
     DepositFullDetailDTO getFullDepositDetails(Integer depositId);
     Page<DepositStatusDTO> getDepositsByStatus(DepositStatus status, Pageable pageable);
+    String refundDeposit(DepositRefundRequest request, HttpServletRequest httpRequest);
 } 

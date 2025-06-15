@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Service.impl;
 
 import com.example.nhatrobackend.Config.VNPAYConfig;
 import com.example.nhatrobackend.DTO.*;
+import com.example.nhatrobackend.DTO.request.DepositRefundRequest;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
 import com.example.nhatrobackend.Entity.*;
@@ -24,14 +25,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.text.SimpleDateFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +50,7 @@ public class DepositServiceImpl implements DepositService {
     private final UploadImageFileService uploadImageFileService;
     private final DepositTenantComplaintImageRepository tenantComplaintImageRepository;
     private final DepositLandlordComplaintImageRepository landlordComplaintImageRepository;
+    private static final Logger log = LoggerFactory.getLogger(DepositServiceImpl.class);
 
 
     @Override
@@ -204,12 +210,9 @@ public class DepositServiceImpl implements DepositService {
     }
 
     @Override
-    public Page<PostResponseDTO> getDepositedPosts(Integer userId, Pageable pageable) {
-        // Lấy danh sách các bài post mà người dùng đã đặt cọc
-        Page<Deposit> deposits = depositRepository.findByUser_UserIdOrderByCreatedAtDesc(userId, pageable);
-
-        // Chuyển đổi từ Deposit sang PostResponseDTO
-        return deposits.map(deposit -> postMapper.toPostResponseDTO(deposit.getPost()));
+    public Page<PostWithDepositDTO> getDepositedPosts(Integer userId, Pageable pageable) {
+        Page<Deposit> deposits = depositRepository.findByUser_UserId(userId, pageable);
+        return deposits.map(deposit -> postMapper.toPostWithDepositDTO(deposit.getPost(), deposit));
     }
 
     @Override
@@ -456,5 +459,81 @@ public class DepositServiceImpl implements DepositService {
                 .paymentMethod(deposit.getPaymentMethod())
                 .transactionId(deposit.getTransactionId())
                 .build());
+    }
+
+    @Override
+    @Transactional
+    public String refundDeposit(DepositRefundRequest request, HttpServletRequest httpRequest) {
+        Deposit deposit = depositRepository.findById(request.getDepositId())
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc"));
+
+        // Kiểm tra trạng thái deposit
+        if (deposit.getStatus() != DepositStatus.PAID && deposit.getStatus() != DepositStatus.CONFIRMED) {
+            throw new RuntimeException("Không thể hoàn tiền cho đơn đặt cọc này");
+        }
+
+        // Chuẩn bị thông tin hoàn tiền
+        String transactionId = deposit.getTransactionId();
+        String transactionDate = deposit.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        Double amount = deposit.getAmount();
+        String orderInfo = "Hoan tien dat coc - DepositID: " + deposit.getDepositId();
+        String ipAddress = VNPayUtil.getIpAddress(httpRequest);
+
+        log.info("Refund information:");
+        log.info("Transaction ID: {}", transactionId);
+        log.info("Transaction Date: {}", transactionDate);
+        log.info("Amount: {}", amount);
+        log.info("Order Info: {}", orderInfo);
+        log.info("IP Address: {}", ipAddress);
+
+        // Tạo cấu hình hoàn tiền
+        Map<String, String> vnpParams = vnPayConfig.getVNPayRefundConfig(
+                transactionId, transactionDate, amount, orderInfo, ipAddress);
+
+        // Tạo chuỗi hash
+        String hashData = String.join("|",
+                vnpParams.get("vnp_RequestId"),
+                vnpParams.get("vnp_Version"),
+                vnpParams.get("vnp_Command"),
+                vnpParams.get("vnp_TmnCode"),
+                vnpParams.get("vnp_TransactionType"),
+                vnpParams.get("vnp_TxnRef"),
+                vnpParams.get("vnp_Amount"),
+                vnpParams.get("vnp_TransactionDate"),
+                vnpParams.get("vnp_CreateBy"),
+                vnpParams.get("vnp_CreateDate"),
+                vnpParams.get("vnp_IpAddr"),
+                vnpParams.get("vnp_OrderInfo")
+        );
+
+        String vnpSecureHash = VNPayUtil.hmacSHA512(vnPayConfig.getSecretKey(), hashData);
+        vnpParams.put("vnp_SecureHash", vnpSecureHash);
+
+        log.info("VNPAY Parameters:");
+        vnpParams.forEach((key, value) -> log.info("{}: {}", key, value));
+        log.info("Hash Data: {}", hashData);
+        log.info("Secure Hash: {}", vnpSecureHash);
+
+        // Gọi API hoàn tiền
+        try {
+            log.info("Calling VNPAY API at URL: {}", vnPayConfig.getVnp_RefundUrl());
+            String response = VNPayUtil.callVNPayAPI(vnPayConfig.getVnp_RefundUrl(), vnpParams);
+            log.info("VNPAY Response: {}", response);
+            
+            // Parse response và cập nhật trạng thái
+            if (response.contains("\"vnp_ResponseCode\":\"00\"")) {
+                deposit.setStatus(DepositStatus.REFUNDED);
+                deposit.setRefundAmount(amount);
+                deposit.setRefundTransactionId(vnpParams.get("vnp_RequestId"));
+                deposit.setUpdatedAt(LocalDateTime.now());
+                depositRepository.save(deposit);
+                return "Hoàn tiền thành công";
+            } else {
+                throw new RuntimeException("Hoàn tiền thất bại: " + response);
+            }
+        } catch (Exception e) {
+            log.error("Error calling VNPAY API", e);
+            throw new RuntimeException("Lỗi khi gọi API hoàn tiền: " + e.getMessage());
+        }
     }
 } 
