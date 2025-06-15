@@ -1,5 +1,9 @@
 package com.example.nhatrobackend.Service;
 
+import com.example.nhatrobackend.Entity.Deposit;
+import com.example.nhatrobackend.Entity.Post;
+import com.example.nhatrobackend.Entity.Room;
+import com.example.nhatrobackend.Entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -15,6 +19,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -254,5 +259,73 @@ public class MailService {
             }
         }
         log.info("Finished sending matching post notification emails.");
+    }
+
+    /**
+     * Send deposit success notification to both tenant and landlord
+     */
+    public void sendDepositSuccessNotification(Deposit deposit) throws MessagingException, UnsupportedEncodingException {
+        Post post = deposit.getPost();
+        Room room = post.getRoom();
+        User tenant = deposit.getUser();
+        User landlord = post.getUser();
+
+        // Format room address
+        String roomAddress = String.format("%s %s, %s, %s, %s",
+                room.getHouseNumber(),
+                room.getStreet(),
+                room.getWard(),
+                room.getDistrict(),
+                room.getCity());
+
+        // Format dates
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String depositTime = deposit.getCreatedAt().format(formatter);
+        String holdUntil = deposit.getHoldUntil().format(formatter);
+
+        // Create post URL
+        String postUrl = String.format("%s/posts/%s", serverName, post.getPostUuid());
+
+        // Prepare email data
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("postTitle", post.getTitle());
+        properties.put("roomAddress", roomAddress);
+        properties.put("roomArea", room.getArea());
+        properties.put("roomPrice", String.format("%,.0f", room.getPrice()));
+        properties.put("depositId", deposit.getDepositId());
+        properties.put("depositAmount", String.format("%,.0f", deposit.getAmount()));
+        properties.put("depositTime", depositTime);
+        properties.put("holdUntil", holdUntil);
+        properties.put("landlordName", landlord.getFullName());
+        properties.put("landlordPhone", landlord.getPhoneNumber());
+        properties.put("tenantName", tenant.getFullName());
+        properties.put("tenantPhone", tenant.getPhoneNumber());
+        properties.put("postUrl", postUrl);
+
+        // Send email to tenant
+        if (tenant.getEmail() != null) {
+            sendDepositSuccessEmail(tenant.getEmail(), properties);
+        }
+
+        // Send email to landlord
+        if (landlord.getEmail() != null) {
+            sendDepositSuccessEmail(landlord.getEmail(), properties);
+        }
+    }
+
+    private void sendDepositSuccessEmail(String emailTo, Map<String, Object> properties) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+        Context context = new Context();
+        context.setVariables(properties);
+
+        helper.setFrom(emailFrom, "Nhà Trọ Rẻ");
+        helper.setTo(emailTo);
+        helper.setSubject("Thông báo đặt cọc thành công");
+        String html = templateEngine.process("deposit-success-email.html", context);
+        helper.setText(html, true);
+
+        mailSender.send(message);
+        log.info("Deposit success notification email has been sent to: {}", emailTo);
     }
 }

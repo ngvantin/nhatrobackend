@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:remove="all">Thông báo đặt cọc thành công</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style type="text/css">
+        /* Basic styling for better compatibility */
+        body {
+            margin: 0; 
+            padding: 0; 
+            background-color: #f4f4f4; 
+            font-family: Arial, sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            padding: 20px;
+            text-align: center;
+            background-color: #173849;
+            color: #ffffff;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin: 0;
+            font-weight: bold;
+        }
+        .main-content {
+            padding: 40px 30px;
+        }
+        .title-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .title-section h1 {
+             color: #173849;
+             font-size: 24px;
+             margin: 0;
+             padding: 0;
+        }
+        .title-divider {
+            width: 50px;
+            height: 3px;
+            background-color: #173849;
+            margin: 15px auto;
+        }
+        .content-section {
+            color: #333333;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .info-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .info-section h3 {
+            color: #173849;
+            margin-top: 0;
+        }
+        .info-row {
+            margin: 10px 0;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .button-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .button {
+            display: inline-block; 
+            background-color: #173849; 
+            color: #ffffff; 
+            text-decoration: none; 
+            padding: 12px 30px; 
+            border-radius: 5px; 
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #173849;
+            padding: 30px 20px;
+            text-align: center;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .footer .copyright {
+             font-size: 12px;
+             border-top: 1px solid rgba(255,255,255,0.1);
+             padding-top: 15px;
+             margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td>
+            <table class="container" role="presentation" align="center" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <!-- Header -->
+                <tr>
+                    <td class="header">
+                        <h1>Nhà Trọ Rẻ</h1>
+                    </td>
+                </tr>
+
+                <!-- Main Content -->
+                <tr>
+                    <td class="main-content">
+                        <!-- Title Section -->
+                        <div class="title-section">
+                            <h1>Đặt cọc thành công</h1>
+                            <div class="title-divider"></div>
+                        </div>
+
+                        <!-- Content Section -->
+                        <div class="content-section">
+                            <p>Kính gửi Quý khách hàng,</p>
+                            <p>Chúng tôi xin thông báo rằng đơn đặt cọc của bạn đã được xử lý thành công. Dưới đây là thông tin chi tiết:</p>
+
+                            <!-- Room Information -->
+                            <div class="info-section">
+                                <h3>Thông tin phòng trọ</h3>
+                                <div class="info-row">
+                                    <span class="info-label">Tiêu đề:</span>
+                                    <span th:text="${postTitle}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Địa chỉ:</span>
+                                    <span th:text="${roomAddress}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Diện tích:</span>
+                                    <span th:text="${roomArea + ' m²'}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Giá thuê:</span>
+                                    <span th:text="${roomPrice + ' VNĐ/tháng'}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Deposit Information -->
+                            <div class="info-section">
+                                <h3>Thông tin đặt cọc</h3>
+                                <div class="info-row">
+                                    <span class="info-label">Mã đặt cọc:</span>
+                                    <span th:text="${depositId}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Số tiền đặt cọc:</span>
+                                    <span th:text="${depositAmount + ' VNĐ'}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Thời gian đặt cọc:</span>
+                                    <span th:text="${depositTime}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Thời hạn giữ chỗ:</span>
+                                    <span th:text="${holdUntil}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Contact Information -->
+                            <div class="info-section">
+                                <h3>Thông tin liên hệ</h3>
+                                <div class="info-row">
+                                    <span class="info-label">Chủ trọ:</span>
+                                    <span th:text="${landlordName}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Số điện thoại chủ trọ:</span>
+                                    <span th:text="${landlordPhone}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Người đặt cọc:</span>
+                                    <span th:text="${tenantName}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Số điện thoại người đặt cọc:</span>
+                                    <span th:text="${tenantPhone}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Button Section -->
+                            <div class="button-section">
+                                <a th:href="${postUrl}" class="button">Xem chi tiết bài đăng</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td class="footer">
+                        <p>Hotline: 1900 1234</p>
+                        <p>Email: support@nhatrore.com</p>
+                        <div class="copyright">
+                            <p>&copy; 2024 Nhà Trọ Rẻ. Tất cả các quyền được bảo lưu.</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html> 

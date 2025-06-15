@@ -16,6 +16,7 @@ import com.example.nhatrobackend.Service.DepositService;
 import com.example.nhatrobackend.Service.NotificationService;
 import com.example.nhatrobackend.Service.UploadImageFileService;
 import com.example.nhatrobackend.Service.UserService;
+import com.example.nhatrobackend.Service.MailService;
 import com.example.nhatrobackend.util.VNPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -50,6 +51,7 @@ public class DepositServiceImpl implements DepositService {
     private final UploadImageFileService uploadImageFileService;
     private final DepositTenantComplaintImageRepository tenantComplaintImageRepository;
     private final DepositLandlordComplaintImageRepository landlordComplaintImageRepository;
+    private final MailService mailService;
     private static final Logger log = LoggerFactory.getLogger(DepositServiceImpl.class);
 
 
@@ -167,27 +169,26 @@ public class DepositServiceImpl implements DepositService {
     }
 
     private String processDepositSuccess(String transactionCode, String amountStr, String orderInfo) {
-        String[] parts = orderInfo.split(" - DepositID: ");
-        Integer depositId = null;
-        if (parts.length == 2) {
-            try {
-                depositId = Integer.parseInt(parts[1]);
-            } catch (NumberFormatException e) {
-                return "Không tìm thấy thông tin DepositID trong orderInfo.";
-            }
-        } else {
-            return "Định dạng orderInfo không hợp lệ.";
-        }
-
+        // Tìm deposit từ orderInfo
+        String depositIdStr = orderInfo.split("DepositID: ")[1];
+        int depositId = Integer.parseInt(depositIdStr);
         Deposit deposit = depositRepository.findById(depositId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt cọc"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin đặt cọc"));
 
+        // Cập nhật trạng thái deposit
         deposit.setStatus(DepositStatus.PAID);
         deposit.setTransactionId(transactionCode);
         deposit.setUpdatedAt(LocalDateTime.now());
         depositRepository.save(deposit);
 
-        return "Đặt cọc thành công. Vui lòng chờ chủ trọ xác nhận.";
+        // Gửi email thông báo
+        try {
+            mailService.sendDepositSuccessNotification(deposit);
+        } catch (Exception e) {
+            log.error("Failed to send deposit success notification email", e);
+        }
+
+        return "Đặt cọc thành công";
     }
 
     private String processDepositFailed(String transactionCode, String responseCode, String orderInfo) {
