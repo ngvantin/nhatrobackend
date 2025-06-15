@@ -127,8 +127,8 @@ public class DepositServiceImpl implements DepositService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt cọc"));
 
         // Kiểm tra quyền truy cập
-        if (!deposit.getUser().getUserId().equals(currentUserId) && 
-            !deposit.getPost().getUser().getUserId().equals(currentUserId)) {
+        if (!deposit.getUser().getUserId().equals(currentUserId) &&
+                !deposit.getPost().getUser().getUserId().equals(currentUserId)) {
             throw new RuntimeException("Không có quyền truy cập đơn đặt cọc này");
         }
 
@@ -207,7 +207,7 @@ public class DepositServiceImpl implements DepositService {
     public Page<PostResponseDTO> getDepositedPosts(Integer userId, Pageable pageable) {
         // Lấy danh sách các bài post mà người dùng đã đặt cọc
         Page<Deposit> deposits = depositRepository.findByUser_UserIdOrderByCreatedAtDesc(userId, pageable);
-        
+
         // Chuyển đổi từ Deposit sang PostResponseDTO
         return deposits.map(deposit -> postMapper.toPostResponseDTO(deposit.getPost()));
     }
@@ -216,7 +216,7 @@ public class DepositServiceImpl implements DepositService {
     public Page<PostResponseDTO> getPostsWithDepositsByOtherUsers(Integer currentUserId, Pageable pageable) {
         // Get all posts that have deposits from other users
         Page<Post> posts = depositRepository.findPostsWithDepositsByOtherUsers(currentUserId, pageable);
-        
+
         // Convert to DTO using MapStruct
         return posts.map(postMapper::toPostResponseDTO);
     }
@@ -241,10 +241,10 @@ public class DepositServiceImpl implements DepositService {
     public DepositDetailDTO getDepositDetailsById(Integer depositId) {
         Deposit deposit = depositRepository.findById(depositId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc với ID: " + depositId));
-        
+
         User depositor = deposit.getUser();
         User landlord = deposit.getPost().getUser();
-        
+
         return DepositDetailDTO.builder()
                 .depositId(deposit.getDepositId())
                 .createdAt(deposit.getCreatedAt())
@@ -258,6 +258,9 @@ public class DepositServiceImpl implements DepositService {
                 .landlordFullName(landlord.getFullName())
                 .landlordEmail(landlord.getEmail())
                 .landlordPhoneNumber(landlord.getPhoneNumber())
+                // Trạng thái xác nhận
+                .landlordConfirmed(deposit.getLandlordConfirmed())
+                .tenantConfirmed(deposit.getTenantConfirmed())
                 .build();
     }
 
@@ -265,21 +268,21 @@ public class DepositServiceImpl implements DepositService {
     public String confirmByTenant(Integer depositId, Integer currentUserId) {
         Deposit deposit = depositRepository.findById(depositId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc với ID: " + depositId));
-        
+
         // Kiểm tra xem người dùng hiện tại có phải là người đặt cọc không
         if (!deposit.getUser().getUserId().equals(currentUserId)) {
             throw new IllegalArgumentException("Bạn không có quyền xác nhận đơn đặt cọc này");
         }
-        
+
         // Cập nhật trạng thái xác nhận từ người thuê
         deposit.setTenantConfirmed(true);
         deposit.setUpdatedAt(LocalDateTime.now());
-        
+
         // Nếu cả hai bên đã xác nhận, cập nhật trạng thái đặt cọc
         if (deposit.getLandlordConfirmed() != null && deposit.getLandlordConfirmed()) {
             deposit.setStatus(DepositStatus.CONFIRMED);
         }
-        
+
         depositRepository.save(deposit);
         return "Xác nhận đặt cọc từ người thuê thành công.";
     }
@@ -288,21 +291,21 @@ public class DepositServiceImpl implements DepositService {
     public String confirmByLandlord(Integer depositId, Integer currentUserId) {
         Deposit deposit = depositRepository.findById(depositId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc với ID: " + depositId));
-        
+
         // Kiểm tra xem người dùng hiện tại có phải là chủ trọ không
         if (!deposit.getPost().getUser().getUserId().equals(currentUserId)) {
             throw new IllegalArgumentException("Bạn không có quyền xác nhận đơn đặt cọc này");
         }
-        
+
         // Cập nhật trạng thái xác nhận từ chủ trọ
         deposit.setLandlordConfirmed(true);
         deposit.setUpdatedAt(LocalDateTime.now());
-        
+
         // Nếu cả hai bên đã xác nhận, cập nhật trạng thái đặt cọc
         if (deposit.getTenantConfirmed() != null && deposit.getTenantConfirmed()) {
             deposit.setStatus(DepositStatus.CONFIRMED);
         }
-        
+
         depositRepository.save(deposit);
         return "Xác nhận đặt cọc từ chủ trọ thành công.";
     }
@@ -321,6 +324,7 @@ public class DepositServiceImpl implements DepositService {
         // Cập nhật thông tin khiếu nại
         deposit.setTenantComplaintReason(requestDTO.getReason());
         deposit.setUpdatedAt(LocalDateTime.now());
+        deposit.setTenantConfirmed(false);
 
         // Upload video nếu có
         if (requestDTO.getVideo() != null && !requestDTO.getVideo().isEmpty()) {
@@ -369,6 +373,7 @@ public class DepositServiceImpl implements DepositService {
         // Cập nhật thông tin khiếu nại
         deposit.setLandlordComplaintReason(requestDTO.getReason());
         deposit.setUpdatedAt(LocalDateTime.now());
+        deposit.setLandlordConfirmed(false);
 
         // Upload video nếu có
         if (requestDTO.getVideo() != null && !requestDTO.getVideo().isEmpty()) {
@@ -401,5 +406,55 @@ public class DepositServiceImpl implements DepositService {
         }
 
         return "Gửi khiếu nại từ chủ trọ thành công.";
+    }
+
+    @Override
+    public DepositFullDetailDTO getFullDepositDetails(Integer depositId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc với ID: " + depositId));
+
+        User depositor = deposit.getUser();
+        User landlord = deposit.getPost().getUser();
+
+        return DepositFullDetailDTO.builder()
+                .depositId(deposit.getDepositId())
+                .status(deposit.getStatus())
+                .landlordConfirmed(deposit.getLandlordConfirmed())
+                .tenantConfirmed(deposit.getTenantConfirmed())
+                .tenantComplaintReason(deposit.getTenantComplaintReason())
+                .tenantComplaintVideoUrl(deposit.getTenantComplaintVideoUrl())
+                .landlordComplaintReason(deposit.getLandlordComplaintReason())
+                .landlordComplaintVideoUrl(deposit.getLandlordComplaintVideoUrl())
+                .tenantComplaintImages(deposit.getTenantComplaintImages() != null ? 
+                    deposit.getTenantComplaintImages().stream()
+                        .map(DepositTenantComplaintImage::getImageUrl)
+                        .toList() : null)
+                .landlordComplaintImages(deposit.getLandlordComplaintImages() != null ? 
+                    deposit.getLandlordComplaintImages().stream()
+                        .map(DepositLandlordComplaintImage::getImageUrl)
+                        .toList() : null)
+                .createdAt(deposit.getCreatedAt())
+                // Thông tin người đặt cọc
+                .depositorId(depositor.getUserId())
+                .depositorFullName(depositor.getFullName())
+                .depositorEmail(depositor.getEmail())
+                .depositorPhoneNumber(depositor.getPhoneNumber())
+                // Thông tin chủ trọ
+                .landlordId(landlord.getUserId())
+                .landlordFullName(landlord.getFullName())
+                .landlordEmail(landlord.getEmail())
+                .landlordPhoneNumber(landlord.getPhoneNumber())
+                .build();
+    }
+
+    @Override
+    public Page<DepositStatusDTO> getDepositsByStatus(DepositStatus status, Pageable pageable) {
+        Page<Deposit> deposits = depositRepository.findByStatus(status, pageable);
+        return deposits.map(deposit -> DepositStatusDTO.builder()
+                .depositId(deposit.getDepositId())
+                .amount(deposit.getAmount())
+                .paymentMethod(deposit.getPaymentMethod())
+                .transactionId(deposit.getTransactionId())
+                .build());
     }
 } 

@@ -1,18 +1,32 @@
 package com.example.nhatrobackend.DTO;
 
+import com.example.nhatrobackend.Entity.Field.DepositStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DepositDetailDTO {
-    private Integer depositId;
+public class DepositFullDetailDTO {
+    private int depositId;
+    private DepositStatus status;
+    private Boolean landlordConfirmed;
+    private Boolean tenantConfirmed;
+    
+    private String tenantComplaintReason;
+    private String tenantComplaintVideoUrl;
+    private String landlordComplaintReason;
+    private String landlordComplaintVideoUrl;
+    
+    private List<String> tenantComplaintImages;
+    private List<String> landlordComplaintImages;
+    
     private LocalDateTime createdAt;
     
     // Thông tin người đặt cọc
@@ -26,8 +40,4 @@ public class DepositDetailDTO {
     private String landlordFullName;
     private String landlordEmail;
     private String landlordPhoneNumber;
-
-    // Trạng thái xác nhận
-    private Boolean landlordConfirmed;
-    private Boolean tenantConfirmed;
 } 

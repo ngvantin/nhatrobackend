@@ -1,11 +1,9 @@
 package com.example.nhatrobackend.Service;
 
-import com.example.nhatrobackend.DTO.DepositComplaintRequestDTO;
-import com.example.nhatrobackend.DTO.DepositDetailDTO;
-import com.example.nhatrobackend.DTO.PostResponseDTO;
-import com.example.nhatrobackend.DTO.UserDepositDTO;
+import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
+import com.example.nhatrobackend.Entity.Field.DepositStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +16,7 @@ public interface DepositService {
     Object getDepositDetails(Integer depositId, Integer currentUserId);
     Object confirmDeposit(Integer depositId, Integer currentUserId, Boolean isConfirmed);
     Page<PostResponseDTO> getDepositedPosts(Integer userId, Pageable pageable);
-//    Page<DepositResponseDTO> getDepositsByUser(Integer userId, Pageable pageable);
+    //    Page<DepositResponseDTO> getDepositsByUser(Integer userId, Pageable pageable);
     Page<PostResponseDTO> getPostsWithDepositsByOtherUsers(Integer currentUserId, Pageable pageable);
     List<UserDepositDTO> getUsersWithDepositsByPostId(Integer postId);
     DepositDetailDTO getDepositDetailsById(Integer depositId);
@@ -26,4 +24,6 @@ public interface DepositService {
     String confirmByLandlord(Integer depositId, Integer currentUserId);
     String complaintByTenant(Integer depositId, Integer currentUserId, DepositComplaintRequestDTO requestDTO);
     String complaintByLandlord(Integer depositId, Integer currentUserId, DepositComplaintRequestDTO requestDTO);
+    DepositFullDetailDTO getFullDepositDetails(Integer depositId);
+    Page<DepositStatusDTO> getDepositsByStatus(DepositStatus status, Pageable pageable);
 } 

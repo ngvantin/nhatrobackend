@@ -3,6 +3,7 @@ package com.example.nhatrobackend.Rest;
 import com.example.nhatrobackend.DTO.*;
 import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
+import com.example.nhatrobackend.Entity.Field.DepositStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.DepositService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -82,7 +83,7 @@ public class DepositController {
             @RequestParam(defaultValue = "10") int size) {
         Integer currentUserId = authenticationFacade.getCurrentUserId();
         Pageable pageable = PageRequest.of(page, size);
-        
+
         return ResponseEntity.ok(ResponseWrapper.<Page<PostResponseDTO>>builder()
                 .status("success")
                 .data(depositService.getDepositedPosts(currentUserId, pageable))
@@ -187,6 +188,58 @@ public class DepositController {
                 .status("success")
                 .data(message)
                 .message(message)
+                .build());
+    }
+
+    @GetMapping("/{depositId}/full-details")
+    public ResponseEntity<ResponseWrapper<DepositFullDetailDTO>> getFullDepositDetails(
+            @PathVariable Integer depositId) {
+        DepositFullDetailDTO depositDetails = depositService.getFullDepositDetails(depositId);
+        return ResponseEntity.ok(ResponseWrapper.<DepositFullDetailDTO>builder()
+                .status("success")
+                .data(depositDetails)
+                .message("Thông tin chi tiết đầy đủ của đặt cọc.")
+                .build());
+    }
+
+    @GetMapping("/status/paid")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByStatusPaid(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByStatus(DepositStatus.PAID, pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với trạng thái " + DepositStatus.PAID)
+                .build());
+    }
+
+
+    @GetMapping("/status/confirmed")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByStatusConfirmed(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByStatus(DepositStatus.CONFIRMED, pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với trạng thái " + DepositStatus.CONFIRMED)
+                .build());
+    }
+
+
+    @GetMapping("/status/canelled")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByStatusCanelled(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByStatus(DepositStatus.CANCELLED, pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với trạng thái " + DepositStatus.CANCELLED)
                 .build());
     }
 } 
