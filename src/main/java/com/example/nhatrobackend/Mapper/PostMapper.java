@@ -99,6 +99,22 @@ public interface PostMapper {
     @Mapping(source = "createdAt", target = "createdAt")
     SimilarPostResponse toSimilarPostResponse(Post post);
 
+    // Ánh xạ từ Post và Deposit sang PostWithDepositDTO
+    @Mapping(source = "post.room.electricityPrice", target = "electricityPrice")
+    @Mapping(source = "post.room.waterPrice", target = "waterPrice")
+    @Mapping(source = "post.room.price", target = "price")
+    @Mapping(source = "post.room.area", target = "area")
+    @Mapping(source = "post.room.city", target = "city")
+    @Mapping(source = "post.room.district", target = "district")
+    @Mapping(source = "post.room.ward", target = "ward")
+    @Mapping(source = "post.postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
+    @Mapping(source = "post.postUuid", target = "postUuid")
+    @Mapping(source = "post.postId", target = "postId")
+    @Mapping(source = "post.title", target = "title")
+    @Mapping(source = "post.createdAt", target = "createdAt")
+    @Mapping(source = "deposit.depositId", target = "depositId")
+    PostWithDepositDTO toPostWithDepositDTO(Post post, Deposit deposit);
+
     // dính lỗi khi sửa security xóa bảng account
 //    // Phương thức chuyển đổi từ Post và ReportPost sang ReportPostDetailDTO
 //    @Mapping(source = "post.room.price", target = "price")

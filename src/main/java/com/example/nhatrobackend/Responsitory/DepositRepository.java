@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Responsitory;
 
 import com.example.nhatrobackend.Entity.Deposit;
+import com.example.nhatrobackend.Entity.Field.DepositStatus;
 import com.example.nhatrobackend.Entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,4 +22,7 @@ public interface DepositRepository extends JpaRepository<Deposit, Integer> {
     Page<Post> findPostsWithDepositsByOtherUsers(@Param("currentUserId") Integer currentUserId, Pageable pageable);
     
     List<Deposit> findByPost_PostId(Integer postId);
+    
+    Page<Deposit> findByStatus(DepositStatus status, Pageable pageable);
+
 } 
