@@ -63,24 +63,6 @@
         .content-section p {
              margin: 0 0 20px 0;
         }
-        .button-section {
-            text-align: center;
-            margin: 30px 0;
-        }
-        .button-section p {
-            color: #666666;
-            margin-bottom: 15px;
-        }
-        .button {
-            display: inline-block; 
-            background-color: #173849; 
-            color: #ffffff; 
-            text-decoration: none; 
-            padding: 12px 30px; 
-            border-radius: 5px; 
-            font-weight: bold;
-        }
-
         .footer {
             background-color: #173849;
             padding: 30px 20px;
@@ -119,7 +101,7 @@
                 <!-- Header with Logo Text -->
                 <tr>
                     <td class="header">
-                        <h1>Nhà Trọ Rẻ</h1>
+                        <h1>Trọ Tốt</h1>
                     </td>
                 </tr>
 
@@ -135,14 +117,6 @@
                         <!-- Content Section -->
                         <div class="content-section">
                             <p th:text="${content}">Nội dung thông báo</p>
-                            
-                            <!-- Button Section -->
-                            <div th:if="${buttonText}" class="button-section">
-                                <p>Bạn có thể xem chi tiết bằng cách nhấp vào nút bên dưới:</p>
-                                <a th:href="${buttonUrl}" class="button" style="color: #ffffff;" th:text="${buttonText}">
-                                    Xem chi tiết
-                                </a>
-                            </div>
                         </div>
 
                         <!-- Additional Info Section -->
@@ -165,12 +139,12 @@
                         <!-- Contact Info -->
                         <div style="margin-bottom: 15px;">
                             <p>Hotline: 1900 1234</p>
-                            <p>Email: support@nhatrore.com</p>
+                            <p>Email: support@trotot.com</p>
                         </div>
 
                         <!-- Copyright -->
                         <div class="copyright">
-                             <p>&copy; 2024 Nhà Trọ Rẻ. Tất cả các quyền được bảo lưu.</p>
+                             <p>&copy; 2024 Trọ Tốt. Tất cả các quyền được bảo lưu.</p>
                         </div>
                     </td>
                 </tr>

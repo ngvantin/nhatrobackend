@@ -103,6 +103,9 @@ public class User implements UserDetails, Serializable {
     @Column(name = "post_count", nullable = false, columnDefinition = "integer default 0")
     private Integer postCount;
 
+    @Column(name = "balance", nullable = false, columnDefinition = "double precision default 0")
+    private Double balance;
+
     // Quan hệ 1-N với Post
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Post> post;

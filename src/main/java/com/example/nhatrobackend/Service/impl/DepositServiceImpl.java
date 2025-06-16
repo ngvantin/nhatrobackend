@@ -7,6 +7,7 @@ import com.example.nhatrobackend.DTO.request.DepositRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
 import com.example.nhatrobackend.Entity.*;
 import com.example.nhatrobackend.Entity.Field.DepositStatus;
+import com.example.nhatrobackend.Entity.Field.PaymentType;
 import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Responsitory.DepositRepository;
 import com.example.nhatrobackend.Responsitory.DepositTenantComplaintImageRepository;
@@ -16,6 +17,8 @@ import com.example.nhatrobackend.Service.DepositService;
 import com.example.nhatrobackend.Service.NotificationService;
 import com.example.nhatrobackend.Service.UploadImageFileService;
 import com.example.nhatrobackend.Service.UserService;
+import com.example.nhatrobackend.Service.MailService;
+import com.example.nhatrobackend.Service.PaymentHistoryService;
 import com.example.nhatrobackend.util.VNPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -50,6 +53,8 @@ public class DepositServiceImpl implements DepositService {
     private final UploadImageFileService uploadImageFileService;
     private final DepositTenantComplaintImageRepository tenantComplaintImageRepository;
     private final DepositLandlordComplaintImageRepository landlordComplaintImageRepository;
+    private final MailService mailService;
+    private final PaymentHistoryService paymentHistoryService;
     private static final Logger log = LoggerFactory.getLogger(DepositServiceImpl.class);
 
 
@@ -167,27 +172,26 @@ public class DepositServiceImpl implements DepositService {
     }
 
     private String processDepositSuccess(String transactionCode, String amountStr, String orderInfo) {
-        String[] parts = orderInfo.split(" - DepositID: ");
-        Integer depositId = null;
-        if (parts.length == 2) {
-            try {
-                depositId = Integer.parseInt(parts[1]);
-            } catch (NumberFormatException e) {
-                return "Không tìm thấy thông tin DepositID trong orderInfo.";
-            }
-        } else {
-            return "Định dạng orderInfo không hợp lệ.";
-        }
-
+        // Tìm deposit từ orderInfo
+        String depositIdStr = orderInfo.split("DepositID: ")[1];
+        int depositId = Integer.parseInt(depositIdStr);
         Deposit deposit = depositRepository.findById(depositId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt cọc"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin đặt cọc"));
 
+        // Cập nhật trạng thái deposit
         deposit.setStatus(DepositStatus.PAID);
         deposit.setTransactionId(transactionCode);
         deposit.setUpdatedAt(LocalDateTime.now());
         depositRepository.save(deposit);
 
-        return "Đặt cọc thành công. Vui lòng chờ chủ trọ xác nhận.";
+        // Gửi email thông báo
+        try {
+            mailService.sendDepositSuccessNotification(deposit);
+        } catch (Exception e) {
+            log.error("Failed to send deposit success notification email", e);
+        }
+
+        return "Đặt cọc thành công";
     }
 
     private String processDepositFailed(String transactionCode, String responseCode, String orderInfo) {
@@ -455,6 +459,7 @@ public class DepositServiceImpl implements DepositService {
         Page<Deposit> deposits = depositRepository.findByStatus(status, pageable);
         return deposits.map(deposit -> DepositStatusDTO.builder()
                 .depositId(deposit.getDepositId())
+                .postUuid(deposit.getPost().getPostUuid())
                 .amount(deposit.getAmount())
                 .paymentMethod(deposit.getPaymentMethod())
                 .transactionId(deposit.getTransactionId())
@@ -535,5 +540,93 @@ public class DepositServiceImpl implements DepositService {
             log.error("Error calling VNPAY API", e);
             throw new RuntimeException("Lỗi khi gọi API hoàn tiền: " + e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional
+    public String refundDepositToTenant(Integer depositId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc"));
+
+        // Kiểm tra trạng thái đặt cọc
+        if (deposit.getStatus() != DepositStatus.PAID) {
+            throw new RuntimeException("Đơn đặt cọc chưa được thanh toán");
+        }
+
+        // Hoàn tiền cho người đặt cọc
+        User tenant = deposit.getUser();
+        tenant.setBalance(tenant.getBalance() + deposit.getAmount());
+        userService.saveUser(tenant);
+
+        // Cập nhật trạng thái đặt cọc
+        deposit.setStatus(DepositStatus.REFUNDED);
+        deposit.setRefundAmount(deposit.getAmount());
+        deposit.setUpdatedAt(LocalDateTime.now());
+        depositRepository.save(deposit);
+
+        // Lưu lịch sử thanh toán
+        PaymentHistory paymentHistory = PaymentHistory.builder()
+                .user(tenant)
+                .paymentAmount(deposit.getAmount().longValue())
+                .paymentType(PaymentType.REFUND)
+                .deposit(deposit)
+                .paymentTime(LocalDateTime.now())
+                .description("Hoàn tiền đặt cọc cho đơn #" + deposit.getDepositId())
+                .build();
+        paymentHistoryService.savePaymentHistory(paymentHistory);
+
+        return "Hoàn tiền thành công";
+    }
+
+    @Override
+    @Transactional
+    public String payCommissionToLandlord(Integer depositId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc"));
+
+        // Kiểm tra trạng thái đặt cọc
+        if (deposit.getStatus() != DepositStatus.PAID) {
+            throw new RuntimeException("Đơn đặt cọc chưa được thanh toán");
+        }
+
+        Post post = deposit.getPost();
+        Room room = post.getRoom();
+        User landlord = post.getUser();
+
+        // Tính toán số tiền hoa hồng (10% giá phòng)
+        double commissionAmount = room.getPrice() * 0.1;
+        double landlordAmount = deposit.getAmount() - commissionAmount;
+
+        // Cập nhật số dư cho chủ trọ
+        landlord.setBalance(landlord.getBalance() + landlordAmount);
+        userService.saveUser(landlord);
+
+        // Lưu lịch sử thanh toán cho chủ trọ
+        PaymentHistory landlordPayment = PaymentHistory.builder()
+                .user(landlord)
+                .paymentAmount((long) landlordAmount)
+                .paymentType(PaymentType.COMMISSION)
+                .deposit(deposit)
+                .commissionRate(0.1)
+                .commissionAmount(commissionAmount)
+                .paymentTime(LocalDateTime.now())
+                .description("Thanh toán tiền đặt cọc cho đơn #" + deposit.getDepositId())
+                .build();
+        paymentHistoryService.savePaymentHistory(landlordPayment);
+
+        // Lưu lịch sử thanh toán cho hệ thống (hoa hồng)
+        PaymentHistory commissionPayment = PaymentHistory.builder()
+                .user(null) // Hệ thống
+                .paymentAmount((long) commissionAmount)
+                .paymentType(PaymentType.COMMISSION)
+                .deposit(deposit)
+                .commissionRate(0.1)
+                .commissionAmount(commissionAmount)
+                .paymentTime(LocalDateTime.now())
+                .description("Hoa hồng từ đơn đặt cọc #" + deposit.getDepositId())
+                .build();
+        paymentHistoryService.savePaymentHistory(commissionPayment);
+
+        return "Thanh toán hoa hồng thành công";
     }
 } 

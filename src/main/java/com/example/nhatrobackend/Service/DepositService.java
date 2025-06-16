@@ -28,4 +28,6 @@ public interface DepositService {
     DepositFullDetailDTO getFullDepositDetails(Integer depositId);
     Page<DepositStatusDTO> getDepositsByStatus(DepositStatus status, Pageable pageable);
     String refundDeposit(DepositRefundRequest request, HttpServletRequest httpRequest);
+    String refundDepositToTenant(Integer depositId);
+    String payCommissionToLandlord(Integer depositId);
 } 

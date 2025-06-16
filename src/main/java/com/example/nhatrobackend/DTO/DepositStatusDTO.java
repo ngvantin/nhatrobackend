@@ -14,4 +14,5 @@ public class DepositStatusDTO {
     private Double amount;
     private String paymentMethod;
     private String transactionId;
+    private String postUuid;
 } 
