@@ -96,6 +96,11 @@ public class PaymentHistoryServiceImpl implements PaymentHistoryService {
         return mapToAdminPaymentHistoryResponse(paymentHistory);
     }
 
+    @Override
+    public PaymentHistory savePaymentHistory(PaymentHistory paymentHistory) {
+        return paymentHistoryRepository.save(paymentHistory);
+    }
+
     private AdminPaymentHistoryResponse mapToAdminPaymentHistoryResponse(PaymentHistory paymentHistory) {
         if (paymentHistory == null) return null;
         

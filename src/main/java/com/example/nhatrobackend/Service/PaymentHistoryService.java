@@ -2,6 +2,7 @@ package com.example.nhatrobackend.Service;
 
 import com.example.nhatrobackend.DTO.response.PaymentHistoryResponse;
 import com.example.nhatrobackend.DTO.response.AdminPaymentHistoryResponse;
+import com.example.nhatrobackend.Entity.PaymentHistory;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
@@ -13,4 +14,5 @@ public interface PaymentHistoryService {
     PaymentHistoryResponse getPaymentDetailsById(Integer userId, Long paymentId);
     Page<PaymentHistoryResponse> getAllPaymentHistories(int page, int size, String sortBy, String direction);
     AdminPaymentHistoryResponse getAdminPaymentDetailsById(Long paymentId);
+    PaymentHistory savePaymentHistory(PaymentHistory paymentHistory);
 }

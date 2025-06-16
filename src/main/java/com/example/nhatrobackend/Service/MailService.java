@@ -281,10 +281,6 @@ public class MailService {
         // Format dates
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         String depositTime = deposit.getCreatedAt().format(formatter);
-        String holdUntil = deposit.getHoldUntil().format(formatter);
-
-        // Create post URL
-        String postUrl = String.format("%s/posts/%s", serverName, post.getPostUuid());
 
         // Prepare email data
         Map<String, Object> properties = new HashMap<>();
@@ -292,15 +288,16 @@ public class MailService {
         properties.put("roomAddress", roomAddress);
         properties.put("roomArea", room.getArea());
         properties.put("roomPrice", String.format("%,.0f", room.getPrice()));
+        properties.put("furnitureStatus", room.getFurnitureStatus().getValue());
+        properties.put("electricityPrice", String.format("%,.0f", room.getElectricityPrice()));
+        properties.put("waterPrice", String.format("%,.0f", room.getWaterPrice()));
         properties.put("depositId", deposit.getDepositId());
         properties.put("depositAmount", String.format("%,.0f", deposit.getAmount()));
         properties.put("depositTime", depositTime);
-        properties.put("holdUntil", holdUntil);
         properties.put("landlordName", landlord.getFullName());
         properties.put("landlordPhone", landlord.getPhoneNumber());
         properties.put("tenantName", tenant.getFullName());
         properties.put("tenantPhone", tenant.getPhoneNumber());
-        properties.put("postUrl", postUrl);
 
         // Send email to tenant
         if (tenant.getEmail() != null) {
@@ -319,7 +316,7 @@ public class MailService {
         Context context = new Context();
         context.setVariables(properties);
 
-        helper.setFrom(emailFrom, "Nhà Trọ Rẻ");
+        helper.setFrom(emailFrom, "Trọ Tốt");
         helper.setTo(emailTo);
         helper.setSubject("Thông báo đặt cọc thành công");
         String html = templateEngine.process("deposit-success-email.html", context);

@@ -77,19 +77,6 @@
             font-weight: bold;
             color: #666;
         }
-        .button-section {
-            text-align: center;
-            margin: 30px 0;
-        }
-        .button {
-            display: inline-block; 
-            background-color: #173849; 
-            color: #ffffff; 
-            text-decoration: none; 
-            padding: 12px 30px; 
-            border-radius: 5px; 
-            font-weight: bold;
-        }
         .footer {
             background-color: #173849;
             padding: 30px 20px;
@@ -116,7 +103,7 @@
                 <!-- Header -->
                 <tr>
                     <td class="header">
-                        <h1>Nhà Trọ Rẻ</h1>
+                        <h1>Trọ Tốt</h1>
                     </td>
                 </tr>
 
@@ -153,6 +140,18 @@
                                     <span class="info-label">Giá thuê:</span>
                                     <span th:text="${roomPrice + ' VNĐ/tháng'}"></span>
                                 </div>
+                                <div class="info-row">
+                                    <span class="info-label">Tình trạng nội thất:</span>
+                                    <span th:text="${furnitureStatus == 'FULL' ? 'Đầy đủ' : 'Không có'}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Giá điện:</span>
+                                    <span th:text="${electricityPrice + ' VNĐ/kWh'}"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Giá nước:</span>
+                                    <span th:text="${waterPrice + ' VNĐ/m³'}"></span>
+                                </div>
                             </div>
 
                             <!-- Deposit Information -->
@@ -169,10 +168,6 @@
                                 <div class="info-row">
                                     <span class="info-label">Thời gian đặt cọc:</span>
                                     <span th:text="${depositTime}"></span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-label">Thời hạn giữ chỗ:</span>
-                                    <span th:text="${holdUntil}"></span>
                                 </div>
                             </div>
 
@@ -196,11 +191,6 @@
                                     <span th:text="${tenantPhone}"></span>
                                 </div>
                             </div>
-
-                            <!-- Button Section -->
-                            <div class="button-section">
-                                <a th:href="${postUrl}" class="button">Xem chi tiết bài đăng</a>
-                            </div>
                         </div>
                     </td>
                 </tr>
@@ -209,9 +199,9 @@
                 <tr>
                     <td class="footer">
                         <p>Hotline: 1900 1234</p>
-                        <p>Email: support@nhatrore.com</p>
+                        <p>Email: support@trotot.com</p>
                         <div class="copyright">
-                            <p>&copy; 2024 Nhà Trọ Rẻ. Tất cả các quyền được bảo lưu.</p>
+                            <p>&copy; 2024 Trọ Tốt. Tất cả các quyền được bảo lưu.</p>
                         </div>
                     </td>
                 </tr>

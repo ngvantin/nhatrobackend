@@ -230,15 +230,52 @@ public class DepositController {
                 .build());
     }
 
-    @PostMapping("/refund")
-    public ResponseEntity<ResponseWrapper<String>> refundDeposit(
-            @RequestBody DepositRefundRequest request,
-            HttpServletRequest httpRequest) {
-        String result = depositService.refundDeposit(request, httpRequest);
-        return ResponseEntity.ok(ResponseWrapper.<String>builder()
-                .status("success")
-                .data(result)
-                .message(result)
-                .build());
+//    @PostMapping("/refund")
+//    public ResponseEntity<ResponseWrapper<String>> refundDeposit(
+//            @RequestBody DepositRefundRequest request,
+//            HttpServletRequest httpRequest) {
+//        String result = depositService.refundDeposit(request, httpRequest);
+//        return ResponseEntity.ok(ResponseWrapper.<String>builder()
+//                .status("success")
+//                .data(result)
+//                .message(result)
+//                .build());
+//    }
+
+
+    @PostMapping("/refund/{depositId}")
+    public ResponseEntity<ResponseWrapper<String>> refundDeposit(@PathVariable int depositId) {
+        try {
+            String result = depositService.refundDepositToTenant(depositId);
+            return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                    .status("success")
+                    .data(result)
+                    .message(result)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseWrapper.<String>builder()
+                    .status("error")
+                    .data(null)
+                    .message("Lỗi khi hoàn tiền: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/pay-commission/{depositId}")
+    public ResponseEntity<ResponseWrapper<String>> payCommission(@PathVariable int depositId) {
+        try {
+            String result = depositService.payCommissionToLandlord(depositId);
+            return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                    .status("success")
+                    .data(result)
+                    .message(result)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseWrapper.<String>builder()
+                    .status("error")
+                    .data(null)
+                    .message("Lỗi khi thanh toán hoa hồng: " + e.getMessage())
+                    .build());
+        }
     }
 } 
