@@ -5,6 +5,8 @@ public enum DepositStatus {
     PAID, // Đã thanh toán mới đặt cọc
     CONFIRMED, // Đã xác nhận từ 1 hoặc cả hai bên
     CANCELLED, // Đã hủy từ 1 hoặc cả hai bên
-    REFUNDED, // Đã hoàn tiền
+    REFUNDED, // Đã hoàn tiền cho người cọc
+    COMMISSION, // Chủ trọ thắng khiếu nại
+    SUCCESS, //giao dịch thuận lợi
     EXPIRED // Hết hạn giữ chỗ
 } 

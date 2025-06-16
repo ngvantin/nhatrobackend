@@ -549,7 +549,7 @@ public class DepositServiceImpl implements DepositService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc"));
 
         // Kiểm tra trạng thái đặt cọc
-        if (deposit.getStatus() != DepositStatus.PAID) {
+        if (deposit.getStatus() == DepositStatus.PAID) {
             throw new RuntimeException("Đơn đặt cọc chưa được thanh toán");
         }
 
@@ -564,16 +564,12 @@ public class DepositServiceImpl implements DepositService {
         deposit.setUpdatedAt(LocalDateTime.now());
         depositRepository.save(deposit);
 
-        // Lưu lịch sử thanh toán
-        PaymentHistory paymentHistory = PaymentHistory.builder()
-                .user(tenant)
-                .paymentAmount(deposit.getAmount().longValue())
-                .paymentType(PaymentType.REFUND)
-                .deposit(deposit)
-                .paymentTime(LocalDateTime.now())
-                .description("Hoàn tiền đặt cọc cho đơn #" + deposit.getDepositId())
-                .build();
-        paymentHistoryService.savePaymentHistory(paymentHistory);
+        // Gửi email thông báo hoàn tiền
+        try {
+            mailService.sendRefundSuccessNotification(deposit);
+        } catch (Exception e) {
+            log.error("Failed to send refund notification email: {}", e.getMessage());
+        }
 
         return "Hoàn tiền thành công";
     }
@@ -585,7 +581,7 @@ public class DepositServiceImpl implements DepositService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc"));
 
         // Kiểm tra trạng thái đặt cọc
-        if (deposit.getStatus() != DepositStatus.PAID) {
+        if (deposit.getStatus() == DepositStatus.PAID) {
             throw new RuntimeException("Đơn đặt cọc chưa được thanh toán");
         }
 
@@ -601,31 +597,52 @@ public class DepositServiceImpl implements DepositService {
         landlord.setBalance(landlord.getBalance() + landlordAmount);
         userService.saveUser(landlord);
 
-        // Lưu lịch sử thanh toán cho chủ trọ
-        PaymentHistory landlordPayment = PaymentHistory.builder()
-                .user(landlord)
-                .paymentAmount((long) landlordAmount)
-                .paymentType(PaymentType.COMMISSION)
-                .deposit(deposit)
-                .commissionRate(0.1)
-                .commissionAmount(commissionAmount)
-                .paymentTime(LocalDateTime.now())
-                .description("Thanh toán tiền đặt cọc cho đơn #" + deposit.getDepositId())
-                .build();
-        paymentHistoryService.savePaymentHistory(landlordPayment);
+        deposit.setStatus(DepositStatus.COMMISSION);
+        depositRepository.save(deposit);
 
-        // Lưu lịch sử thanh toán cho hệ thống (hoa hồng)
-        PaymentHistory commissionPayment = PaymentHistory.builder()
-                .user(null) // Hệ thống
-                .paymentAmount((long) commissionAmount)
-                .paymentType(PaymentType.COMMISSION)
-                .deposit(deposit)
-                .commissionRate(0.1)
-                .commissionAmount(commissionAmount)
-                .paymentTime(LocalDateTime.now())
-                .description("Hoa hồng từ đơn đặt cọc #" + deposit.getDepositId())
-                .build();
-        paymentHistoryService.savePaymentHistory(commissionPayment);
+        // Gửi email thông báo thanh toán hoa hồng
+        try {
+            mailService.sendCommissionPaymentNotification(deposit, landlordAmount, commissionAmount);
+        } catch (Exception e) {
+            log.error("Failed to send commission payment notification email: {}", e.getMessage());
+        }
+
+        return "Thanh toán hoa hồng thành công";
+    }
+
+
+    @Override
+    @Transactional
+    public String paySuccessToLandlord(Integer depositId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc"));
+
+        // Kiểm tra trạng thái đặt cọc
+        if (deposit.getStatus() == DepositStatus.PAID) {
+            throw new RuntimeException("Đơn đặt cọc chưa được thanh toán");
+        }
+
+        Post post = deposit.getPost();
+        Room room = post.getRoom();
+        User landlord = post.getUser();
+
+        // Tính toán số tiền hoa hồng (10% giá phòng)
+        double commissionAmount = room.getPrice() * 0.1;
+        double landlordAmount = deposit.getAmount() - commissionAmount;
+
+        // Cập nhật số dư cho chủ trọ
+        landlord.setBalance(landlord.getBalance() + landlordAmount);
+        userService.saveUser(landlord);
+
+        deposit.setStatus(DepositStatus.SUCCESS);
+        depositRepository.save(deposit);
+
+        // Gửi email thông báo thanh toán hoa hồng
+        try {
+            mailService.sendCommissionPaymentNotification(deposit, landlordAmount, commissionAmount);
+        } catch (Exception e) {
+            log.error("Failed to send commission payment notification email: {}", e.getMessage());
+        }
 
         return "Thanh toán hoa hồng thành công";
     }

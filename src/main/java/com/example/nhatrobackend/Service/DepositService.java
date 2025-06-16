@@ -30,4 +30,5 @@ public interface DepositService {
     String refundDeposit(DepositRefundRequest request, HttpServletRequest httpRequest);
     String refundDepositToTenant(Integer depositId);
     String payCommissionToLandlord(Integer depositId);
+    String paySuccessToLandlord(Integer depositId);
 } 
