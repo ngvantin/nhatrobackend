@@ -19,6 +19,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -310,6 +311,90 @@ public class MailService {
         }
     }
 
+    /**
+     * Send refund success notification to tenant
+     */
+    public void sendRefundSuccessNotification(Deposit deposit) throws MessagingException, UnsupportedEncodingException {
+        Post post = deposit.getPost();
+        Room room = post.getRoom();
+        User tenant = deposit.getUser();
+        User landlord = post.getUser();
+
+        // Format room address
+        String roomAddress = String.format("%s %s, %s, %s, %s",
+                room.getHouseNumber(),
+                room.getStreet(),
+                room.getWard(),
+                room.getDistrict(),
+                room.getCity());
+
+        // Format dates
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String refundTime = deposit.getUpdatedAt().format(formatter);
+
+        // Prepare email data
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("postTitle", post.getTitle());
+        properties.put("roomAddress", roomAddress);
+        properties.put("roomArea", room.getArea());
+        properties.put("roomPrice", String.format("%,.0f", room.getPrice()));
+        properties.put("depositId", deposit.getDepositId());
+        properties.put("refundAmount", String.format("%,.0f", deposit.getRefundAmount()));
+        properties.put("refundTime", refundTime);
+        properties.put("landlordName", landlord.getFullName());
+        properties.put("landlordPhone", landlord.getPhoneNumber());
+        properties.put("tenantName", tenant.getFullName());
+        properties.put("tenantPhone", tenant.getPhoneNumber());
+
+        // Send email to tenant
+        if (tenant.getEmail() != null) {
+            sendRefundSuccessEmail(tenant.getEmail(), properties);
+        }
+    }
+
+    /**
+     * Send commission payment notification to landlord
+     */
+    public void sendCommissionPaymentNotification(Deposit deposit, double landlordAmount, double commissionAmount) throws MessagingException, UnsupportedEncodingException {
+        Post post = deposit.getPost();
+        Room room = post.getRoom();
+        User tenant = deposit.getUser();
+        User landlord = post.getUser();
+
+        // Format room address
+        String roomAddress = String.format("%s %s, %s, %s, %s",
+                room.getHouseNumber(),
+                room.getStreet(),
+                room.getWard(),
+                room.getDistrict(),
+                room.getCity());
+
+        // Format dates
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String paymentTime = LocalDateTime.now().format(formatter);
+
+        // Prepare email data
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("postTitle", post.getTitle());
+        properties.put("roomAddress", roomAddress);
+        properties.put("roomArea", room.getArea());
+        properties.put("roomPrice", String.format("%,.0f", room.getPrice()));
+        properties.put("depositId", deposit.getDepositId());
+        properties.put("depositAmount", String.format("%,.0f", deposit.getAmount()));
+        properties.put("landlordAmount", String.format("%,.0f", landlordAmount));
+        properties.put("commissionAmount", String.format("%,.0f", commissionAmount));
+        properties.put("paymentTime", paymentTime);
+        properties.put("landlordName", landlord.getFullName());
+        properties.put("landlordPhone", landlord.getPhoneNumber());
+        properties.put("tenantName", tenant.getFullName());
+        properties.put("tenantPhone", tenant.getPhoneNumber());
+
+        // Send email to landlord
+        if (landlord.getEmail() != null) {
+            sendCommissionPaymentEmail(landlord.getEmail(), properties);
+        }
+    }
+
     private void sendDepositSuccessEmail(String emailTo, Map<String, Object> properties) throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
@@ -324,5 +409,37 @@ public class MailService {
 
         mailSender.send(message);
         log.info("Deposit success notification email has been sent to: {}", emailTo);
+    }
+
+    private void sendRefundSuccessEmail(String emailTo, Map<String, Object> properties) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+        Context context = new Context();
+        context.setVariables(properties);
+
+        helper.setFrom(emailFrom, "Trọ Tốt");
+        helper.setTo(emailTo);
+        helper.setSubject("Thông báo hoàn tiền đặt cọc");
+        String html = templateEngine.process("refund-success-email.html", context);
+        helper.setText(html, true);
+
+        mailSender.send(message);
+        log.info("Refund success notification email has been sent to: {}", emailTo);
+    }
+
+    private void sendCommissionPaymentEmail(String emailTo, Map<String, Object> properties) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+        Context context = new Context();
+        context.setVariables(properties);
+
+        helper.setFrom(emailFrom, "Trọ Tốt");
+        helper.setTo(emailTo);
+        helper.setSubject("Thông báo thanh toán hoa hồng");
+        String html = templateEngine.process("commission-success-email.html", context);
+        helper.setText(html, true);
+
+        mailSender.send(message);
+        log.info("Commission payment notification email has been sent to: {}", emailTo);
     }
 }
