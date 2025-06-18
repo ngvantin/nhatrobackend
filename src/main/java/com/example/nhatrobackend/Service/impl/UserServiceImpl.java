@@ -569,4 +569,25 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toUserDetailAdminDTO(savedUser);
     }
+
+
+    @Override
+    @Transactional
+    public UserDetailAdminDTO unlockUserAccount(Integer userId) {
+        User user = findUserByIdOrThrow(userId);
+
+        // Kiểm tra nếu user đã hoạt đông
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            throw new IllegalStateException("Tài khoản người dùng đã bị khóa trước đó.");
+        }
+
+        // Cập nhật trạng thái thành LOCKED
+        user.setStatus(UserStatus.ACTIVE);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu vào DB
+        User savedUser = userRepository.save(user);
+
+        return userMapper.toUserDetailAdminDTO(savedUser);
+    }
 }

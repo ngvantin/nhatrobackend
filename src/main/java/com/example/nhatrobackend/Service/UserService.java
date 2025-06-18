@@ -49,4 +49,5 @@ public interface UserService {
     String uploadCccdImages(String userUuid, MultipartFile frontCccd, MultipartFile backCccd, CccdUploadDTO dto) throws IOException;
 
     UserDetailAdminDTO lockUserAccount(Integer userId);
+    UserDetailAdminDTO unlockUserAccount(Integer userId);
 }
