@@ -45,7 +45,7 @@ public class MailService {
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom(emailFrom, "Nhà Trọ Rẻ");
+        helper.setFrom(emailFrom, "Trọ Tốt");
 
         if (recipients.contains(",")) { // send to multiple users
             helper.setTo(InternetAddress.parse(recipients));
@@ -88,7 +88,7 @@ public class MailService {
         properties.put("buttonUrl", buttonUrl);
         context.setVariables(properties);
 
-        helper.setFrom(emailFrom, "Nhà Trọ Rẻ");
+        helper.setFrom(emailFrom, "Trọ Tốt");
         helper.setTo(emailTo);
         helper.setSubject(title);
         String html = templateEngine.process("notification-email.html", context);
@@ -113,7 +113,7 @@ public class MailService {
         properties.put("linkConfirm", linkConfirm);
         context.setVariables(properties);
 
-        helper.setFrom(emailFrom, "Nhà Trọ Rẻ");
+        helper.setFrom(emailFrom, "Trọ Tốt");
         helper.setTo(emailTo);
         helper.setSubject("Xác nhận đặt lại mật khẩu");
         String html = templateEngine.process("reset-password-email.html", context);
@@ -138,7 +138,7 @@ public class MailService {
         properties.put("linkConfirm", linkConfirm);
         context.setVariables(properties);
 
-        helper.setFrom(emailFrom, "Nhà Trọ Rẻ");
+        helper.setFrom(emailFrom, "Trọ Tốt");
         helper.setTo(emailTo);
         helper.setSubject("Xác nhận tài khoản");
         String html = templateEngine.process("confirm-email.html", context);
@@ -441,5 +441,19 @@ public class MailService {
 
         mailSender.send(message);
         log.info("Commission payment notification email has been sent to: {}", emailTo);
+    }
+
+    /**
+     * Send account locked notification
+     */
+    public void sendAccountLockedNotification(String emailTo) throws MessagingException, UnsupportedEncodingException {
+        sendNotificationEmail(
+            emailTo,
+            "Tài khoản của bạn đã bị khóa",
+            "Thông báo khóa tài khoản",
+            "Tài khoản của bạn đã bị khóa do vi phạm điều khoản sử dụng. Vui lòng liên hệ với chúng tôi qua email hoặc số điện thoại hotline để được hỗ trợ.",
+            "Liên hệ hỗ trợ",
+            String.format("%s/contact", serverName)
+        );
     }
 }

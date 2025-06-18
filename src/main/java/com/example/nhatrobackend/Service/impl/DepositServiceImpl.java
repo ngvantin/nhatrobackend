@@ -216,7 +216,7 @@ public class DepositServiceImpl implements DepositService {
 
     @Override
     public Page<PostWithDepositDTO> getDepositedPosts(Integer userId, Pageable pageable) {
-        Page<Deposit> deposits = depositRepository.findByUser_UserId(userId, pageable);
+        Page<Deposit> deposits = depositRepository.findByUser_UserIdOrderByCreatedAtDesc(userId, pageable);
         return deposits.map(deposit -> postMapper.toPostWithDepositDTO(deposit.getPost(), deposit));
     }
 
@@ -231,7 +231,7 @@ public class DepositServiceImpl implements DepositService {
 
     @Override
     public List<UserDepositDTO> getUsersWithDepositsByPostId(Integer postId) {
-        List<Deposit> deposits = depositRepository.findByPost_PostId(postId);
+        List<Deposit> deposits = depositRepository.findByPost_PostIdOrderByCreatedAtDesc(postId);
         return deposits.stream()
                 .map(deposit -> UserDepositDTO.builder()
                         .depositId(deposit.getDepositId())
@@ -459,7 +459,7 @@ public class DepositServiceImpl implements DepositService {
 
     @Override
     public Page<DepositStatusDTO> getDepositsByStatus(DepositStatus status, Pageable pageable) {
-        Page<Deposit> deposits = depositRepository.findByStatus(status, pageable);
+        Page<Deposit> deposits = depositRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
         return deposits.map(deposit -> DepositStatusDTO.builder()
                 .depositId(deposit.getDepositId())
                 .postUuid(deposit.getPost().getPostUuid())
@@ -642,7 +642,7 @@ public class DepositServiceImpl implements DepositService {
         landlord.setBalance(landlord.getBalance() + landlordAmount);
         userService.saveUser(landlord);
 
-        deposit.setStatus(DepositStatus.CONFIRMEDPENDING);
+        deposit.setStatus(DepositStatus.COMMISSION);
         depositRepository.save(deposit);
 
         // Gửi email thông báo thanh toán hoa hồng

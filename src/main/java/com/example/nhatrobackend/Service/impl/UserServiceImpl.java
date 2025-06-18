@@ -7,10 +7,7 @@ import com.example.nhatrobackend.DTO.response.UserLandlordResponse;
 import com.example.nhatrobackend.DTO.response.UserPostCountDTO;
 import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.DTO.response.UserStatsResponse;
-import com.example.nhatrobackend.Entity.Field.EventType;
-import com.example.nhatrobackend.Entity.Field.LandlordStatus;
-import com.example.nhatrobackend.Entity.Field.Status;
-import com.example.nhatrobackend.Entity.Field.UserType;
+import com.example.nhatrobackend.Entity.Field.*;
 import com.example.nhatrobackend.Entity.Notification;
 import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Mapper.UserMapper;
@@ -544,5 +541,32 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         return "Đăng ký quyền chủ trọ thành công, vui lòng chờ phê duyệt.";
+    }
+
+    @Override
+    @Transactional
+    public UserDetailAdminDTO lockUserAccount(Integer userId) {
+        User user = findUserByIdOrThrow(userId);
+
+        // Kiểm tra nếu user đã bị khóa
+        if (user.getStatus() == UserStatus.LOCKED) {
+            throw new IllegalStateException("Tài khoản người dùng đã bị khóa trước đó.");
+        }
+
+        // Cập nhật trạng thái thành LOCKED
+        user.setStatus(UserStatus.LOCKED);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        // Lưu vào DB
+        User savedUser = userRepository.save(user);
+
+        // Gửi email thông báo
+        try {
+            mailService.sendAccountLockedNotification(user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send account locked email", e);
+        }
+
+        return userMapper.toUserDetailAdminDTO(savedUser);
     }
 }

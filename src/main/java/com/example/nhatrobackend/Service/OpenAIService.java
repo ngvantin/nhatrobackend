@@ -202,7 +202,22 @@ public class OpenAIService {
                 String jsonResponse = mapper.writeValueAsString(result);
                 log.info("[Chatbot] Response from searchRoomsFlexible: {}", jsonResponse);
 
-                return jsonResponse;
+                // Format the response to include clickable links
+                StringBuilder formattedResponse = new StringBuilder();
+                formattedResponse.append("<h3>Kết quả tìm nhà trọ</h3>\n<ul>\n");
+                
+                for (var post : result.getContent()) {
+                    formattedResponse.append("  <li>\n");
+                    formattedResponse.append("    🏠 <a href=\"http://localhost:5173/roomdetail/").append(post.getPostUuid()).append("\"><strong>").append(post.getTitle()).append("</strong></a>\n");
+                    formattedResponse.append("    <br> - <strong>Giá thuê</strong>: ").append(String.format("%,.0f", post.getPrice())).append(" VND/tháng\n");
+                    formattedResponse.append("    <br> - <strong>Diện tích</strong>: ").append(post.getArea()).append(" m²\n");
+                    formattedResponse.append("    <br> - <strong>Địa chỉ</strong>: ").append(post.getWard()).append(", ").append(post.getDistrict()).append(", ").append(post.getCity()).append("\n");
+                    formattedResponse.append("    <br> - <strong>Nội thất</strong>: Đầy đủ nội thất\n");
+                    formattedResponse.append("  </li>\n");
+                }
+                
+                formattedResponse.append("</ul>");
+                return formattedResponse.toString();
             default:
                 throw new IllegalArgumentException("Function not supported: " + functionName);
         }
@@ -231,11 +246,11 @@ public class OpenAIService {
                 "- Khi hiển thị thông tin nhà trọ, luôn bao gồm các trường: Tiêu đề, Giá thuê, Diện tích, Địa chỉ, Trạng thái nội thất\n" +
                 "- Định dạng giá tiền theo VND với dấu phẩy phân cách\n" +
                 "- Hiển thị kết quả theo định dạng:\n" +
-                "  🏠 **[Tiêu đề]**\n" +
-                "  - **Giá thuê**: [Giá] VND/tháng\n" +
-                "  - **Diện tích**: [Diện tích] m²\n" +
-                "  - **Địa chỉ**: [Địa chỉ]\n" +
-                "  - **Nội thất**: [Trạng thái nội thất]\n" +
+                "  🏠 <a href=\"http://localhost:5173/roomdetail/[postUuid]\"><strong>[Tiêu đề]</strong></a>\n" +
+                "  - <strong>Giá thuê</strong>: [Giá] VND/tháng\n" +
+                "  - <strong>Diện tích</strong>: [Diện tích] m²\n" +
+                "  - <strong>Địa chỉ</strong>: [Địa chỉ]\n" +
+                "  - <strong>Nội thất</strong>: [Trạng thái nội thất]\n" +
                 "</room_search_guidelines>\n" +
                 "<url_guidelines>\n" +
                 "  - Khi trả về kết quả tìm kiếm, luôn bao gồm URL đến trang FE với các tham số tìm kiếm\n" +
