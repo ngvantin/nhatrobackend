@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -199,13 +200,13 @@ public class DepositServiceImpl implements DepositService {
         if (parts.length == 2) {
             try {
                 Integer depositId = Integer.parseInt(parts[1]);
-                Deposit deposit = depositRepository.findById(depositId)
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt cọc"));
-
-                deposit.setStatus(DepositStatus.CANCELLED);
-                deposit.setCancellationReason("Thanh toán thất bại: " + responseCode);
-                deposit.setUpdatedAt(LocalDateTime.now());
-                depositRepository.save(deposit);
+//                Deposit deposit = depositRepository.findById(depositId)
+//                        .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt cọc"));
+//
+//                deposit.setStatus(DepositStatus.CANCELLED);
+//                deposit.setCancellationReason("Thanh toán thất bại: " + responseCode);
+//                deposit.setUpdatedAt(LocalDateTime.now());
+//                depositRepository.save(deposit);
             } catch (NumberFormatException e) {
                 return "Không tìm thấy thông tin DepositID hợp lệ.";
             }
@@ -332,6 +333,7 @@ public class DepositServiceImpl implements DepositService {
         deposit.setTenantComplaintReason(requestDTO.getReason());
         deposit.setUpdatedAt(LocalDateTime.now());
         deposit.setTenantConfirmed(false);
+        deposit.setStatus(DepositStatus.CANCELLED);
 
         // Upload video nếu có
         if (requestDTO.getVideo() != null && !requestDTO.getVideo().isEmpty()) {
@@ -381,6 +383,7 @@ public class DepositServiceImpl implements DepositService {
         deposit.setLandlordComplaintReason(requestDTO.getReason());
         deposit.setUpdatedAt(LocalDateTime.now());
         deposit.setLandlordConfirmed(false);
+        deposit.setStatus(DepositStatus.CANCELLED);
 
         // Upload video nếu có
         if (requestDTO.getVideo() != null && !requestDTO.getVideo().isEmpty()) {
@@ -432,14 +435,14 @@ public class DepositServiceImpl implements DepositService {
                 .tenantComplaintVideoUrl(deposit.getTenantComplaintVideoUrl())
                 .landlordComplaintReason(deposit.getLandlordComplaintReason())
                 .landlordComplaintVideoUrl(deposit.getLandlordComplaintVideoUrl())
-                .tenantComplaintImages(deposit.getTenantComplaintImages() != null ? 
-                    deposit.getTenantComplaintImages().stream()
-                        .map(DepositTenantComplaintImage::getImageUrl)
-                        .toList() : null)
-                .landlordComplaintImages(deposit.getLandlordComplaintImages() != null ? 
-                    deposit.getLandlordComplaintImages().stream()
-                        .map(DepositLandlordComplaintImage::getImageUrl)
-                        .toList() : null)
+                .tenantComplaintImages(deposit.getTenantComplaintImages() != null ?
+                        deposit.getTenantComplaintImages().stream()
+                                .map(DepositTenantComplaintImage::getImageUrl)
+                                .toList() : null)
+                .landlordComplaintImages(deposit.getLandlordComplaintImages() != null ?
+                        deposit.getLandlordComplaintImages().stream()
+                                .map(DepositLandlordComplaintImage::getImageUrl)
+                                .toList() : null)
                 .createdAt(deposit.getCreatedAt())
                 // Thông tin người đặt cọc
                 .depositorId(depositor.getUserId())
@@ -463,6 +466,48 @@ public class DepositServiceImpl implements DepositService {
                 .amount(deposit.getAmount())
                 .paymentMethod(deposit.getPaymentMethod())
                 .transactionId(deposit.getTransactionId())
+                .status(deposit.getStatus())
+                .build());
+    }
+
+    @Override
+    public Page<DepositStatusDTO> getDepositsByMultipleStatuses(Pageable pageable) {
+        List<DepositStatus> statuses = Arrays.asList(
+            DepositStatus.CONFIRMEDPENDING,
+            DepositStatus.REFUNDED,
+            DepositStatus.COMMISSION
+        );
+
+        Page<Deposit> deposits = depositRepository.findByStatusIn(statuses, pageable);
+        
+        return deposits.map(deposit -> DepositStatusDTO.builder()
+                .depositId(deposit.getDepositId())
+                .postUuid(deposit.getPost().getPostUuid())
+                .amount(deposit.getAmount())
+                .paymentMethod(deposit.getPaymentMethod())
+                .transactionId(deposit.getTransactionId())
+                .status(deposit.getStatus())
+                .build());
+    }
+
+
+    @Override
+    public Page<DepositStatusDTO> getDepositsByMultipleSuccess(Pageable pageable) {
+        List<DepositStatus> statuses = Arrays.asList(
+                DepositStatus.SUCCESS,
+                DepositStatus.COMMISSIONSUCCESS,
+                DepositStatus.REFUNDEDSUCCESS
+        );
+
+        Page<Deposit> deposits = depositRepository.findByStatusIn(statuses, pageable);
+
+        return deposits.map(deposit -> DepositStatusDTO.builder()
+                .depositId(deposit.getDepositId())
+                .postUuid(deposit.getPost().getPostUuid())
+                .amount(deposit.getAmount())
+                .paymentMethod(deposit.getPaymentMethod())
+                .transactionId(deposit.getTransactionId())
+                .status(deposit.getStatus())
                 .build());
     }
 
@@ -524,7 +569,7 @@ public class DepositServiceImpl implements DepositService {
             log.info("Calling VNPAY API at URL: {}", vnPayConfig.getVnp_RefundUrl());
             String response = VNPayUtil.callVNPayAPI(vnPayConfig.getVnp_RefundUrl(), vnpParams);
             log.info("VNPAY Response: {}", response);
-            
+
             // Parse response và cập nhật trạng thái
             if (response.contains("\"vnp_ResponseCode\":\"00\"")) {
                 deposit.setStatus(DepositStatus.REFUNDED);
@@ -597,7 +642,7 @@ public class DepositServiceImpl implements DepositService {
         landlord.setBalance(landlord.getBalance() + landlordAmount);
         userService.saveUser(landlord);
 
-        deposit.setStatus(DepositStatus.COMMISSION);
+        deposit.setStatus(DepositStatus.CONFIRMEDPENDING);
         depositRepository.save(deposit);
 
         // Gửi email thông báo thanh toán hoa hồng
@@ -645,5 +690,64 @@ public class DepositServiceImpl implements DepositService {
         }
 
         return "Thanh toán hoa hồng thành công";
+    }
+
+
+    @Override
+    @Transactional
+    public String updateToRefundedSuccess(Integer depositId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc"));
+
+        // Kiểm tra trạng thái hiện tại
+        if (deposit.getStatus() != DepositStatus.REFUNDED) {
+            throw new RuntimeException("Chỉ có thể cập nhật trạng thái REFUNDED_SUCCESS khi đơn đặt cọc đang ở trạng thái REFUNDED");
+        }
+
+        // Cập nhật trạng thái
+        deposit.setStatus(DepositStatus.REFUNDEDSUCCESS);
+        deposit.setUpdatedAt(LocalDateTime.now());
+        depositRepository.save(deposit);
+
+        return "Cập nhật trạng thái hoàn cọc thành công";
+    }
+
+    @Override
+    @Transactional
+    public String updateToCommissionSuccess(Integer depositId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc"));
+
+        // Kiểm tra trạng thái hiện tại
+        if (deposit.getStatus() != DepositStatus.COMMISSION) {
+            throw new RuntimeException("Chỉ có thể cập nhật trạng thái COMMISSION_SUCCESS khi đơn đặt cọc đang ở trạng thái COMMISSION");
+        }
+
+        // Cập nhật trạng thái
+        deposit.setStatus(DepositStatus.COMMISSIONSUCCESS);
+        deposit.setUpdatedAt(LocalDateTime.now());
+        depositRepository.save(deposit);
+
+        return "Cập nhật trạng thái thanh toán hoa hồng thành công";
+    }
+
+
+    @Override
+    @Transactional
+    public String updateToSuccess(Integer depositId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông tin đặt cọc"));
+
+        // Kiểm tra trạng thái hiện tại
+        if (deposit.getStatus() != DepositStatus.CONFIRMEDPENDING) {
+            throw new RuntimeException("Chỉ có thể cập nhật trạng thái CONFIRMEDPENDING khi đơn đặt cọc đang ở trạng thái COMMISSION");
+        }
+
+        // Cập nhật trạng thái
+        deposit.setStatus(DepositStatus.SUCCESS);
+        deposit.setUpdatedAt(LocalDateTime.now());
+        depositRepository.save(deposit);
+
+        return "Cập nhật trạng thái thanh toán hoa hồng thành công";
     }
 } 
