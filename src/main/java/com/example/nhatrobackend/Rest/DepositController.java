@@ -215,8 +215,6 @@ public class DepositController {
                 .message("Danh sách đặt cọc với trạng thái " + DepositStatus.CONFIRMED)
                 .build());
     }
-
-
     @GetMapping("/status/canelled")
     public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByStatusCanelled(
             @RequestParam(defaultValue = "0") int page,
@@ -227,6 +225,70 @@ public class DepositController {
                 .status("success")
                 .data(deposits)
                 .message("Danh sách đặt cọc với trạng thái " + DepositStatus.CANCELLED)
+                .build());
+    }
+
+    @GetMapping("/status/refunded")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByStatusRefunded(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByStatus(DepositStatus.REFUNDED, pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với trạng thái " + DepositStatus.REFUNDED)
+                .build());
+    }
+
+    @GetMapping("/status/refundedsuccess")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByStatusRefundedSuccess(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByStatus(DepositStatus.REFUNDEDSUCCESS, pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với trạng thái " + DepositStatus.REFUNDEDSUCCESS)
+                .build());
+    }
+
+    @GetMapping("/status/commission")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByStatusCommission(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByStatus(DepositStatus.COMMISSION, pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với trạng thái " + DepositStatus.COMMISSION)
+                .build());
+    }
+    @GetMapping("/status/commissionsuccess")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByStatusCommissionSuccess(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByStatus(DepositStatus.COMMISSIONSUCCESS, pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với trạng thái " + DepositStatus.COMMISSIONSUCCESS)
+                .build());
+    }
+
+    @GetMapping("/status/success")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByStatusSuccess(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByStatus(DepositStatus.SUCCESS, pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với trạng thái " + DepositStatus.SUCCESS)
                 .build());
     }
 
@@ -293,6 +355,108 @@ public class DepositController {
                     .status("error")
                     .data(null)
                     .message("Lỗi khi thanh toán hoa hồng: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/update-refunded-success/{depositId}")
+    public ResponseEntity<ResponseWrapper<String>> updateToRefundedSuccess(@PathVariable int depositId) {
+        try {
+            String result = depositService.updateToRefundedSuccess(depositId);
+            return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                    .status("success")
+                    .data(result)
+                    .message(result)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseWrapper.<String>builder()
+                    .status("error")
+                    .data(null)
+                    .message("Lỗi khi cập nhật trạng thái hoàn cọc: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/update-commission-success/{depositId}")
+    public ResponseEntity<ResponseWrapper<String>> updateToCommissionSuccess(@PathVariable int depositId) {
+        try {
+            String result = depositService.updateToCommissionSuccess(depositId);
+            return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                    .status("success")
+                    .data(result)
+                    .message(result)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseWrapper.<String>builder()
+                    .status("error")
+                    .data(null)
+                    .message("Lỗi khi cập nhật trạng thái thanh toán hoa hồng: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/update-success/{depositId}")
+    public ResponseEntity<ResponseWrapper<String>> updateToSuccess(@PathVariable int depositId) {
+        try {
+            String result = depositService.updateToSuccess(depositId);
+            return ResponseEntity.ok(ResponseWrapper.<String>builder()
+                    .status("success")
+                    .data(result)
+                    .message(result)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseWrapper.<String>builder()
+                    .status("error")
+                    .data(null)
+                    .message("Lỗi khi cập nhật trạng thái thanh toán hoa hồng: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    @GetMapping("/status/multiplepending")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByMultipleStatuses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByMultipleStatuses(pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với các trạng thái CONFIRMEDPENDING, REFUNDED, COMMISSION")
+                .build());
+    }
+
+    @GetMapping("/status/multiplesuccess")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsByMultipleSuccess(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DepositStatusDTO> deposits = depositService.getDepositsByMultipleSuccess(pageable);
+        return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                .status("success")
+                .data(deposits)
+                .message("Danh sách đặt cọc với các trạng thái SUCCESS, COMMISSIONSUCCESS, REFUNDEDSUCCESS")
+                .build());
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<ResponseWrapper<Page<DepositStatusDTO>>> getDepositsBySelectedStatus(
+            @PathVariable DepositStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<DepositStatusDTO> deposits = depositService.getDepositsByStatus(status, pageable);
+            return ResponseEntity.ok(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                    .status("success")
+                    .data(deposits)
+                    .message("Danh sách đặt cọc với trạng thái " + status)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseWrapper.<Page<DepositStatusDTO>>builder()
+                    .status("error")
+                    .data(null)
+                    .message("Lỗi khi lấy danh sách đặt cọc: " + e.getMessage())
                     .build());
         }
     }

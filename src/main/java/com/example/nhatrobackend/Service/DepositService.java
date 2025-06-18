@@ -31,4 +31,9 @@ public interface DepositService {
     String refundDepositToTenant(Integer depositId);
     String payCommissionToLandlord(Integer depositId);
     String paySuccessToLandlord(Integer depositId);
+    String updateToRefundedSuccess(Integer depositId);
+    String updateToCommissionSuccess(Integer depositId);
+    String updateToSuccess(Integer depositId);
+    Page<DepositStatusDTO> getDepositsByMultipleStatuses(Pageable pageable);
+    Page<DepositStatusDTO> getDepositsByMultipleSuccess(Pageable pageable);
 } 

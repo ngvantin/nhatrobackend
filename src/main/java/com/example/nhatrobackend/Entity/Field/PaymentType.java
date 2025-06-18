@@ -23,4 +23,4 @@ public enum PaymentType {
         }
         throw new IllegalArgumentException("Unknown PaymentType value: " + value);
     }
-} 
+}

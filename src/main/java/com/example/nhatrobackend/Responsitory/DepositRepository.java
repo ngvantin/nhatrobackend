@@ -24,5 +24,7 @@ public interface DepositRepository extends JpaRepository<Deposit, Integer> {
     List<Deposit> findByPost_PostId(Integer postId);
     
     Page<Deposit> findByStatus(DepositStatus status, Pageable pageable);
-
+    
+    @Query("SELECT d FROM Deposit d WHERE d.status IN :statuses")
+    Page<Deposit> findByStatusIn(@Param("statuses") List<DepositStatus> statuses, Pageable pageable);
 } 
