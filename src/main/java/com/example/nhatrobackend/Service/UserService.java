@@ -6,6 +6,7 @@ import com.example.nhatrobackend.DTO.response.UserPostCountDTO;
 import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.DTO.response.UserStatsResponse;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
+import com.example.nhatrobackend.Entity.Field.UserStatus;
 import com.example.nhatrobackend.Entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,4 +51,6 @@ public interface UserService {
 
     UserDetailAdminDTO lockUserAccount(Integer userId);
     UserDetailAdminDTO unlockUserAccount(Integer userId);
+    
+    Page<UserAdminDTO> getUsersByUserStatus(UserStatus status, Pageable pageable);
 }

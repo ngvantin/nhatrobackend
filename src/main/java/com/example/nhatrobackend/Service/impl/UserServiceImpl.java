@@ -214,6 +214,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserAdminDTO> getUsersByUserStatus(UserStatus status, Pageable pageable) {
+        // Lấy danh sách người dùng theo trạng thái
+        Page<User> userPage = userRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
+
+        // Chuyển đổi danh sách User thành danh sách UserAdminDTO
+        return userPage.map(this::convertToUserAdminDTO);
+    }
+
+    @Override
     public String getLandlordStatusByUserUuid(String userUuid) {
         // Tìm user dựa vào userUuid
         User user = userRepository.findByUserUuid(userUuid)

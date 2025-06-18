@@ -6,6 +6,7 @@ import com.example.nhatrobackend.DTO.response.UserPostCountDTO;
 import com.example.nhatrobackend.DTO.response.UserProfileDTO;
 import com.example.nhatrobackend.DTO.response.UserStatsResponse;
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
+import com.example.nhatrobackend.Entity.Field.UserStatus;
 import com.example.nhatrobackend.Sercurity.AuthenticationFacade;
 import com.example.nhatrobackend.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -189,6 +190,18 @@ public class UserController {
         return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách các quản trị viên thành công", users));
     }
 
+    @GetMapping("/admin/locked-users")
+    public ResponseEntity<ResponseWrapper<Page<UserAdminDTO>>> getLockedUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Lấy danh sách người dùng với trạng thái LOCKED
+        Page<UserAdminDTO> users = userService.getUsersByUserStatus(UserStatus.LOCKED, pageable);
+
+        return ResponseEntity.ok(new ResponseWrapper<>("success", "Lấy danh sách người dùng bị khóa thành công", users));
+    }
 
     @GetMapping("/landlord-status")
     public ResponseEntity<ResponseWrapper<String>> getLandlordStatus(HttpServletRequest request) {
