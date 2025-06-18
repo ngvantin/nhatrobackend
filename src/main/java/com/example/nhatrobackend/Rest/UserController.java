@@ -385,6 +385,33 @@ public class UserController {
                             .build());
         }
     }
+
+
+    @PutMapping("/admin/unlock-account/{userId}")
+    public ResponseEntity<ResponseWrapper<UserDetailAdminDTO>> unlockUserAccount(@PathVariable Integer userId) {
+        try {
+            UserDetailAdminDTO userDetail = userService.unlockUserAccount(userId);
+            return ResponseEntity.ok(ResponseWrapper.<UserDetailAdminDTO>builder()
+                    .status("success")
+                    .data(userDetail)
+                    .message("Tài khoản người dùng đã gỡ khóa thành công.")
+                    .build());
+        } catch (IllegalStateException e) {
+            log.error("Error unlocking user account: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ResponseWrapper.<UserDetailAdminDTO>builder()
+                            .status("error")
+                            .message(e.getMessage())
+                            .build());
+        } catch (Exception e) {
+            log.error("Unexpected error unlocking user account: {}", e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(ResponseWrapper.<UserDetailAdminDTO>builder()
+                            .status("error")
+                            .message("Có lỗi xảy ra khi khóa tài khoản người dùng")
+                            .build());
+        }
+    }
 }
 
 
