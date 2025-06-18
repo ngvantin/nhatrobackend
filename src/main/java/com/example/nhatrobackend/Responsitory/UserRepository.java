@@ -1,6 +1,7 @@
 package com.example.nhatrobackend.Responsitory;
 
 import com.example.nhatrobackend.Entity.Field.LandlordStatus;
+import com.example.nhatrobackend.Entity.Field.UserStatus;
 import com.example.nhatrobackend.Entity.Field.UserType;
 import com.example.nhatrobackend.Entity.Post;
 import com.example.nhatrobackend.Entity.User;
@@ -29,4 +30,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     long countAllLandlordAndTenant();
 
     Optional<User> findByCccdNumber(String cccdNumber);
+
+    Page<User> findByStatusOrderByCreatedAtDesc(UserStatus status, Pageable pageable);
 }
