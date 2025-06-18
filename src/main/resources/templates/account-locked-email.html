@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:remove="all">Xác nhận đặt lại mật khẩu</title>
+    <title th:remove="all" th:text="${title}">Thông báo khóa tài khoản</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style type="text/css">
@@ -27,7 +27,7 @@
         .header {
             padding: 20px;
             text-align: center;
-            background-color: #173849;
+            background-color: #dc3545;
             color: #ffffff;
         }
         .header h1 {
@@ -43,7 +43,7 @@
             margin-bottom: 30px;
         }
         .title-section h1 {
-             color: #173849;
+             color: #dc3545;
              font-size: 24px;
              margin: 0;
              padding: 0;
@@ -51,7 +51,7 @@
         .title-divider {
             width: 50px;
             height: 3px;
-            background-color: #173849;
+            background-color: #dc3545;
             margin: 15px auto;
         }
         .content-section {
@@ -63,26 +63,25 @@
         .content-section p {
              margin: 0 0 20px 0;
         }
-        .button-section {
-            text-align: center;
-            margin: 30px 0;
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
         }
-        .button-section p {
-            color: #666666;
-            margin-bottom: 15px;
+        .contact-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
         }
-        .button {
-            display: inline-block; 
-            background-color: #173849; 
-            color: #ffffff; 
-            text-decoration: none; 
-            padding: 12px 30px; 
-            border-radius: 5px; 
-            font-weight: bold;
+        .contact-info p {
+            margin: 5px 0;
         }
-
         .footer {
-            background-color: #173849;
+            background-color: #343a40;
             padding: 30px 20px;
             text-align: center;
             color: #ffffff;
@@ -102,13 +101,18 @@
              padding-top: 15px;
              margin-top: 15px;
         }
-         .footer .social-links a {
-             display: inline-block;
-             margin: 0 10px;
-             color: #ffffff;
-             font-size: 20px;
-             text-decoration: none;
-         }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #dc3545;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -128,41 +132,43 @@
                     <td class="main-content">
                         <!-- Title Section -->
                         <div class="title-section">
-                            <h1>Yêu cầu đặt lại mật khẩu</h1>
+                            <h1 th:text="${header}">Thông báo khóa tài khoản</h1>
                             <div class="title-divider"></div>
+                        </div>
+
+                        <!-- Warning Box -->
+                        <div class="warning-box">
+                            <strong>Lưu ý quan trọng:</strong>
+                            <p>Tài khoản của bạn đã bị khóa do vi phạm điều khoản sử dụng của Trọ Tốt.</p>
                         </div>
 
                         <!-- Content Section -->
                         <div class="content-section">
-                            <p>Xin chào,</p>
-                            <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng nhấp vào nút bên dưới để tiến hành đặt lại mật khẩu:</p>
-                            
-                            <!-- Button Section -->
-                            <div class="button-section">
-                                <a th:href="${linkConfirm}" class="button" style="color: #ffffff;">
-                                    Đặt lại mật khẩu
-                                </a>
-                            </div>
-                            <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+                            <p th:text="${content}">Nội dung thông báo</p>
                         </div>
 
+                        <!-- Contact Info Section -->
+                        <div class="contact-info">
+                            <h3>Thông tin liên hệ hỗ trợ:</h3>
+                            <p>Hotline: 1900 1234</p>
+                            <p>Email: support@trotot.com</p>
+                            <p>Thời gian làm việc: 8:00 - 22:00 (Thứ 2 - Chủ nhật)</p>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div style="text-align: center;">
+                            <a th:href="${buttonUrl}" class="button" th:text="${buttonText}">Liên hệ hỗ trợ</a>
+                        </div>
                     </td>
                 </tr>
 
                 <!-- Footer -->
                 <tr>
                     <td class="footer">
-                        <!-- Social Media Links (Text) -->
-                        <div class="social-links" style="margin-bottom: 20px;">
-                             <a href="#">Facebook</a> |
-                             <a href="#">Twitter</a> |
-                             <a href="#">Instagram</a>
-                        </div>
-
                         <!-- Contact Info -->
                         <div style="margin-bottom: 15px;">
                             <p>Hotline: 1900 1234</p>
-                            <p>Email: support@nhatrore.com</p>
+                            <p>Email: support@trotot.com</p>
                         </div>
 
                         <!-- Copyright -->

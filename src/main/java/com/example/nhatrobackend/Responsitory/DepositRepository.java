@@ -16,15 +16,14 @@ import java.util.List;
 public interface DepositRepository extends JpaRepository<Deposit, Integer> {
     Page<Deposit> findByUser_UserIdOrderByCreatedAtDesc(Integer userId, Pageable pageable);
     List<Deposit> findByPost_User_UserIdOrderByCreatedAtDesc(Integer userId);
-    Page<Deposit> findByUser_UserId(Integer userId, Pageable pageable);
     
-    @Query("SELECT DISTINCT d.post FROM Deposit d WHERE d.post.user.userId = :currentUserId AND d.user.userId != :currentUserId")
+    @Query("SELECT DISTINCT d.post FROM Deposit d WHERE d.post.user.userId = :currentUserId AND d.user.userId != :currentUserId ORDER BY d.createdAt DESC")
     Page<Post> findPostsWithDepositsByOtherUsers(@Param("currentUserId") Integer currentUserId, Pageable pageable);
     
-    List<Deposit> findByPost_PostId(Integer postId);
+    List<Deposit> findByPost_PostIdOrderByCreatedAtDesc(Integer postId);
     
-    Page<Deposit> findByStatus(DepositStatus status, Pageable pageable);
+    Page<Deposit> findByStatusOrderByCreatedAtDesc(DepositStatus status, Pageable pageable);
     
-    @Query("SELECT d FROM Deposit d WHERE d.status IN :statuses")
+    @Query("SELECT d FROM Deposit d WHERE d.status IN :statuses ORDER BY d.createdAt DESC")
     Page<Deposit> findByStatusIn(@Param("statuses") List<DepositStatus> statuses, Pageable pageable);
 } 

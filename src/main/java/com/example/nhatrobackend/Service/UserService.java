@@ -47,4 +47,6 @@ public interface UserService {
     List<String> getFollowerEmails(Integer userId);
 
     String uploadCccdImages(String userUuid, MultipartFile frontCccd, MultipartFile backCccd, CccdUploadDTO dto) throws IOException;
+
+    UserDetailAdminDTO lockUserAccount(Integer userId);
 }

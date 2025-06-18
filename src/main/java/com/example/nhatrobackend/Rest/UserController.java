@@ -359,6 +359,32 @@ public class UserController {
                             .build());
         }
     }
+
+    @PutMapping("/admin/lock-account/{userId}")
+    public ResponseEntity<ResponseWrapper<UserDetailAdminDTO>> lockUserAccount(@PathVariable Integer userId) {
+        try {
+            UserDetailAdminDTO userDetail = userService.lockUserAccount(userId);
+            return ResponseEntity.ok(ResponseWrapper.<UserDetailAdminDTO>builder()
+                    .status("success")
+                    .data(userDetail)
+                    .message("Tài khoản người dùng đã bị khóa thành công.")
+                    .build());
+        } catch (IllegalStateException e) {
+            log.error("Error locking user account: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ResponseWrapper.<UserDetailAdminDTO>builder()
+                            .status("error")
+                            .message(e.getMessage())
+                            .build());
+        } catch (Exception e) {
+            log.error("Unexpected error locking user account: {}", e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(ResponseWrapper.<UserDetailAdminDTO>builder()
+                            .status("error")
+                            .message("Có lỗi xảy ra khi khóa tài khoản người dùng")
+                            .build());
+        }
+    }
 }
 
 
