@@ -20,6 +20,7 @@ public interface PostRepository  extends JpaRepository<Post, Integer> {
     // Thêm phương thức tìm kiếm theo postUuid
     Optional<Post> findByPostUuid(String postUuid);
     @Query("SELECT p FROM Post p JOIN p.room r WHERE " +
+            "p.status = APPROVED AND " +
             "(:minPrice IS NULL OR r.price >= :minPrice) AND " +
             "(:maxPrice IS NULL OR r.price <= :maxPrice) AND " +
             "(:minArea IS NULL OR r.area >= :minArea) AND " +

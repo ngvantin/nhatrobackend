@@ -46,6 +46,8 @@ public class Post {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "allow_deposit", nullable = false)
+    private boolean allowDeposit = true;
 
     // Thiết lập quan hệ 1-1 với Rooms
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -87,4 +89,16 @@ public class Post {
 //                ", favoritePosts=" + favoritePosts +
                 '}';
     }
+
+//    public void decreaseRoomCountAndUpdateStatus() {
+//        if (room != null && room.getNumberOfRooms() != null && room.getNumberOfRooms() > 0) {
+//            int current = room.getNumberOfRooms();
+//            if (current == 1) {
+//                room.setNumberOfRooms(0);
+//                this.status = PostStatus.SOLDOUT;
+//            } else {
+//                room.setNumberOfRooms(current - 1);
+//            }
+//        }
+//    }
 }

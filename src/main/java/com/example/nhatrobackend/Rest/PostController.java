@@ -604,6 +604,7 @@ public class PostController {
             postRequestDTO.setHouseNumber(dto.getHouseNumber());
             postRequestDTO.setLicensePcccUrl(licensePcccUrl);
             postRequestDTO.setLicenseBusinessUrl(licenseBusinessUrl);
+            postRequestDTO.setAllowDeposit(dto.getAllowDeposit());
 
             log.info("Creating post with {} images, video URL: {}, PCCC URL: {}, Business License URL: {}", 
                     imageUrls.size(), videoUrl, licensePcccUrl, licenseBusinessUrl);

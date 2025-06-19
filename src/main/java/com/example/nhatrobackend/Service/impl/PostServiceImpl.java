@@ -219,6 +219,12 @@ public class PostServiceImpl implements PostService {
         post.setCreatedAt(LocalDateTime.now());
         post.setRoom(room);
         post.setUser(user);
+        // Set allowDeposit
+        if (postRequestDTO.getAllowDeposit() != null) {
+            post.setAllowDeposit(postRequestDTO.getAllowDeposit());
+        } else {
+            post.setAllowDeposit(true);
+        }
         
         // Save post first to get the ID
         Post savedPost = postRepository.save(post);
