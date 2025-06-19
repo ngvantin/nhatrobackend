@@ -191,6 +191,18 @@ public class ReportPostServiceImpl implements ReportPostService {
         reportPost.setUpdatedAt(LocalDateTime.now());
         reportPostRepository.save(reportPost);
 
+        // Gửi email thông báo bài đăng bị khóa cho chủ bài viết
+        try {
+            mailService.sendReportLockedPostEmail(
+                post.getUser(),
+                post.getTitle(),
+                reportPost.getReason(),
+                reportPost.getAdminResponse(),
+                reportPost.getUpdatedAt()
+            );
+        } catch (Exception e) {
+            log.error("Failed to send report-locked post email: {}", e.getMessage());
+        }
 
         // Tạo và lưu notification vào database
         Notification notification = Notification.builder()
@@ -238,14 +250,7 @@ public class ReportPostServiceImpl implements ReportPostService {
         // Gửi notification
         notificationService.sendNotification(event);
 
-//        // Gửi email thông báo
-//        try {
-//            String postUrl = String.format("%s/posts/%d", serverName, user.getUserId());
-//            mailService.send(user.getEmail());
-//        } catch (Exception e) {
-//            log.error("Failed to send post rejection email", e);
-//            // Không throw exception vì đây không phải là lỗi nghiêm trọng
-//        }
+
     }
 
     @Override

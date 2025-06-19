@@ -456,4 +456,31 @@ public class MailService {
             String.format("%s/contact", serverName)
         );
     }
+
+    /**
+     * Send report-locked post notification to user
+     */
+    public void sendReportLockedPostEmail(User user, String postTitle, String reason, String adminResponse, LocalDateTime reportTime) throws MessagingException, UnsupportedEncodingException {
+        if (user.getEmail() == null) return;
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("postTitle", postTitle);
+        properties.put("reason", reason);
+        properties.put("adminResponse", adminResponse);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        properties.put("reportTime", reportTime.format(formatter));
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+        Context context = new Context();
+        context.setVariables(properties);
+
+        helper.setFrom(emailFrom, "Trọ Tốt");
+        helper.setTo(user.getEmail());
+        helper.setSubject("Thông báo bài đăng bị khóa do báo cáo");
+        String html = templateEngine.process("report-locked-post-email.html", context);
+        helper.setText(html, true);
+
+        mailSender.send(message);
+        log.info("Report-locked post notification email has been sent to: {}", user.getEmail());
+    }
 }
