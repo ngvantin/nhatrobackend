@@ -8,6 +8,7 @@ import com.example.nhatrobackend.DTO.response.VNPayResponse;
 import com.example.nhatrobackend.Entity.*;
 import com.example.nhatrobackend.Entity.Field.DepositStatus;
 import com.example.nhatrobackend.Entity.Field.PaymentType;
+import com.example.nhatrobackend.Entity.Field.PostStatus;
 import com.example.nhatrobackend.Mapper.PostMapper;
 import com.example.nhatrobackend.Responsitory.DepositRepository;
 import com.example.nhatrobackend.Responsitory.DepositTenantComplaintImageRepository;
@@ -64,6 +65,16 @@ public class DepositServiceImpl implements DepositService {
         // Kiểm tra và lấy thông tin bài đăng
         Post post = postRepository.findById(depositRequest.getPostId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bài đăng"));
+        if (post.getRoom() != null && post.getRoom().getNumberOfRooms() != null && post.getRoom().getNumberOfRooms() > 0) {
+            int current = post.getRoom().getNumberOfRooms();
+            if (current == 1) {
+                post.getRoom().setNumberOfRooms(0);
+                post.setStatus(PostStatus.SOLDOUT);
+            } else {
+                post.getRoom().setNumberOfRooms(current - 1);
+            }
+        }
+        postRepository.save(post);
 
         // Kiểm tra người dùng
         User user = userService.findByUserId(currentUserId);

@@ -83,4 +83,12 @@ public class Room {
                 ", post=" + post +
                 '}';
     }
+//
+//    public void setNumberOfRooms(Integer numberOfRooms) {
+//        this.numberOfRooms = numberOfRooms;
+//    }
+//
+//    public Integer getNumberOfRooms() {
+//        return numberOfRooms;
+//    }
 }

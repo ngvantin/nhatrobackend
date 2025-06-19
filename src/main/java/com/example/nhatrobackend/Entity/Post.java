@@ -89,4 +89,16 @@ public class Post {
 //                ", favoritePosts=" + favoritePosts +
                 '}';
     }
+
+//    public void decreaseRoomCountAndUpdateStatus() {
+//        if (room != null && room.getNumberOfRooms() != null && room.getNumberOfRooms() > 0) {
+//            int current = room.getNumberOfRooms();
+//            if (current == 1) {
+//                room.setNumberOfRooms(0);
+//                this.status = PostStatus.SOLDOUT;
+//            } else {
+//                room.setNumberOfRooms(current - 1);
+//            }
+//        }
+//    }
 }

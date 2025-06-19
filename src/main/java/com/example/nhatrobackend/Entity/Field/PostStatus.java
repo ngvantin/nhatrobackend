@@ -6,5 +6,6 @@ public enum PostStatus {
     LOCKED,
     REJECTED,
     ACTIVE,
+    SOLDOUT,
     ANONYMOUS; // Thêm trạng thái ẩn danh
     }
