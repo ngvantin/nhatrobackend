@@ -30,7 +30,7 @@
         @Override
         public void registerStompEndpoints(StompEndpointRegistry registry) {
             registry.addEndpoint("/ws") // endpoint STOMP
-                    .setAllowedOriginPatterns("*") // hoặc "http://localhost:5173"
+                    .setAllowedOriginPatterns("*") // hoặc "https://fe-timkiemtro.vercel.app"
                     .withSockJS(); // Kích hoạt SockJS fallback
         }
 
