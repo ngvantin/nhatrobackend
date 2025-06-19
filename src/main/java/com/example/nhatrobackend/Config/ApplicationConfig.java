@@ -33,7 +33,7 @@ public class ApplicationConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**") // Cho phép tất cả API
-                        .allowedOrigins("http://localhost:5173") // Cho phép frontend truy cập
+                        .allowedOrigins("https://fe-timkiemtro.vercel.app") // Cho phép frontend truy cập
 //                        .allowedOrigins("https://fe-timkiemtro.vercel.app/") // Cho phép frontend truy cập
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Các phương thức HTTP
                         .allowedHeaders("*") // Chấp nhận tất cả các header
@@ -49,7 +49,7 @@ public class ApplicationConfig {
 //            @Override
 //            public void addCorsMappings(@NonNull CorsRegistry registry) {
 //                registry.addMapping("**")
-//                        .allowedOrigins("http://localhost:5173")
+//                        .allowedOrigins("https://fe-timkiemtro.vercel.app")
 //                        .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed HTTP methods
 //                        .allowedHeaders("*") // Allowed request headers
 //                        .allowCredentials(false)

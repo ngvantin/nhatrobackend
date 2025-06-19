@@ -208,7 +208,7 @@ public class OpenAIService {
                 
                 for (var post : result.getContent()) {
                     formattedResponse.append("  <li>\n");
-                    formattedResponse.append("    🏠 <a href=\"http://localhost:5173/roomdetail/").append(post.getPostUuid()).append("\"><strong>").append(post.getTitle()).append("</strong></a>\n");
+                    formattedResponse.append("    🏠 <a href=\"https://fe-timkiemtro.vercel.app/roomdetail/").append(post.getPostUuid()).append("\"><strong>").append(post.getTitle()).append("</strong></a>\n");
                     formattedResponse.append("    <br> - <strong>Giá thuê</strong>: ").append(String.format("%,.0f", post.getPrice())).append(" VND/tháng\n");
                     formattedResponse.append("    <br> - <strong>Diện tích</strong>: ").append(post.getArea()).append(" m²\n");
                     formattedResponse.append("    <br> - <strong>Địa chỉ</strong>: ").append(post.getWard()).append(", ").append(post.getDistrict()).append(", ").append(post.getCity()).append("\n");
@@ -246,7 +246,7 @@ public class OpenAIService {
                 "- Khi hiển thị thông tin nhà trọ, luôn bao gồm các trường: Tiêu đề, Giá thuê, Diện tích, Địa chỉ, Trạng thái nội thất\n" +
                 "- Định dạng giá tiền theo VND với dấu phẩy phân cách\n" +
                 "- Hiển thị kết quả theo định dạng:\n" +
-                "  🏠 <a href=\"http://localhost:5173/roomdetail/[postUuid]\"><strong>[Tiêu đề]</strong></a>\n" +
+                "  🏠 <a href=\"https://fe-timkiemtro.vercel.app/roomdetail/[postUuid]\"><strong>[Tiêu đề]</strong></a>\n" +
                 "  - <strong>Giá thuê</strong>: [Giá] VND/tháng\n" +
                 "  - <strong>Diện tích</strong>: [Diện tích] m²\n" +
                 "  - <strong>Địa chỉ</strong>: [Địa chỉ]\n" +
