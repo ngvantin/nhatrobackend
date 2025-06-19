@@ -3,6 +3,7 @@ package com.example.nhatrobackend.Service.impl;
 import com.example.nhatrobackend.Config.VNPAYConfig;
 import com.example.nhatrobackend.DTO.request.PaymentRequest;
 import com.example.nhatrobackend.DTO.response.VNPayResponse;
+import com.example.nhatrobackend.Entity.Field.PaymentType;
 import com.example.nhatrobackend.Entity.PaymentHistory;
 import com.example.nhatrobackend.Entity.User;
 import com.example.nhatrobackend.Responsitory.PaymentHistoryRepository;
@@ -136,6 +137,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .responseCode("00")
                 .orderInfo("Mua "+ purchasedPosts+ " lượt đăng bài")
                 .paymentTime(LocalDateTime.now())
+                .paymentType(PaymentType.VNPAY)
                 .build();
         paymentHistoryRepository.save(paymentHistory);
 

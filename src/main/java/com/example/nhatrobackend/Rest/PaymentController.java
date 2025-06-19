@@ -42,7 +42,7 @@ public class PaymentController {
         String message = parts.length > 1 ? parts[1] : "";
 
         // Tạo URL chuyển hướng tới frontend với các tham số status và message
-        String redirectUrl = UriComponentsBuilder.fromHttpUrl("https://fe-timkiemtro.vercel.app/users/payment-result")
+        String redirectUrl = UriComponentsBuilder.fromHttpUrl("http://localhost:5173/users/payment-result")
                 .queryParam("status", status)
                 .queryParam("message", message)
                 .toUriString();
