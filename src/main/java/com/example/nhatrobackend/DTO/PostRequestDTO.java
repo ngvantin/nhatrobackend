@@ -36,4 +36,5 @@ public class PostRequestDTO {
     private String houseNumber; // Số nhà
     private String licensePcccUrl; // Đường dẫn đến giấy chứng nhận PCCC
     private String licenseBusinessUrl; // Đường dẫn đến giấy phép kinh doanh
+    private Boolean allowDeposit; // Cho phép đặt cọc hay không
 }

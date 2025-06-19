@@ -344,7 +344,7 @@ public class DepositController {
     @PostMapping("/pay-success/{depositId}")
     public ResponseEntity<ResponseWrapper<String>> paySuccess(@PathVariable int depositId) {
         try {
-            String result = depositService.payCommissionToLandlord(depositId);
+            String result = depositService.paySuccessToLandlord(depositId);
             return ResponseEntity.ok(ResponseWrapper.<String>builder()
                     .status("success")
                     .data(result)

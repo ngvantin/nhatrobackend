@@ -36,6 +36,7 @@ public interface PostMapper {
     @Mapping(source = "room.licenseBusinessUrl", target = "licenseBusinessUrl")
     @Mapping(source = "room.licensePcccUrl", target = "licensePcccUrl")
     @Mapping(source = "postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
+    @Mapping(source = "allowDeposit", target = "allowDeposit")
     PostDetailResponseDTO toPostDetailResponseDTO(Post post);
 
     @Mapping(target = "room", source = "dto")
@@ -74,6 +75,7 @@ public interface PostMapper {
 
     // Ánh xạ từ Post sang PostRequestDTO
     @Mapping(source = "postImages", target = "postImages", qualifiedByName = "mapImagesToUrls")
+    @Mapping(source = "allowDeposit", target = "allowDeposit")
     PostRequestDTO toPostRequestDTO(Post post);
 
     // Cập nhật thông tin từ RoomDTO vào PostRequestDTO

@@ -33,4 +33,5 @@ public class CreatePostWithImagesDTO {
     private String houseNumber;
     private MultipartFile licensePccc;
     private MultipartFile licenseBusiness;
+    private Boolean allowDeposit;
 } 

@@ -46,6 +46,8 @@ public class Post {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "allow_deposit", nullable = false)
+    private boolean allowDeposit = true;
 
     // Thiết lập quan hệ 1-1 với Rooms
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

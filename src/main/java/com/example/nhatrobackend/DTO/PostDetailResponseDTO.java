@@ -37,5 +37,6 @@ public class PostDetailResponseDTO{
     private String licensePcccUrl; // Đường dẫn đến giấy chứng nhận PCCC
     private String licenseBusinessUrl; // Đường dẫn đến giấy phép kinh doanh
     private PostStatus status;
+    private Boolean allowDeposit; // Cho phép đặt cọc hay không
 }
 
