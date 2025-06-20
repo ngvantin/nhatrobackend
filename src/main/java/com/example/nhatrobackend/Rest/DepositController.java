@@ -48,7 +48,7 @@ public class DepositController {
         String status = parts[0];
         String message = parts.length > 1 ? parts[1] : "";
 
-        String redirectUrl = UriComponentsBuilder.fromHttpUrl("https://fe-timkiemtro.vercel.app/users/deposit-result")
+        String redirectUrl = UriComponentsBuilder.fromHttpUrl("http://localhost:5173/users/deposit-result")
                 .queryParam("status", status)
                 .queryParam("message", message)
                 .toUriString();
